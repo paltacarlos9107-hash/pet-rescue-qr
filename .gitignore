@@ -1,0 +1,11 @@
+# Archivos de base de datos
+*.db
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Archivos temporales
+__pycache__/
+*.pyc

@@ -9,56 +9,57 @@ from email.mime.text import MIMEText
 import os
 from database import init_db, add_pet, get_pet
 
-# -------- CONFIGURACIÓN --------
+# -------- DETECTAR ENTORNO --------
+IS_PRODUCTION = os.environ.get("RENDER") is not None
+
+# -------- CONFIGURACIÓN DE CORREO --------
+if IS_PRODUCTION:
+    # En Render: usa variables de entorno (seguro)
+    EMAIL_USER = "paltacarlos9107@gmail.com"
+    EMAIL_PASS = "nivtfemzgtsqbfau"
+else:
+    # En local: usa valores directos (¡solo para pruebas!)
+    EMAIL_USER = "paltacarlos9107@gmail.com"          # ← TU CORREO
+    EMAIL_PASS = "nivtfemzgtsqbfau"              # ← TU CONTRASEÑA DE APLICACIÓN
+
+# Validación
+if not EMAIL_USER or not EMAIL_PASS:
+    raise ValueError("❌ Faltan credenciales de correo. Configura EMAIL_USER y EMAIL_PASS.")
+
+# -------- APP FLASK --------
 app = Flask(__name__)
-
-# ⚠️ CONFIGURA TUS CREDENCIALES DE CORREO AQUÍ (en Render, usa "Environment Variables")
-EMAIL_USER = "paltacarlos9107@gmail.com"
-EMAIL_PASS = "hvuafcqbjpxeckmb"  # ¡No tu contraseña normal!
-
-# Inicializa la base de datos al iniciar
 init_db()
 
 # -------- RUTAS --------
 @app.route("/")
 def home():
-    """Página principal: formulario para registrar mascota."""
     return render_template("register.html")
 
 @app.route("/register", methods=["POST"])
 def register():
-    """Registra una nueva mascota y muestra su QR."""
     name = request.form["name"]
     breed = request.form.get("breed", "")
     description = request.form.get("description", "")
     owner_email = request.form["email"]
-
-    # Genera un ID único (ej: "K7M2P9Q4")
     pet_id = str(uuid.uuid4())[:8].upper()
-
-    # Guarda en la base de datos
     add_pet(pet_id, name, breed, description, owner_email)
 
-    # Genera la URL del QR (¡SIEMPRE HTTPS EN RENDER!)
-    if os.environ.get("RENDER"):
-        # Render siempre define esta variable → producción
+    # Generar URL del QR (HTTP en local, HTTPS en Render)
+    if IS_PRODUCTION:
         qr_url = f"https://pet-rescue-qr.onrender.com/pet/{pet_id}"
     else:
-        # Desarrollo local
         qr_url = f"{request.url_root}pet/{pet_id}"
 
-    # Genera el código QR como imagen
+    # Generar imagen QR
     qr_img = qrcode.make(qr_url)
     buffered = BytesIO()
     qr_img.save(buffered, format="PNG")
     qr_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-    # Muestra el formulario + QR
-    return render_template("register.html", qr=qr_base64, qr_url=qr_url, pet_id=name)
+    return render_template("register.html", qr=qr_base64, qr_url=qr_url)
 
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
-    """Página que ve quien escanea el QR."""
     pet = get_pet(pet_id)
     if not pet:
         return "<h2>❌ Mascota no encontrada o ya fue reportada como encontrada.</h2>", 404
@@ -66,26 +67,20 @@ def pet_page(pet_id):
 
 @app.route("/report", methods=["POST"])
 def report_location():
-    """Recibe la ubicación del escaneador y notifica al dueño."""
     data = request.get_json()
     pet_id = data.get("pet_id")
     lat = data.get("lat")
     lng = data.get("lng")
-
     pet = get_pet(pet_id)
     if not pet:
         return jsonify({"error": "Mascota no válida"}), 400
 
-    # Enlace de Google Maps
     map_link = f"https://www.google.com/maps?q={lat},{lng}"
-
-    # Prepara el correo
     msg = MIMEText(f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}")
     msg["Subject"] = f"⚠️ ¡{pet['name']} fue encontrado!"
     msg["From"] = EMAIL_USER
     msg["To"] = pet["owner_email"]
 
-    # Envía el correo
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(EMAIL_USER, EMAIL_PASS)
@@ -95,8 +90,6 @@ def report_location():
         print("❌ Error al enviar correo:", e)
         return jsonify({"error": "No se pudo notificar al dueño"}), 500
 
-# -------- EJECUTAR --------
+# -------- INICIAR SERVIDOR --------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    # ¡CRÍTICO! Bind a 0.0.0.0 para que Render pueda acceder
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=True)
