@@ -40,6 +40,10 @@ def register():
     add_pet(pet_id, name, breed, description, owner_email)
 
     # Genera el enlace del QR
+    # Forzar HTTPS en producción (Render)
+if os.environ.get("RENDER"):
+    qr_url = f"https://{request.host}/pet/{pet_id}"
+else:
     qr_url = f"{request.url_root}pet/{pet_id}"
 
     # Genera el código QR como imagen
