@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>¡Ayuda a {{ pet.name }}!</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #fff3cd;
+      color: #856404;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+    h2 {
+      color: #d39e00;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .help-btn {
+      background-color: #d39e00;
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 18px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    .help-btn:hover {
+      background-color: #bb8b00;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+    .icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🐾</div>
+    <h2>¡Hola! Esta mascota está perdida</h2>
+    <p><strong>{{ pet.name }}</strong></p>
+    {% if pet.breed %}
+      <p>Raza: {{ pet.breed }}</p>
+    {% endif %}
+    {% if pet.description %}
+      <p>{{ pet.description }}</p>
+    {% endif %}
+    
+    <button class="help-btn" id="helpBtn">Sí, quiero ayudar</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    document.getElementById('helpBtn').onclick = async () => {
+      const button = document.getElementById('helpBtn');
+      const status = document.getElementById('status');
+      
+      if (!navigator.geolocation) {
+        status.innerText = "Tu dispositivo no soporta ubicación.";
+        return;
+      }
+
+      button.disabled = true;
+      button.innerText = "Obteniendo ubicación...";
+      status.innerText = "";
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          
+          try {
+            const res = await fetch('/report', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                pet_id: '{{ pet.id }}',
+                lat: latitude,
+                lng: longitude
+              })
+            });
+
+            if (res.ok) {
+              button.style.display = 'none';
+              status.innerHTML = '✅ ¡Gracias! <br>El dueño ya fue notificado.';
+            } else {
+              const data = await res.json();
+              status.innerText = "⚠️ " + (data.error || "No se pudo notificar");
+              button.disabled = false;
+              button.innerText = "Intentar de nuevo";
+            }
+          } catch (err) {
+            status.innerText = "⚠️ Error de conexión.";
+            button.disabled = false;
+            button.innerText = "Intentar de nuevo";
+          }
+        },
+        (err) => {
+          status.innerText = "❌ No diste permiso para acceder a tu ubicación.";
+          button.disabled = false;
+          button.innerText = "Reintentar";
+        },
+        { timeout: 10000 }
+      );
+    };
+  </script>
+</body>
+</html>

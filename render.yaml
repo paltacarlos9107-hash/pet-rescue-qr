@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pet-rescue-qr
+    runtime: python
+    env: python
+    region: colombia   # o "oregon" si prefieres EE.UU.
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar Mascota Perdida</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      color: #2c7be5;
+      text-align: center;
+    }
+    form div {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .qr-section {
+      margin-top: 30px;
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .qr-section img {
+      margin: 15px 0;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      max-width: 200px;
+    }
+    .qr-section a {
+      color: #2c7be5;
+      text-decoration: none;
+    }
+    .qr-section a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐾 Registrar Mascota Perdida</h1>
+
+  <form method="POST" action="/register">
+    <div>
+      <label for="name">Nombre de la mascota *</label>
+      <input type="text" id="name" name="name" required />
+    </div>
+    <div>
+      <label for="breed">Raza (opcional)</label>
+      <input type="text" id="breed" name="breed" />
+    </div>
+    <div>
+      <label for="description">Señas particulares (color, tamaño, collar, etc.)</label>
+      <textarea id="description" name="description" rows="3"></textarea>
+    </div>
+    <div>
+      <label for="email">Tu correo electrónico *</label>
+      <input type="email" id="email" name="email" required />
+      <small>Recibirás una notificación si alguien encuentra a tu mascota.</small>
+    </div>
+    <button type="submit">Registrar Mascota</button>
+  </form>
+
+  {% if qr %}
+  <div class="qr-section">
+    <h2>¡Listo! 🎉</h2>
+    <p>Este es el código QR de <strong>{{ pet_id }}</strong>:</p>
+    <img src="data:image/png;base64,{{ qr }}" alt="Código QR" />
+    <p>
+      <strong>URL:</strong> <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
+    </p>
+    <p>👉 Imprime este QR y ponlo en el collar de tu mascota.</p>
+  </div>
+  {% endif %}
+</body>
+</html>
