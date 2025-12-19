@@ -93,29 +93,45 @@ def pet_page(pet_id):
 
 @app.route("/report", methods=["POST"])
 def report_location():
-    data = request.get_json()
-    pet_id = data.get("pet_id")
-    lat = data.get("lat")
-    lng = data.get("lng")
-
-    pet = get_pet(pet_id)
-    if not pet:
-        return jsonify({"error": "Mascota no válida"}), 400
-
-    map_link = f"https://www.google.com/maps?q={lat},{lng}"
-    msg = MIMEText(f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}")
-    msg["Subject"] = f"⚠️ ¡{pet['name']} fue encontrado!"
-    msg["From"] = EMAIL_USER
-    msg["To"] = pet["owner_email"]
-
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No se recibieron datos"}), 400
+
+        pet_id = data.get("pet_id")
+        lat = data.get("lat")
+        lng = data.get("lng")
+
+        if not pet_id or lat is None or lng is None:
+            return jsonify({"error": "Faltan datos requeridos"}), 400
+
+        pet = get_pet(pet_id)
+        if not pet:
+            return jsonify({"error": "Mascota no encontrada"}), 400
+
+        owner_email = pet.get("owner_email")
+        if not owner_email:
+            print(f"⚠️ Mascota {pet_id} no tiene owner_email")
+            return jsonify({"error": "Dueño no tiene correo registrado"}), 400
+
+        map_link = f"https://www.google.com/maps?q={lat},{lng}"
+        msg = MIMEText(f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}")
+        msg["Subject"] = f"⚠️ ¡{pet['name']} fue encontrado!"
+        msg["From"] = EMAIL_USER
+        msg["To"] = owner_email
+
+        print(f"📧 Enviando correo a: {owner_email}")
+
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(EMAIL_USER, EMAIL_PASS)
-            server.sendmail(EMAIL_USER, pet["owner_email"], msg.as_string())
+            server.sendmail(EMAIL_USER, owner_email, msg.as_string())
+
+        print("✅ Correo enviado exitosamente")
         return jsonify({"status": "success"})
+
     except Exception as e:
-        print("❌ Error al enviar correo:", e)
-        return jsonify({"error": "No se pudo notificar al dueño"}), 500
+        print("❌ Error en /report:", repr(e))
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # -------------------------------------------------
 # EJECUTAR SERVIDOR
