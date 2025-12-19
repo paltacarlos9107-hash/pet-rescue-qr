@@ -1,18 +1,48 @@
-import sqlite3
 import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
-# Nombre del archivo de la base de datos
-DB_PATH = "pets.db"
+# Detectar entorno
+IS_PRODUCTION = os.environ.get("RENDER") is not None
+
+def get_db_connection():
+    if IS_PRODUCTION:
+        # Usar PostgreSQL en Render
+        conn = psycopg2.connect(
+            host=os.environ["DB_HOST"],
+            database=os.environ["DB_NAME"],
+            user=os.environ["DB_USER"],
+            password=os.environ["DB_PASS"],
+            port=os.environ.get("DB_PORT", "5432"),
+            cursor_factory=RealDictCursor
+        )
+    else:
+        # En local, puedes seguir usando SQLite si quieres
+        import sqlite3
+        conn = sqlite3.connect("pets.db")
+        conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
-    """
-    Crea la base de datos y la tabla 'pets' si no existe.
-    """
-    if not os.path.exists(DB_PATH):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE pets (
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if IS_PRODUCTION:
+        # PostgreSQL
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pets (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                breed TEXT,
+                description TEXT,
+                owner_email TEXT NOT NULL,
+                found BOOLEAN DEFAULT FALSE
+            )
+        """)
+    else:
+        # SQLite
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 breed TEXT,
@@ -21,41 +51,27 @@ def init_db():
                 found BOOLEAN DEFAULT 0
             )
         """)
-        conn.commit()
-        conn.close()
-        print("✅ Base de datos creada: pets.db")
+    
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def add_pet(pet_id, name, breed, description, owner_email):
-    """
-    Agrega una nueva mascota a la base de datos.
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO pets (id, name, breed, description, owner_email)
-        VALUES (?, ?, ?, ?, ?)
-    """, (pet_id, name, breed, description, owner_email))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO pets (id, name, breed, description, owner_email) VALUES (%s, %s, %s, %s, %s)",
+        (pet_id, name, breed, description, owner_email)
+    )
     conn.commit()
+    cur.close()
     conn.close()
-    print(f"✅ Mascota '{name}' registrada con ID: {pet_id}")
 
 def get_pet(pet_id):
-    """
-    Busca una mascota por su ID y devuelve sus datos (solo si no está marcada como 'encontrada').
-    """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM pets WHERE id = ? AND found = 0", (pet_id,))
-    row = cursor.fetchone()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
+    pet = cur.fetchone()
+    cur.close()
     conn.close()
-    
-    if row:
-        return {
-            "id": row[0],
-            "name": row[1],
-            "breed": row[2],
-            "description": row[3],
-            "owner_email": row[4],
-            "found": bool(row[5])
-        }
-    return None
+    return pet
