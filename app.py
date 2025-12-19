@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 import sqlite3
 import uuid
 import qrcode
@@ -9,28 +9,54 @@ from email.mime.text import MIMEText
 import os
 from database import init_db, add_pet, get_pet
 
-# -------- DETECTAR ENTORNO --------
+# -------------------------------------------------
+# CONFIGURACIÓN DE ENTORNO
+# -------------------------------------------------
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
-# -------- CONFIGURACIÓN DE CORREO --------
 if IS_PRODUCTION:
-    # En Render: usa variables de entorno (seguro)
-    EMAIL_USER = "paltacarlos9107@gmail.com"
-    EMAIL_PASS = "nivtfemzgtsqbfau"
+    EMAIL_USER = os.environ.get("paltacarlos9107@gmail.com")
+    EMAIL_PASS = os.environ.get("hvuafcqbjpxeckmb")
+    RENDER_APP_URL = "https://pet-rescue-qr-t3bm.onrender.com"
 else:
-    # En local: usa valores directos (¡solo para pruebas!)
-    EMAIL_USER = "paltacarlos9107@gmail.com"          # ← TU CORREO
-    EMAIL_PASS = "nivtfemzgtsqbfau"              # ← TU CONTRASEÑA DE APLICACIÓN
+    # ⚠️ Solo para desarrollo local — ¡NO subir credenciales a GitHub!
+    EMAIL_USER = "paltacarlos9107@gmail.com"
+    EMAIL_PASS = "hvuafcqbjpxeckmb"             
+    RENDER_APP_URL = None
 
-# Validación
 if not EMAIL_USER or not EMAIL_PASS:
-    raise ValueError("❌ Faltan credenciales de correo. Configura EMAIL_USER y EMAIL_PASS.")
+    raise RuntimeError("❌ Faltan credenciales de correo. Configura EMAIL_USER y EMAIL_PASS.")
 
-# -------- APP FLASK --------
+# -------------------------------------------------
+# INICIALIZAR APP
+# -------------------------------------------------
 app = Flask(__name__)
 init_db()
 
-# -------- RUTAS --------
+# -------------------------------------------------
+# MIDDLEWARE: Forzar HTTPS en Render
+# -------------------------------------------------
+@app.before_request
+def force_https():
+    if IS_PRODUCTION:
+        # Render envía 'X-Forwarded-Proto: https' cuando el tráfico original es HTTPS
+        if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
+            return redirect(request.url.replace('http://', 'https://'), code=301)
+
+# -------------------------------------------------
+# MIDDLEWARE: Cabeceras de seguridad
+# -------------------------------------------------
+@app.after_request
+def add_security_headers(response):
+    # Permitir geolocalización en todos los contextos
+    response.headers["Permissions-Policy"] = "geolocation=(*), microphone=(), camera=()"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer-when-downgrade"
+    return response
+
+# -------------------------------------------------
+# RUTAS
+# -------------------------------------------------
 @app.route("/")
 def home():
     return render_template("register.html")
@@ -44,9 +70,9 @@ def register():
     pet_id = str(uuid.uuid4())[:8].upper()
     add_pet(pet_id, name, breed, description, owner_email)
 
-    # Generar URL del QR (HTTP en local, HTTPS en Render)
+    # Generar URL del QR
     if IS_PRODUCTION:
-        qr_url = f"https://pet-rescue-qr.onrender.com/pet/{pet_id}"
+        qr_url = f"{RENDER_APP_URL}/pet/{pet_id}"
     else:
         qr_url = f"{request.url_root}pet/{pet_id}"
 
@@ -71,6 +97,7 @@ def report_location():
     pet_id = data.get("pet_id")
     lat = data.get("lat")
     lng = data.get("lng")
+
     pet = get_pet(pet_id)
     if not pet:
         return jsonify({"error": "Mascota no válida"}), 400
@@ -90,6 +117,11 @@ def report_location():
         print("❌ Error al enviar correo:", e)
         return jsonify({"error": "No se pudo notificar al dueño"}), 500
 
-# -------- INICIAR SERVIDOR --------
+# -------------------------------------------------
+# EJECUTAR SERVIDOR
+# -------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    host = "0.0.0.0"  # Obligatorio en Render
+    debug = not IS_PRODUCTION
+    app.run(host=host, port=port, debug=debug)
