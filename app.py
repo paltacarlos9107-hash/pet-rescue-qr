@@ -16,12 +16,12 @@ IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 if IS_PRODUCTION:
     EMAIL_USER = os.environ.get("paltacarlos9107@gmail.com")
-    EMAIL_PASS = os.environ.get("hvuafcqbjpxeckmb")
+    EMAIL_PASS = os.environ.get("mktdkkgdxwyapglx")
     RENDER_APP_URL = "https://pet-rescue-qr-t3bm.onrender.com"
 else:
     # ⚠️ Solo para desarrollo local — ¡NO subir credenciales a GitHub!
     EMAIL_USER = "paltacarlos9107@gmail.com"
-    EMAIL_PASS = "hvuafcqbjpxeckmb"             
+    EMAIL_PASS = "mktdkkgdxwyapglx"             
     RENDER_APP_URL = None
 
 if not EMAIL_USER or not EMAIL_PASS:
