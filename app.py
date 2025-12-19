@@ -91,6 +91,8 @@ def pet_page(pet_id):
         return "<h2>❌ Mascota no encontrada o ya fue reportada como encontrada.</h2>", 404
     return render_template("pet.html", pet=pet)
 
+import requests  # ¡Asegúrate de importar requests!
+
 @app.route("/report", methods=["POST"])
 def report_location():
     try:
@@ -111,27 +113,56 @@ def report_location():
 
         owner_email = pet.get("owner_email")
         if not owner_email:
-            print(f"⚠️ Mascota {pet_id} no tiene owner_email")
             return jsonify({"error": "Dueño no tiene correo registrado"}), 400
 
+        # Generar enlace de Google Maps
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
-        msg = MIMEText(f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}")
-        msg["Subject"] = f"⚠️ ¡{pet['name']} fue encontrado!"
-        msg["From"] = EMAIL_USER
-        msg["To"] = owner_email
 
-        print(f"📧 Enviando correo a: {owner_email}")
+        # Obtener API Key de SendGrid
+        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+        if not SENDGRID_API_KEY:
+            print("❌ SENDGRID_API_KEY no configurada")
+            return jsonify({"error": "Servicio de notificación no disponible"}), 500
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.sendmail(EMAIL_USER, owner_email, msg.as_string())
+        # Preparar el payload
+        payload = {
+            "personalizations": [
+                {
+                    "to": [{"email": owner_email}],
+                    "subject": f"⚠️ ¡{pet['name']} fue encontrado!"
+                }
+            ],
+            "from": {"email": "no-reply@petrescue.app"},  # Debe ser un correo verificado en SendGrid si usas "Single Sender Verification"
+            "content": [
+                {
+                    "type": "text/plain",
+                    "value": f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
+                }
+            ]
+        }
 
-        print("✅ Correo enviado exitosamente")
-        return jsonify({"status": "success"})
+        # Enviar con SendGrid
+        headers = {
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers=headers,
+            json=payload
+        )
+
+        if response.status_code == 202:
+            print("✅ Correo enviado con SendGrid")
+            return jsonify({"status": "success"})
+        else:
+            print(f"📧 Error SendGrid ({response.status_code}): {response.text}")
+            return jsonify({"error": "No se pudo enviar la notificación"}), 500
 
     except Exception as e:
-        print("❌ Error en /report:", repr(e))
-        return jsonify({"error": "Error interno del servidor"}), 500
+        print("❌ Error en /report con SendGrid:", repr(e))
+        return jsonify({"error": "Error interno"}), 500
 
 # -------------------------------------------------
 # EJECUTAR SERVIDOR
