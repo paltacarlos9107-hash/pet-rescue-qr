@@ -15,8 +15,8 @@ from database import init_db, add_pet, get_pet
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 if IS_PRODUCTION:
-    EMAIL_USER = os.environ.get("paltacarlos9107@gmail.com")
-    EMAIL_PASS = os.environ.get("mktdkkgdxwyapglx")
+    EMAIL_USER = os.environ.get("EMAIL_USER")       
+    EMAIL_PASS = os.environ.get("EMAIL_PASS") 
     RENDER_APP_URL = "https://pet-rescue-qr-t3bm.onrender.com"
 else:
     # ⚠️ Solo para desarrollo local — ¡NO subir credenciales a GitHub!
