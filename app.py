@@ -7,6 +7,16 @@ import base64
 import os
 import requests  # Para SendGrid
 from database import init_db, add_pet, get_pet
+import cloudinary
+import cloudinary.uploader
+
+# Configurar Cloudinary (solo en producción)
+if IS_PRODUCTION:
+    cloudinary.config(
+        cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.environ.get("CLOUDINARY_API_KEY"),
+        api_secret=os.environ.get("CLOUDINARY_API_SECRET")
+    )
 
 # -------------------------------------------------
 # CONFIGURACIÓN DE ENTORNO
@@ -61,16 +71,32 @@ def register():
     breed = request.form.get("breed", "")
     description = request.form.get("description", "")
     owner_email = request.form["email"]
-    pet_id = str(uuid.uuid4())[:8].upper()
-    add_pet(pet_id, name, breed, description, owner_email)
+    owner_phone = request.form.get("phone", "")
 
-    # Generar URL del QR (usa el host real en Render)
+    # Subir foto si existe
+    photo_url = None
+    if "photo" in request.files:
+        photo = request.files["photo"]
+        if photo and photo.filename:
+            try:
+                upload_result = cloudinary.uploader.upload(
+                    photo,
+                    folder="pet_rescue_qr",
+                    resource_type="image"
+                )
+                photo_url = upload_result["secure_url"]
+            except Exception as e:
+                print("📷 Error al subir foto:", e)
+
+    pet_id = str(uuid.uuid4())[:8].upper()
+    add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
+
+    # Generar QR
     if IS_PRODUCTION:
         qr_url = f"https://{request.host}/pet/{pet_id}"
     else:
         qr_url = f"{request.url_root}pet/{pet_id}"
 
-    # Generar imagen QR
     qr_img = qrcode.make(qr_url)
     buffered = BytesIO()
     qr_img.save(buffered, format="PNG")

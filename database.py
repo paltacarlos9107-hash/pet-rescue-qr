@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
@@ -17,8 +18,7 @@ def get_db_connection():
             cursor_factory=RealDictCursor
         )
     else:
-        # En local, puedes seguir usando SQLite si quieres
-        import sqlite3
+        # En local, usar SQLite
         conn = sqlite3.connect("pets.db")
         conn.row_factory = sqlite3.Row
     return conn
@@ -28,7 +28,7 @@ def init_db():
     cur = conn.cursor()
     
     if IS_PRODUCTION:
-        # PostgreSQL
+        # PostgreSQL: usa BOOLEAN
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -36,11 +36,13 @@ def init_db():
                 breed TEXT,
                 description TEXT,
                 owner_email TEXT NOT NULL,
+                owner_phone TEXT,
+                photo_url TEXT,
                 found BOOLEAN DEFAULT FALSE
             )
         """)
     else:
-        # SQLite
+        # SQLite: usa INTEGER para booleano (0/1)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -48,7 +50,9 @@ def init_db():
                 breed TEXT,
                 description TEXT,
                 owner_email TEXT NOT NULL,
-                found BOOLEAN DEFAULT 0
+                owner_phone TEXT,
+                photo_url TEXT,
+                found INTEGER DEFAULT 0
             )
         """)
     
@@ -56,13 +60,21 @@ def init_db():
     cur.close()
     conn.close()
 
-def add_pet(pet_id, name, breed, description, owner_email):
+def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, photo_url=None):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO pets (id, name, breed, description, owner_email) VALUES (%s, %s, %s, %s, %s)",
-        (pet_id, name, breed, description, owner_email)
-    )
+    
+    if IS_PRODUCTION:
+        cur.execute(
+            "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
+        )
+    else:
+        cur.execute(
+            "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
+        )
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -70,7 +82,12 @@ def add_pet(pet_id, name, breed, description, owner_email):
 def get_pet(pet_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
+    
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND found = 0", (pet_id,))
+    
     pet = cur.fetchone()
     cur.close()
     conn.close()

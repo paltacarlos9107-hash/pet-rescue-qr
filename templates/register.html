@@ -89,8 +89,16 @@
       <input type="email" id="email" name="email" required />
       <small>Recibirás una notificación si alguien encuentra a tu mascota.</small>
     </div>
+    <div>
+      <label for="phone">Número de contacto (opcional)</label>
+      <input type="tel" id="phone" name="phone" placeholder="+57 300 123 4567">
+    </div>
+    <div>
+      <label for="photo">Foto de la mascota (opcional)</label>
+      <input type="file" id="photo" name="photo" accept="image/*">
+    </div>
     <button type="submit">Registrar Mascota</button>
-  </form>
+  <form method="POST" action="/register" enctype="multipart/form-data">
 
   {% if qr %}
   <div class="qr-section">

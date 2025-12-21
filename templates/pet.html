@@ -59,6 +59,9 @@
     <div class="icon">🐾</div>
     <h2>¡Hola! Esta mascota está perdida</h2>
     <p><strong>{{ pet.name }}</strong></p>
+    {% if pet.photo_url %}
+    <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" style="max-width:200px; border-radius:8px; margin:10px 0;">
+    {% endif %}
     {% if pet.breed %}
       <p>Raza: {{ pet.breed }}</p>
     {% endif %}
