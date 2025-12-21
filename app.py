@@ -57,118 +57,76 @@ def home():
 
 @app.route("/register", methods=["POST"])
 def register():
-    name = request.form["name"]
-    breed = request.form.get("breed", "")
-    description = request.form.get("description", "")
-    owner_email = request.form["email"]
-    owner_phone = request.form.get("phone", "")
-
-    # Subir foto si se proporciona
-    photo_url = None
-    if "photo" in request.files:
-        photo = request.files["photo"]
-        if photo and photo.filename:
-            try:
-                upload_result = cloudinary.uploader.upload(
-                    photo,
-                    folder="pet_rescue_qr",
-                    resource_type="image"
-                )
-                photo_url = upload_result["secure_url"]
-            except Exception as e:
-                print("📷 Error al subir foto:", e)
-
-    pet_id = str(uuid.uuid4())[:8].upper()
-    add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
-
-    # Generar URL del QR (siempre HTTPS en Render)
-    if IS_PRODUCTION:
-        qr_url = f"https://{request.host}/pet/{pet_id}"
-    else:
-        qr_url = f"{request.url_root}pet/{pet_id}"
-
-    # Generar imagen QR
-    qr_img = qrcode.make(qr_url)
-    buffered = BytesIO()
-    qr_img.save(buffered, format="PNG")
-    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
-
-    return render_template("register.html", qr=qr_base64, qr_url=qr_url)
-
-@app.route("/pet/<pet_id>")
-def pet_page(pet_id):
-    pet = get_pet(pet_id)
-    if not pet:
-        return "<h2>❌ Mascota no encontrada o ya fue reportada como encontrada.</h2>", 404
-    return render_template("pet.html", pet=pet)
-
-@app.route("/report", methods=["POST"])
-def report_location():
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "No se recibieron datos"}), 400
+        # Obtener datos del formulario
+        name = request.form.get("name", "").strip()
+        breed = request.form.get("breed", "").strip()
+        description = request.form.get("description", "").strip()
+        owner_email = request.form.get("email", "").strip()
+        owner_phone = request.form.get("phone", "").strip()
 
-        pet_id = data.get("pet_id")
-        lat = data.get("lat")
-        lng = data.get("lng")
-
-        if not pet_id or lat is None or lng is None:
-            return jsonify({"error": "Faltan datos requeridos"}), 400
-
-        pet = get_pet(pet_id)
-        if not pet:
-            return jsonify({"error": "Mascota no encontrada"}), 400
-
-        owner_email = pet.get("owner_email")
-        if not owner_email:
-            return jsonify({"error": "Dueño no tiene correo registrado"}), 400
-
-        map_link = f"https://www.google.com/maps?q={lat},{lng}"
-
-        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-        SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
-
-        if SENDGRID_API_KEY:
-            payload = {
-                "personalizations": [
-                    {
-                        "to": [{"email": owner_email}],
-                        "subject": f"⚠️ ¡{pet['name']} fue encontrado!"
-                    }
-                ],
-                "from": {"email": SENDGRID_FROM_EMAIL},
-                "content": [
-                    {
-                        "type": "text/plain",
-                        "value": f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
-                    }
-                ]
-            }
-
-            headers = {
-                "Authorization": f"Bearer {SENDGRID_API_KEY}",
-                "Content-Type": "application/json"
-            }
-
-            response = requests.post(
-                "https://api.sendgrid.com/v3/mail/send",
-                headers=headers,
-                json=payload
+        # Validación básica
+        if not name or not owner_email:
+            return render_template(
+                "register.html",
+                error="El nombre de la mascota y el correo son obligatorios."
             )
 
-            if response.status_code != 202:
-                print(f"📧 SendGrid error ({response.status_code}): {response.text}")
-                return jsonify({"error": "No se pudo enviar la notificación"}), 500
-        else:
-            print(f"📧 [LOCAL] Simulando correo a {owner_email}")
-            print(f"📍 Ubicación: {map_link}")
+        # Subir foto si se proporciona
+        photo_url = None
+        if "photo" in request.files:
+            photo = request.files["photo"]
+            if photo and photo.filename:
+                try:
+                    # Subir a Cloudinary (solo si está configurado)
+                    if IS_PRODUCTION:
+                        upload_result = cloudinary.uploader.upload(
+                            photo,
+                            folder="pet_rescue_qr",
+                            resource_type="image",
+                            timeout=30
+                        )
+                        photo_url = upload_result.get("secure_url")
+                    else:
+                        # En local, no subimos, pero podrías guardar en /tmp si quieres
+                        photo_url = None
+                except Exception as e:
+                    print("📷 Advertencia: error al subir foto a Cloudinary:", str(e))
+                    # No detenemos el registro si falla la foto
+                    photo_url = None
 
-        return jsonify({"status": "success"})
+        # Generar ID único
+        pet_id = str(uuid.uuid4())[:8].upper()
+
+        # Guardar en base de datos
+        add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
+
+        # Generar URL del QR
+        if IS_PRODUCTION:
+            qr_url = f"https://{request.host}/pet/{pet_id}"
+        else:
+            qr_url = f"{request.url_root}pet/{pet_id}"
+
+        # Generar código QR como imagen base64
+        qr_img = qrcode.make(qr_url)
+        buffered = BytesIO()
+        qr_img.save(buffered, format="PNG")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+        # Mostrar resultado
+        return render_template(
+            "register.html",
+            qr=qr_base64,
+            qr_url=qr_url,
+            success=f"¡Mascota '{name}' registrada! Usa el QR para ayudar a encontrarla."
+        )
 
     except Exception as e:
-        print("❌ Error en /report:", repr(e))
-        return jsonify({"error": "Error interno del servidor"}), 500
+        print("❌ Error en /register:", repr(e))
+        return render_template(
+            "register.html",
+            error="Ocurrió un error al registrar la mascota. Inténtalo de nuevo."
+        )
 
 # -------------------------------------------------
 # EJECUTAR SERVIDOR
