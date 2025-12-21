@@ -106,7 +106,7 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
-        if not 
+        if not data:
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
@@ -126,7 +126,6 @@ def report_location():
 
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
 
-        # Usar SendGrid solo si está configurado
         SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
 
