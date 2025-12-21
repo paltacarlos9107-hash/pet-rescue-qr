@@ -5,33 +5,23 @@ import qrcode
 from io import BytesIO
 import base64
 import os
-import requests  # Para SendGrid
-from database import init_db, add_pet, get_pet
+import requests
 import cloudinary
 import cloudinary.uploader
+from database import init_db, add_pet, get_pet
 
-# Configurar Cloudinary (solo en producción)
+# -------------------------------------------------
+# CONFIGURACIÓN DE ENTORNO (¡DEBE IR AL INICIO!)
+# -------------------------------------------------
+IS_PRODUCTION = os.environ.get("RENDER") is not None
+
+# Configurar Cloudinary solo en producción
 if IS_PRODUCTION:
     cloudinary.config(
         cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
         api_key=os.environ.get("CLOUDINARY_API_KEY"),
         api_secret=os.environ.get("CLOUDINARY_API_SECRET")
     )
-
-# -------------------------------------------------
-# CONFIGURACIÓN DE ENTORNO
-# -------------------------------------------------
-IS_PRODUCTION = os.environ.get("RENDER") is not None
-
-if IS_PRODUCTION:
-    # En Render: usa variables de entorno
-    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-    # El correo "from" debe estar verificado en SendGrid
-    SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "no-reply@petrescue.app")
-else:
-    # En local: puedes usar valores directos (opcional, para pruebas)
-    SENDGRID_API_KEY = None  # Opcional: si quieres probar SendGrid localmente
-    SENDGRID_FROM_EMAIL = "paltacarlos9107@gmail.com"
 
 # -------------------------------------------------
 # INICIALIZAR APP
@@ -73,7 +63,7 @@ def register():
     owner_email = request.form["email"]
     owner_phone = request.form.get("phone", "")
 
-    # Subir foto si existe
+    # Subir foto si se proporciona
     photo_url = None
     if "photo" in request.files:
         photo = request.files["photo"]
@@ -91,12 +81,13 @@ def register():
     pet_id = str(uuid.uuid4())[:8].upper()
     add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
 
-    # Generar QR
+    # Generar URL del QR (siempre HTTPS en Render)
     if IS_PRODUCTION:
         qr_url = f"https://{request.host}/pet/{pet_id}"
     else:
         qr_url = f"{request.url_root}pet/{pet_id}"
 
+    # Generar imagen QR
     qr_img = qrcode.make(qr_url)
     buffered = BytesIO()
     qr_img.save(buffered, format="PNG")
@@ -115,7 +106,7 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
-        if not data:
+        if not 
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
@@ -135,7 +126,10 @@ def report_location():
 
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
 
-        # Solo enviar correo si estamos en producción o si se configura SendGrid en local
+        # Usar SendGrid solo si está configurado
+        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+        SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
+
         if SENDGRID_API_KEY:
             payload = {
                 "personalizations": [
@@ -168,7 +162,6 @@ def report_location():
                 print(f"📧 SendGrid error ({response.status_code}): {response.text}")
                 return jsonify({"error": "No se pudo enviar la notificación"}), 500
         else:
-            # Modo local: solo imprimir en consola
             print(f"📧 [LOCAL] Simulando correo a {owner_email}")
             print(f"📍 Ubicación: {map_link}")
 
