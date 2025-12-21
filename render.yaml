@@ -1,13 +1,24 @@
 services:
   - type: web
     name: pet-rescue-qr
-    runtime: python
     env: python
-    region: colombia   # o "oregon" si prefieres EE.UU.
+    region: oregon
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py"
     envVars:
-      - key: EMAIL_USER
+      - key: SENDGRID_API_KEY
         sync: false
-      - key: EMAIL_PASS
+      - key: SENDGRID_FROM_EMAIL
         sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+    # ¡Esta línea fuerza Python 3.11!
+    envVersion: "3.11"
