@@ -71,34 +71,27 @@
 <body>
   <h1>🐾 Registrar Mascota</h1>
 
-  <form method="POST" action="/register">
-    <div>
-      <label for="name">Nombre de la mascota *</label>
-      <input type="text" id="name" name="name" required />
-    </div>
-    <div>
-      <label for="breed">Raza (opcional)</label>
-      <input type="text" id="breed" name="breed" />
-    </div>
-    <div>
-      <label for="description">Señas particulares (color, tamaño, collar, etc.)</label>
-      <textarea id="description" name="description" rows="3"></textarea>
-    </div>
-    <div>
-      <label for="email">Tu correo electrónico *</label>
-      <input type="email" id="email" name="email" required />
-      <small>Recibirás una notificación si alguien encuentra a tu mascota.</small>
-    </div>
-    <div>
-      <label for="phone">Número de contacto (opcional)</label>
-      <input type="tel" id="phone" name="phone" placeholder="+57 300 123 4567">
-    </div>
-    <div>
-      <label for="photo">Foto de la mascota (opcional)</label>
-      <input type="file" id="photo" name="photo" accept="image/*">
-    </div>
-    <button type="submit">Registrar Mascota</button>
-  <form method="POST" action="/register" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data">
+  <label>Nombre de la mascota *</label>
+  <input type="text" name="name" required>
+
+  <label>Raza (opcional)</label>
+  <input type="text" name="breed">
+
+  <label>Señas particulares</label>
+  <textarea name="description"></textarea>
+
+  <label>Tu correo electrónico *</label>
+  <input type="email" name="email" required>
+
+  <label>Número de contacto (opcional)</label>
+  <input type="tel" name="phone">
+
+  <label>Foto (opcional)</label>
+  <input type="file" name="photo" accept="image/*">
+
+  <button type="submit">Registrar Mascota</button>
+</form>
 
   {% if qr %}
   <div class="qr-section">
