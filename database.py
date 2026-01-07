@@ -1,14 +1,11 @@
 import os
-import sqlite3
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Detectar entorno
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 def get_db_connection():
     if IS_PRODUCTION:
-        # Usar PostgreSQL en Render
         conn = psycopg2.connect(
             host=os.environ["DB_HOST"],
             database=os.environ["DB_NAME"],
@@ -18,7 +15,7 @@ def get_db_connection():
             cursor_factory=RealDictCursor
         )
     else:
-        # En local, usar SQLite
+        import sqlite3
         conn = sqlite3.connect("pets.db")
         conn.row_factory = sqlite3.Row
     return conn
@@ -26,9 +23,7 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    
     if IS_PRODUCTION:
-        # PostgreSQL: usa BOOLEAN
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -42,7 +37,6 @@ def init_db():
             )
         """)
     else:
-        # SQLite: usa INTEGER para booleano (0/1)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -52,10 +46,9 @@ def init_db():
                 owner_email TEXT NOT NULL,
                 owner_phone TEXT,
                 photo_url TEXT,
-                found INTEGER DEFAULT 0
+                found BOOLEAN DEFAULT 0
             )
         """)
-    
     conn.commit()
     cur.close()
     conn.close()
@@ -63,7 +56,6 @@ def init_db():
 def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, photo_url=None):
     conn = get_db_connection()
     cur = conn.cursor()
-    
     if IS_PRODUCTION:
         cur.execute(
             "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -74,7 +66,6 @@ def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, pho
             "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
         )
-    
     conn.commit()
     cur.close()
     conn.close()
@@ -82,12 +73,10 @@ def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, pho
 def get_pet(pet_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    
     if IS_PRODUCTION:
         cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
     else:
         cur.execute("SELECT * FROM pets WHERE id = ? AND found = 0", (pet_id,))
-    
     pet = cur.fetchone()
     cur.close()
     conn.close()

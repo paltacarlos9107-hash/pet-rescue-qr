@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, redirect
-import sqlite3
 import uuid
 import qrcode
 from io import BytesIO
@@ -11,12 +10,12 @@ import cloudinary.uploader
 from database import init_db, add_pet, get_pet
 
 # -------------------------------------------------
-# CONFIGURACIÓN DE ENTORNO (¡DEBE IR AL INICIO!)
+# CONFIGURACIÓN DE ENTORNO
 # -------------------------------------------------
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
-# Configurar Cloudinary solo en producción
 if IS_PRODUCTION:
+    # Configurar Cloudinary
     cloudinary.config(
         cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
         api_key=os.environ.get("CLOUDINARY_API_KEY"),
@@ -58,62 +57,44 @@ def home():
 @app.route("/register", methods=["POST"])
 def register():
     try:
-        # Obtener datos del formulario
         name = request.form.get("name", "").strip()
         breed = request.form.get("breed", "").strip()
         description = request.form.get("description", "").strip()
         owner_email = request.form.get("email", "").strip()
         owner_phone = request.form.get("phone", "").strip()
 
-        # Validación básica
         if not name or not owner_email:
-            return render_template(
-                "register.html",
-                error="El nombre de la mascota y el correo son obligatorios."
-            )
+            return render_template("register.html", error="El nombre y correo son obligatorios.")
 
-        # Subir foto si se proporciona
+        # Subir foto a Cloudinary
         photo_url = None
         if "photo" in request.files:
             photo = request.files["photo"]
             if photo and photo.filename:
                 try:
-                    # Subir a Cloudinary (solo si está configurado)
-                    if IS_PRODUCTION:
-                        upload_result = cloudinary.uploader.upload(
-                            photo,
-                            folder="pet_rescue_qr",
-                            resource_type="image",
-                            timeout=30
-                        )
-                        photo_url = upload_result.get("secure_url")
-                    else:
-                        # En local, no subimos, pero podrías guardar en /tmp si quieres
-                        photo_url = None
+                    upload_result = cloudinary.uploader.upload(
+                        photo,
+                        folder="pet_rescue_qr",
+                        resource_type="image"
+                    )
+                    photo_url = upload_result.get("secure_url")
                 except Exception as e:
-                    print("📷 Advertencia: error al subir foto a Cloudinary:", str(e))
-                    # No detenemos el registro si falla la foto
-                    photo_url = None
+                    print("📷 Error al subir foto:", str(e))
 
-        # Generar ID único
         pet_id = str(uuid.uuid4())[:8].upper()
-
-        # Guardar en base de datos
         add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
 
-        # Generar URL del QR
+        # Generar QR
         if IS_PRODUCTION:
             qr_url = f"https://{request.host}/pet/{pet_id}"
         else:
             qr_url = f"{request.url_root}pet/{pet_id}"
 
-        # Generar código QR como imagen base64
         qr_img = qrcode.make(qr_url)
         buffered = BytesIO()
         qr_img.save(buffered, format="PNG")
         qr_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-        # Mostrar resultado
         return render_template(
             "register.html",
             qr=qr_base64,
@@ -123,10 +104,74 @@ def register():
 
     except Exception as e:
         print("❌ Error en /register:", repr(e))
-        return render_template(
-            "register.html",
-            error="Ocurrió un error al registrar la mascota. Inténtalo de nuevo."
+        return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
+
+@app.route("/pet/<pet_id>")
+def pet_page(pet_id):
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
+    return render_template("pet.html", pet=pet)
+
+@app.route("/report", methods=["POST"])
+def report_location():
+    try:
+        data = request.get_json()
+        if not 
+            return jsonify({"error": "No se recibieron datos"}), 400
+
+        pet_id = data.get("pet_id")
+        lat = data.get("lat")
+        lng = data.get("lng")
+
+        if not pet_id or lat is None or lng is None:
+            return jsonify({"error": "Faltan datos requeridos"}), 400
+
+        pet = get_pet(pet_id)
+        if not pet:
+            return jsonify({"error": "Mascota no encontrada"}), 400
+
+        owner_email = pet.get("owner_email")
+        if not owner_email:
+            return jsonify({"error": "Dueño no tiene correo registrado"}), 400
+
+        map_link = f"https://www.google.com/maps?q={lat},{lng}"
+
+        # Enviar con SendGrid
+        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+        SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
+
+        if not SENDGRID_API_KEY:
+            print("⚠️ SENDGRID_API_KEY no configurada")
+            return jsonify({"error": "Notificación no disponible"}), 500
+
+        payload = {
+            "personalizations": [{"to": [{"email": owner_email}]}],
+            "from": {"email": SENDGRID_FROM_EMAIL},
+            "subject": f"⚠️ ¡{pet['name']} fue encontrado!",
+            "content": [{"type": "text/plain", "value": f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"}]
+        }
+
+        headers = {
+            "Authorization": f"Bearer {SENDGRID_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers=headers,
+            json=payload
         )
+
+        if response.status_code == 202:
+            return jsonify({"status": "success"})
+        else:
+            print("📧 SendGrid error:", response.text)
+            return jsonify({"error": "No se pudo notificar"}), 500
+
+    except Exception as e:
+        print("❌ Error en /report:", repr(e))
+        return jsonify({"error": "Error interno"}), 500
 
 # -------------------------------------------------
 # EJECUTAR SERVIDOR
