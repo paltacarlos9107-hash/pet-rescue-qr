@@ -2,61 +2,101 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Pet Rescue QR</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
         .login-box {
-            background: white;
+            background: rgba(255, 255, 255, 0.94);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
+            text-align: center;
         }
-        h2 { text-align: center; color: #2c3e50; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
         }
         .error {
             background: #ffebee;
             color: #c62828;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .icon {
+            font-size: 40px;
             margin-bottom: 15px;
+            color: #4CAF50;
         }
     </style>
 </head>
 <body>
     <div class="login-box">
-        <h2>🔒 Acceso Restringido</h2>
+        <div class="icon">🔒</div>
+        <h2>Acceso Restringido</h2>
+        
         {% if error %}
             <div class="error">{{ error }}</div>
         {% endif %}
+
         <form method="POST">
             <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" name="username" required>
+                <label for="username">Usuario</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
             </div>
             <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" required>
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
             </div>
             <button type="submit">Iniciar Sesión</button>
         </form>
