@@ -9,6 +9,9 @@ import cloudinary
 import cloudinary.uploader
 from database import init_db, add_pet, get_pet
 
+# -------------------------------------------------
+# CONFIGURACIÓN DE ENTORNO
+# -------------------------------------------------
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 if IS_PRODUCTION:
@@ -18,15 +21,24 @@ if IS_PRODUCTION:
         api_secret=os.environ.get("CLOUDINARY_API_SECRET")
     )
 
+# -------------------------------------------------
+# INICIALIZAR APP
+# -------------------------------------------------
 app = Flask(__name__)
 init_db()
 
+# -------------------------------------------------
+# MIDDLEWARE: Forzar HTTPS en Render
+# -------------------------------------------------
 @app.before_request
 def force_https():
     if IS_PRODUCTION:
         if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
             return redirect(request.url.replace('http://', 'https://'), code=301)
 
+# -------------------------------------------------
+# MIDDLEWARE: Cabeceras de seguridad
+# -------------------------------------------------
 @app.after_request
 def add_security_headers(response):
     response.headers["Permissions-Policy"] = "geolocation=(*), microphone=(), camera=()"
@@ -34,6 +46,9 @@ def add_security_headers(response):
     response.headers["Referrer-Policy"] = "no-referrer-when-downgrade"
     return response
 
+# -------------------------------------------------
+# RUTAS
+# -------------------------------------------------
 @app.route("/")
 def home():
     return render_template("register.html")
@@ -99,11 +114,7 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
-<<<<<<< HEAD
         if data is None:
-=======
-        if not
->>>>>>> d909c62aa0fc06ebf12157c73c7fce4fcb00260b
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
@@ -158,6 +169,9 @@ def report_location():
         print("❌ Error en /report:", repr(e))
         return jsonify({"error": "Error interno"}), 500
 
+# -------------------------------------------------
+# EJECUTAR SERVIDOR
+# -------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     host = "0.0.0.0"
