@@ -1,16 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>¡Gracias por ayudar!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Gracias por ayudar! - Pet Rescue QR</title>
     <style>
-        body { font-family: Arial; text-align: center; padding: 40px; }
-        .success { color: #2e7d32; font-size: 24px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .success-icon {
+            font-size: 60px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.5;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        a:hover {
+            background-color: #1565c0;
+        }
     </style>
 </head>
 <body>
-    <div class="success">✅ ¡Gracias por tu ayuda!</div>
-    <p>El dueño de la mascota ha sido notificado.</p>
-    <a href="/">Registrar otra mascota</a>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>¡Gracias por tu ayuda!</h1>
+        <p>El dueño de la mascota ha sido notificado con tu ubicación.</p>
+        <p>Tu gesto puede marcar la diferencia entre perderla y volverla a ver.</p>
+        <a href="/">← Registrar otra mascota</a>
+    </div>
 </body>
 </html>
