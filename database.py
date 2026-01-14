@@ -23,32 +23,28 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS pets (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                breed TEXT,
-                description TEXT,
-                owner_email TEXT NOT NULL,
-                owner_phone TEXT,
-                photo_url TEXT,
-                found BOOLEAN DEFAULT FALSE
-            )
-        """)
-    else:
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS pets (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                breed TEXT,
-                description TEXT,
-                owner_email TEXT NOT NULL,
-                owner_phone TEXT,
-                photo_url TEXT,
-                found BOOLEAN DEFAULT 0
-            )
-        """)
+    
+    # Crear tabla si no existe
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS pets (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            breed TEXT,
+            description TEXT,
+            owner_email TEXT NOT NULL,
+            owner_phone TEXT,
+            photo_url TEXT,
+            found BOOLEAN DEFAULT FALSE
+        )
+    """)
+    
+    # Asegurar que las columnas existan (por si la tabla ya existía)
+    try:
+        cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS owner_phone TEXT")
+        cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS photo_url TEXT")
+    except Exception as e:
+        print("⚠️ Advertencia al agregar columnas:", e)
+    
     conn.commit()
     cur.close()
     conn.close()
