@@ -15,8 +15,8 @@
 <body>
     <h1>🐾 ¿Viste a {{ pet.name }}?</h1>
 
-    {% if pet.photo_path %}
-        <img src="{{ pet.photo_path }}" alt="Foto de {{ pet.name }}" class="pet-photo">
+    {% if pet.photo_url %}
+    <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo">
     {% endif %}
 
     <p><strong>Raza:</strong> {{ pet.breed or "No especificada" }}</p>
