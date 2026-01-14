@@ -1,11 +1,12 @@
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
 
+# Detectar entorno
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 def get_db_connection():
     if IS_PRODUCTION:
+        import psycopg2
+        from psycopg2.extras import RealDictCursor
         conn = psycopg2.connect(
             host=os.environ["DB_HOST"],
             database=os.environ["DB_NAME"],
@@ -24,26 +25,42 @@ def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # Crear tabla si no existe
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS pets (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            breed TEXT,
-            description TEXT,
-            owner_email TEXT NOT NULL,
-            owner_phone TEXT,
-            photo_url TEXT,
-            found BOOLEAN DEFAULT FALSE
-        )
-    """)
-    
-    # Asegurar que las columnas existan (por si la tabla ya existía)
-    try:
-        cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS owner_phone TEXT")
-        cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS photo_url TEXT")
-    except Exception as e:
-        print("⚠️ Advertencia al agregar columnas:", e)
+    if IS_PRODUCTION:
+        # PostgreSQL
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pets (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                breed TEXT,
+                description TEXT,
+                owner_email TEXT NOT NULL,
+                owner_phone TEXT,
+                photo_url TEXT,
+                found BOOLEAN DEFAULT FALSE
+            )
+        """)
+        # Asegurar columnas adicionales si la tabla ya existía
+        try:
+            cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS owner_phone TEXT")
+            cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS photo_url TEXT")
+        except Exception as e:
+            print("⚠️ Advertencia al agregar columnas en PostgreSQL:", e)
+    else:
+        # SQLite
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pets (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                breed TEXT,
+                description TEXT,
+                owner_email TEXT NOT NULL,
+                owner_phone TEXT,
+                photo_url TEXT,
+                found BOOLEAN DEFAULT 0
+            )
+        """)
+        # En SQLite, ALTER TABLE es limitado, pero como creamos la tabla completa,
+        # no necesitamos agregar columnas por separado si usamos CREATE TABLE IF NOT EXISTS
     
     conn.commit()
     cur.close()

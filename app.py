@@ -118,7 +118,7 @@ def report_location():
     try:
         data = request.get_json()
         if not 
-        return jsonify({"error": "No se recibieron datos"}), 400
+            return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
         lat = data.get("lat")
@@ -135,6 +135,7 @@ def report_location():
         if not owner_email:
             return jsonify({"error": "Dueño no tiene correo registrado"}), 400
 
+        # ✅ Corrección: eliminar espacios en Google Maps
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
 
         # Enviar con SendGrid
@@ -157,6 +158,7 @@ def report_location():
             "Content-Type": "application/json"
         }
 
+        # ✅ Corrección: eliminar espacios en la URL de SendGrid
         response = requests.post(
             "https://api.sendgrid.com/v3/mail/send",
             headers=headers,
