@@ -1,55 +1,45 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¡Gracias por ayudar! - Pet Rescue QR</title>
+    <meta charset="utf-8">
+    <title>¡Gracias por ayudar!</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 40px 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .success-icon {
-            font-size: 60px;
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #2e7d32;
-            margin-bottom: 15px;
-        }
-        p {
-            font-size: 18px;
-            line-height: 1.5;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #1976d2;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        a:hover {
-            background-color: #1565c0;
-        }
-    </style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 40px 20px;
+        background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .content {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        margin: 0 auto;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .success {
+        color: #2e7d32;
+        font-size: 28px;
+        margin: 20px 0;
+    }
+    a {
+        color: #1976d2;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 20px;
+    }
+    a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="success-icon">✅</div>
-        <h1>¡Gracias por tu ayuda!</h1>
+    <div class="content">
+        <div class="success">✅ ¡Gracias por tu ayuda!</div>
         <p>El dueño de la mascota ha sido notificado con tu ubicación.</p>
-        <p>Tu gesto puede marcar la diferencia entre perderla y volverla a ver.</p>
         <a href="/">← Registrar otra mascota</a>
     </div>
 </body>

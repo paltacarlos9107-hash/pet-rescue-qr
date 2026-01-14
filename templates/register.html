@@ -5,34 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Mascota - Pet Rescue QR</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 0 15px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; }
-        button:hover { background: #45a049; }
-        .qr-section { margin-top: 20px; text-align: center; }
-        .qr-section img { max-width: 200px; margin: 10px 0; }
-        .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .error { background: #ffebee; color: #c62828; }
-        .success { background: #e8f5e9; color: #2e7d32; }
-    </style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 0 15px;
+        background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        backdrop-filter: blur(2px);
+    }
+    .content {
+        background: rgba(255, 255, 255, 0.92);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
+    input, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; }
+    button {
+        background: #4CAF50;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+    }
+    button:hover { background: #45a049; }
+    .qr-section { margin-top: 20px; text-align: center; }
+    .qr-section img { max-width: 200px; margin: 10px 0; border: 2px solid #eee; border-radius: 8px; }
+    .message {
+        padding: 12px;
+        margin: 15px 0;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    .error { background: #ffebee; color: #c62828; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+</style>
 </head>
 <body>
-    <h1>🐾 Registrar Mascota Perdida</h1>
+    <div class="content">
+        <h1>🐾 Registrar Mascota Perdida</h1>
 
-    {% if success %}
-        <div class="message success">{{ success }}</div>
-        <div class="qr-section">
-            <p><strong>Código QR:</strong></p>
-            <img src="data:image/png;base64,{{ qr }}" alt="QR Code">
-            <p><a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
-        </div>
-    {% endif %}
+        {% if success %}
+            <div class="message success">{{ success }}</div>
+            <div class="qr-section">
+                <p><strong>Código QR:</strong></p>
+                <img src="image/png;base64,{{ qr }}" alt="QR Code">
+                <p><a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
+            </div>
+        {% endif %}
 
-    {% if error %}
-        <div class="message error">{{ error }}</div>
-    {% endif %}
+        {% if error %}
+            <div class="message error">{{ error }}</div>
+        {% endif %}
 
     {% if not success %}
     <form method="POST" action="/register" enctype="multipart/form-data">

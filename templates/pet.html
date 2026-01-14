@@ -5,16 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ayudar a {{ pet.name }} - Pet Rescue QR</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 0 15px; text-align: center; }
-        .pet-photo { max-width: 200px; border-radius: 8px; margin: 10px 0; }
-        .contact-info { background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; }
-        .contact-info a { color: #1976d2; text-decoration: none; font-weight: bold; }
-        button { background: #2196F3; color: white; padding: 12px 24px; border: none; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        button:hover { background: #1976D2; }
-        .loading { display: none; margin-top: 10px; }
-    </style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 0 15px;
+        text-align: center;
+        background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    .content {
+        background: rgba(255, 255, 255, 0.94);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .pet-photo {
+        max-width: 200px;
+        border-radius: 10px;
+        margin: 10px 0;
+        border: 2px solid #eee;
+    }
+    .contact-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    .contact-info a {
+        color: #1976d2;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    button {
+        background: #2196F3;
+        color: white;
+        padding: 14px 28px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        margin-top: 15px;
+    }
+    button:hover { background: #1976D2; }
+    .loading {
+        display: none;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #555;
+    }
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+</style>
 </head>
 <body>
+    <div class="content">
     <h1>🐾 ¿Viste a {{ pet.name }}?</h1>
 
     {% if pet.photo_url %}
@@ -75,5 +126,6 @@
             }
         };
     </script>
+    </div>
 </body>
 </html>
