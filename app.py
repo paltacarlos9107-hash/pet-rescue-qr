@@ -167,7 +167,7 @@ def report_location():
         )
 
         if response.status_code == 202:
-            return jsonify({"status": "success"})
+            return render_template("thanks.html")
         else:
             print("📧 SendGrid error:", response.text)
             return jsonify({"error": "No se pudo notificar"}), 500
