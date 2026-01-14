@@ -99,7 +99,7 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
-        if not :
+        if not 
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
