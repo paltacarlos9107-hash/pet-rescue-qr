@@ -1,38 +1,65 @@
-<script>
-document.getElementById("helpBtn").onclick = async () => {
-    const button = document.getElementById("helpBtn");
-    const loading = document.getElementById("loading");
-    button.disabled = true;
-    loading.style.display = "block";
-    loading.textContent = "Obteniendo ubicación...";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayudar a {{ pet.name }} - Pet Rescue QR</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 0 15px; text-align: center; }
+        .pet-photo { max-width: 200px; border-radius: 8px; margin: 10px 0; }
+        button { background: #2196F3; color: white; padding: 12px 24px; border: none; cursor: pointer; font-size: 16px; }
+        button:hover { background: #1976D2; }
+        .loading { display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🐾 ¿Viste a {{ pet.name }}?</h1>
 
-    try {
-        const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000
-            });
-        });
+    {% if pet.photo_path %}
+        <img src="{{ pet.photo_path }}" alt="Foto de {{ pet.name }}" class="pet-photo">
+    {% endif %}
 
-        const response = await fetch("/report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                pet_id: "{{ pet.id }}",
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            })
-        });
+    <p><strong>Raza:</strong> {{ pet.breed or "No especificada" }}</p>
+    <p><strong>Señas:</strong> {{ pet.description or "No especificadas" }}</p>
 
-        if (response.ok) {
-            // Redirigir a la página de agradecimiento
-            window.location.href = "/thanks";
-        } else {
-            loading.textContent = "No se pudo enviar la ubicación.";
-        }
-    } catch (error) {
-        loading.textContent = "No se pudo obtener la ubicación.";
-        console.error("Error:", error);
-    }
-};
-</script>
+    <button id="helpBtn">Sí, quiero ayudar</button>
+    <div class="loading" id="loading">Obteniendo ubicación...</div>
+
+    <script>
+        document.getElementById("helpBtn").onclick = async () => {
+            const button = document.getElementById("helpBtn");
+            const loading = document.getElementById("loading");
+            button.disabled = true;
+            loading.style.display = "block";
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    });
+                });
+
+                const response = await fetch("/report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pet_id: "{{ pet.id }}",
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
+                });
+
+                if (response.ok) {
+                    loading.textContent = "¡Gracias! Se ha notificado al dueño.";
+                } else {
+                    loading.textContent = "No se pudo enviar la ubicación.";
+                }
+            } catch (error) {
+                loading.textContent = "No se pudo obtener la ubicación.";
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
