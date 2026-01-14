@@ -8,6 +8,7 @@ import requests
 import cloudinary
 import cloudinary.uploader
 from database import init_db, add_pet, get_pet
+import re
 
 # -------------------------------------------------
 # CONFIGURACIÓN DE ENTORNO
@@ -64,6 +65,12 @@ def register():
 
         if not name or not owner_email:
             return render_template("register.html", error="El nombre y correo son obligatorios.")
+
+        # ✅ Validación opcional de número de teléfono
+        if owner_phone:
+            # Expresión regular: permite +, dígitos, espacios, guiones, paréntesis
+            if not re.match(r"^\+?[\d\s\-\(\)]{7,}$", owner_phone):
+                return render_template("register.html", error="El número de contacto no es válido. Usa un formato como +57 300 123 4567.")
 
         photo_url = None
         if "photo" in request.files:
