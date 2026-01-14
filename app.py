@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, session
 import uuid
 import qrcode
 from io import BytesIO
@@ -8,7 +8,9 @@ import requests
 import cloudinary
 import cloudinary.uploader
 from database import init_db, add_pet, get_pet
-import re
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+import secrets
 
 # -------------------------------------------------
 # CONFIGURACIÓN DE ENTORNO
@@ -23,13 +25,34 @@ if IS_PRODUCTION:
     )
 
 # -------------------------------------------------
+# CONFIGURACIÓN DE LOGIN
+# -------------------------------------------------
+LOGIN_USER = os.environ.get("LOGIN_USER", "admin")
+LOGIN_PASS_HASH = os.environ.get("LOGIN_PASS_HASH")
+
+if not IS_PRODUCTION and not LOGIN_PASS_HASH:
+    LOGIN_PASS_HASH = generate_password_hash("1234")
+
+# -------------------------------------------------
 # INICIALIZAR APP
 # -------------------------------------------------
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 init_db()
 
 # -------------------------------------------------
-# MIDDLEWARE: Forzar HTTPS en Render
+# DECORADOR: Requiere login
+# -------------------------------------------------
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+# -------------------------------------------------
+# MIDDLEWARE
 # -------------------------------------------------
 @app.before_request
 def force_https():
@@ -37,9 +60,6 @@ def force_https():
         if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
             return redirect(request.url.replace('http://', 'https://'), code=301)
 
-# -------------------------------------------------
-# MIDDLEWARE: Cabeceras de seguridad
-# -------------------------------------------------
 @app.after_request
 def add_security_headers(response):
     response.headers["Permissions-Policy"] = "geolocation=(*), microphone=(), camera=()"
@@ -48,13 +68,35 @@ def add_security_headers(response):
     return response
 
 # -------------------------------------------------
-# RUTAS
+# RUTAS DE LOGIN
+# -------------------------------------------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if username == LOGIN_USER and check_password_hash(LOGIN_PASS_HASH, password):
+            session["logged_in"] = True
+            return redirect("/")
+        else:
+            return render_template("login.html", error="Usuario o contraseña incorrectos.")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("logged_in", None)
+    return redirect("/login")
+
+# -------------------------------------------------
+# RUTAS PROTEGIDAS
 # -------------------------------------------------
 @app.route("/")
+@login_required
 def home():
     return render_template("register.html")
 
 @app.route("/register", methods=["POST"])
+@login_required
 def register():
     try:
         name = request.form.get("name", "").strip()
@@ -65,12 +107,6 @@ def register():
 
         if not name or not owner_email:
             return render_template("register.html", error="El nombre y correo son obligatorios.")
-
-        # ✅ Validación opcional de número de teléfono
-        if owner_phone:
-            # Expresión regular: permite +, dígitos, espacios, guiones, paréntesis
-            if not re.match(r"^\+?[\d\s\-\(\)]{7,}$", owner_phone):
-                return render_template("register.html", error="El número de contacto no es válido. Usa un formato como +57 300 123 4567.")
 
         photo_url = None
         if "photo" in request.files:
@@ -110,6 +146,9 @@ def register():
         print("❌ Error en /register:", repr(e))
         return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
 
+# -------------------------------------------------
+# RUTAS PÚBLICAS
+# -------------------------------------------------
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
     pet = get_pet(pet_id)
@@ -167,7 +206,7 @@ def report_location():
         )
 
         if response.status_code == 202:
-            return render_template("thanks.html")
+            return jsonify({"status": "success"})
         else:
             print("📧 SendGrid error:", response.text)
             return jsonify({"error": "No se pudo notificar"}), 500
@@ -176,15 +215,13 @@ def report_location():
         print("❌ Error en /report:", repr(e))
         return jsonify({"error": "Error interno"}), 500
 
-# -------------------------------------------------
-# EJECUTAR SERVIDOR
-# -------------------------------------------------
 @app.route("/thanks")
 def thanks():
     return render_template("thanks.html")
 
+# -------------------------------------------------
+# SERVIDOR
+# -------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    host = "0.0.0.0"
-    debug = not IS_PRODUCTION
-    app.run(host=host, port=port, debug=debug)
+    port = int(os.environ.get("PORT", 10000))  # Render usa 10000 por defecto
+    app.run(host="0.0.0.0", port=port, debug=not IS_PRODUCTION)
