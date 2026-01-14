@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet
+from database import init_db, add_pet, get_pet, get_user_by_email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -23,15 +23,6 @@ if IS_PRODUCTION:
         api_key=os.environ.get("CLOUDINARY_API_KEY"),
         api_secret=os.environ.get("CLOUDINARY_API_SECRET")
     )
-
-# -------------------------------------------------
-# CONFIGURACIÓN DE LOGIN
-# -------------------------------------------------
-LOGIN_USER = os.environ.get("LOGIN_USER", "admin")
-LOGIN_PASS_HASH = os.environ.get("LOGIN_PASS_HASH")
-
-if not IS_PRODUCTION and not LOGIN_PASS_HASH:
-    LOGIN_PASS_HASH = generate_password_hash("1234")
 
 # -------------------------------------------------
 # INICIALIZAR APP
@@ -68,23 +59,27 @@ def add_security_headers(response):
     return response
 
 # -------------------------------------------------
-# RUTAS DE LOGIN
+# RUTAS DE LOGIN (MULTIUSUARIO)
 # -------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
-        if username == LOGIN_USER and check_password_hash(LOGIN_PASS_HASH, password):
+        
+        user = get_user_by_email(email)
+        if user and check_password_hash(user["password_hash"], password):
             session["logged_in"] = True
+            session["user_email"] = email
             return redirect("/")
         else:
-            return render_template("login.html", error="Usuario o contraseña incorrectos.")
+            return render_template("login.html", error="Correo o contraseña incorrectos.")
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     session.pop("logged_in", None)
+    session.pop("user_email", None)
     return redirect("/login")
 
 # -------------------------------------------------
@@ -223,5 +218,5 @@ def thanks():
 # SERVIDOR
 # -------------------------------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render usa 10000 por defecto
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port, debug=not IS_PRODUCTION)

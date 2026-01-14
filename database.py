@@ -21,12 +21,78 @@ def get_db_connection():
         conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
+def init_users_table():
+    """Crea la tabla de usuarios si no existe."""
     conn = get_db_connection()
     cur = conn.cursor()
     
     if IS_PRODUCTION:
         # PostgreSQL
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    else:
+        # SQLite
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def add_user(email, password_hash):
+    """Agrega un nuevo usuario a la base de datos."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if IS_PRODUCTION:
+        cur.execute(
+            "INSERT INTO users (email, password_hash) VALUES (%s, %s)",
+            (email, password_hash)
+        )
+    else:
+        cur.execute(
+            "INSERT INTO users (email, password_hash) VALUES (?, ?)",
+            (email, password_hash)
+        )
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_user_by_email(email):
+    """Obtiene un usuario por su correo electrónico."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    else:
+        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+    
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user
+
+def init_db():
+    """Inicializa todas las tablas de la base de datos."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if IS_PRODUCTION:
+        # PostgreSQL - Tabla pets
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -39,14 +105,14 @@ def init_db():
                 found BOOLEAN DEFAULT FALSE
             )
         """)
-        # Asegurar columnas adicionales si la tabla ya existía
+        # Asegurar columnas adicionales
         try:
             cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS owner_phone TEXT")
             cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS photo_url TEXT")
         except Exception as e:
-            print("⚠️ Advertencia al agregar columnas en PostgreSQL:", e)
+            print("⚠️ Advertencia al agregar columnas en pets:", e)
     else:
-        # SQLite
+        # SQLite - Tabla pets
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
                 id TEXT PRIMARY KEY,
@@ -59,16 +125,19 @@ def init_db():
                 found BOOLEAN DEFAULT 0
             )
         """)
-        # En SQLite, ALTER TABLE es limitado, pero como creamos la tabla completa,
-        # no necesitamos agregar columnas por separado si usamos CREATE TABLE IF NOT EXISTS
     
     conn.commit()
     cur.close()
     conn.close()
 
+    # Inicializar tabla de usuarios
+    init_users_table()
+
 def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, photo_url=None):
+    """Agrega una mascota a la base de datos."""
     conn = get_db_connection()
     cur = conn.cursor()
+    
     if IS_PRODUCTION:
         cur.execute(
             "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -79,17 +148,21 @@ def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, pho
             "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
         )
+    
     conn.commit()
     cur.close()
     conn.close()
 
 def get_pet(pet_id):
+    """Obtiene una mascota por su ID."""
     conn = get_db_connection()
     cur = conn.cursor()
+    
     if IS_PRODUCTION:
         cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
     else:
         cur.execute("SELECT * FROM pets WHERE id = ? AND found = 0", (pet_id,))
+    
     pet = cur.fetchone()
     cur.close()
     conn.close()
