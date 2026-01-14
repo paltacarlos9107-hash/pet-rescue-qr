@@ -9,37 +9,24 @@ import cloudinary
 import cloudinary.uploader
 from database import init_db, add_pet, get_pet
 
-# -------------------------------------------------
-# CONFIGURACIÓN DE ENTORNO
-# -------------------------------------------------
 IS_PRODUCTION = os.environ.get("RENDER") is not None
 
 if IS_PRODUCTION:
-    # Configurar Cloudinary
     cloudinary.config(
         cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
         api_key=os.environ.get("CLOUDINARY_API_KEY"),
         api_secret=os.environ.get("CLOUDINARY_API_SECRET")
     )
 
-# -------------------------------------------------
-# INICIALIZAR APP
-# -------------------------------------------------
 app = Flask(__name__)
 init_db()
 
-# -------------------------------------------------
-# MIDDLEWARE: Forzar HTTPS en Render
-# -------------------------------------------------
 @app.before_request
 def force_https():
     if IS_PRODUCTION:
         if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
             return redirect(request.url.replace('http://', 'https://'), code=301)
 
-# -------------------------------------------------
-# MIDDLEWARE: Cabeceras de seguridad
-# -------------------------------------------------
 @app.after_request
 def add_security_headers(response):
     response.headers["Permissions-Policy"] = "geolocation=(*), microphone=(), camera=()"
@@ -47,9 +34,6 @@ def add_security_headers(response):
     response.headers["Referrer-Policy"] = "no-referrer-when-downgrade"
     return response
 
-# -------------------------------------------------
-# RUTAS
-# -------------------------------------------------
 @app.route("/")
 def home():
     return render_template("register.html")
@@ -66,7 +50,6 @@ def register():
         if not name or not owner_email:
             return render_template("register.html", error="El nombre y correo son obligatorios.")
 
-        # Subir foto a Cloudinary
         photo_url = None
         if "photo" in request.files:
             photo = request.files["photo"]
@@ -84,7 +67,6 @@ def register():
         pet_id = str(uuid.uuid4())[:8].upper()
         add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
 
-        # Generar QR
         if IS_PRODUCTION:
             qr_url = f"https://{request.host}/pet/{pet_id}"
         else:
@@ -117,7 +99,7 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
-        if not 
+        if not :
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
@@ -135,10 +117,8 @@ def report_location():
         if not owner_email:
             return jsonify({"error": "Dueño no tiene correo registrado"}), 400
 
-        # ✅ Corrección: eliminar espacios en Google Maps
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
 
-        # Enviar con SendGrid
         SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
 
@@ -158,7 +138,6 @@ def report_location():
             "Content-Type": "application/json"
         }
 
-        # ✅ Corrección: eliminar espacios en la URL de SendGrid
         response = requests.post(
             "https://api.sendgrid.com/v3/mail/send",
             headers=headers,
@@ -175,9 +154,6 @@ def report_location():
         print("❌ Error en /report:", repr(e))
         return jsonify({"error": "Error interno"}), 500
 
-# -------------------------------------------------
-# EJECUTAR SERVIDOR
-# -------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     host = "0.0.0.0"
