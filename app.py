@@ -99,7 +99,11 @@ def pet_page(pet_id):
 def report_location():
     try:
         data = request.get_json()
+<<<<<<< HEAD
         if data is None:
+=======
+        if not
+>>>>>>> d909c62aa0fc06ebf12157c73c7fce4fcb00260b
             return jsonify({"error": "No se recibieron datos"}), 400
 
         pet_id = data.get("pet_id")
