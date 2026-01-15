@@ -91,41 +91,46 @@
 
     <!-- Script de geolocalización -->
     <script>
-        document.getElementById("helpBtn").onclick = async () => {
-            const button = document.getElementById("helpBtn");
-            const loading = document.getElementById("loading");
-            button.disabled = true;
-            loading.style.display = "block";
+document.getElementById("helpBtn").onclick = async () => {
+    const button = document.getElementById("helpBtn");
+    const loading = document.getElementById("loading");
+    button.disabled = true;
+    loading.style.display = "block";
+    loading.textContent = "Obteniendo ubicación...";
 
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000
-                    });
-                });
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
+        });
 
-                const response = await fetch("/report", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        pet_id: "{{ pet.id }}",
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    })
-                });
+        const response = await fetch("/report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                pet_id: "{{ pet.id }}",
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            })
+        });
 
-                if (response.ok) {
-                    window.location.href = "/thanks";
-                } else {
-                    loading.textContent = "No se pudo enviar la ubicación.";
-                }
-            } catch (error) {
-                loading.textContent = "No se pudo obtener la ubicación.";
-                console.error(error);
-            }
-        };
-    </script>
+        const result = await response.json();
+        if (result.status === "success") {
+            // Redirigir directamente a WhatsApp
+            window.location.href = result.whatsapp_url;
+        } else {
+            loading.textContent = result.error || "No se pudo generar el enlace.";
+            button.disabled = false;
+        }
+    } catch (error) {
+        loading.textContent = "No se pudo obtener la ubicación.";
+        console.error(error);
+        button.disabled = false;
+    }
+};
+</script>
     </div>
 </body>
 </html>

@@ -169,47 +169,26 @@ def report_location():
         if not pet:
             return jsonify({"error": "Mascota no encontrada"}), 400
 
-        owner_email = pet.get("owner_email")
-        if not owner_email:
-            return jsonify({"error": "Dueño no tiene correo registrado"}), 400
+        owner_phone = pet.get("owner_phone")
+        if not owner_phone:
+            return jsonify({"error": "Dueño no tiene número de teléfono registrado"}), 400
 
+        # Limpiar el número: solo dígitos (WhatsApp requiere formato internacional sin + ni espacios)
+        clean_phone = ''.join(filter(str.isdigit, owner_phone))
+        if not clean_phone.startswith('57') and len(clean_phone) == 10:
+            # Asumir Colombia si no tiene prefijo
+            clean_phone = '57' + clean_phone
+
+        # Crear enlace de WhatsApp
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
+        message = f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
+        whatsapp_url = f"https://wa.me/{clean_phone}?text={requests.utils.quote(message)}"
 
-        SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-        SENDGRID_FROM_EMAIL = os.environ.get("SENDGRID_FROM_EMAIL", "paltacarlos9107@gmail.com")
-
-        if not SENDGRID_API_KEY:
-            print("⚠️ SENDGRID_API_KEY no configurada")
-            return jsonify({"error": "Notificación no disponible"}), 500
-
-        payload = {
-            "personalizations": [{"to": [{"email": owner_email}]}],
-            "from": {"email": SENDGRID_FROM_EMAIL},
-            "subject": f"⚠️ ¡{pet['name']} fue encontrado!",
-            "content": [{"type": "text/plain", "value": f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"}]
-        }
-
-        headers = {
-            "Authorization": f"Bearer {SENDGRID_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        response = requests.post(
-            "https://api.sendgrid.com/v3/mail/send",
-            headers=headers,
-            json=payload
-        )
-
-        if response.status_code == 202:
-            return jsonify({"status": "success"})
-        else:
-            print("📧 SendGrid error:", response.text)
-            return jsonify({"error": "No se pudo notificar"}), 500
+        return jsonify({"status": "success", "whatsapp_url": whatsapp_url})
 
     except Exception as e:
         print("❌ Error en /report:", repr(e))
         return jsonify({"error": "Error interno"}), 500
-
 @app.route("/thanks")
 def thanks():
     return render_template("thanks.html")
