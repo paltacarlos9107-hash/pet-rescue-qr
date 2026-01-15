@@ -146,6 +146,13 @@ def register():
 # RUTAS PÚBLICAS
 # -------------------------------------------------
 
+# ¡¡¡ RUTA TEMPORAL - ELIMINAR DESPUÉS !!!
+@app.route("/make-me-admin")
+def make_me_admin():
+    from database import make_user_admin
+    make_user_admin("carlospalta91@hotmail.com")  # ← ¡Cambia esto por tu correo real!
+    return "✅ ¡Ahora eres administrador! Elimina esta ruta."
+
 # ¡¡¡ RUTA TEMPORAL PARA AGREGAR USUARIOS- ELIMINAR DESPUÉS !!!
 @app.route("/add-user/<email>/<password>")
 def add_user_temp(email, password):
