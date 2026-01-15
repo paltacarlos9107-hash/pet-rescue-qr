@@ -245,7 +245,7 @@ def thanks():
 def admin_panel():
     from database import get_db_connection, add_user, get_all_pets
     
-    # Obtener usuarios
+    # Obtener todos los usuarios
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -256,8 +256,8 @@ def admin_panel():
     cur.close()
     conn.close()
 
-    # Obtener mascotas
-    pets = get_all_pets()
+    # Obtener TODAS las mascotas (sin filtrar por dueño)
+    pets = get_all_pets()  # ← Sin parámetro = todas las mascotas
 
     message = ""
     
