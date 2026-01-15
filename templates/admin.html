@@ -2,141 +2,350 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Pet Rescue QR</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 15px;
-            background: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .message {
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 6px;
-            background: #e8f5e9;
-            color: #2e7d32;
-            font-weight: bold;
-        }
-        form {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        button {
-            background: #4CAF50;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        header {
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
             color: white;
-            padding: 10px 20px;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        header h1::before {
+            content: "🔐";
+            font-size: 24px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .message {
+            padding: 14px 20px;
+            margin: 0 0 25px 0;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2::before {
+            content: "➕";
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        button {
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 12px 25px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
         }
-        button.delete {
-            background: #f44336;
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
-        table {
+        
+        .users-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
         }
-        th, td {
-            padding: 12px;
+        
+        .users-table th {
+            background: #f1f8e9;
+            color: #2e7d32;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding: 14px 15px;
+            font-weight: 600;
+            border-bottom: 2px solid #c8e6c9;
         }
-        th {
-            background: #f5f5f5;
+        
+        .users-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #eee;
+            color: #333;
         }
+        
         .admin-badge {
             background: #2196F3;
             color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .delete-btn {
+            background: linear-gradient(120deg, #f44336, #d32f2f);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: #e8f5e9;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+            
+            header h1 {
+                font-size: 22px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            button, .delete-btn {
+                width: auto;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Panel de Administración</h1>
+        <header>
+            <h1>Panel de Administración</h1>
+        </header>
         
-        {% if message %}
-            <div class="message">{{ message }}</div>
-        {% endif %}
+        <div class="content">
+            {% if message %}
+                <div class="message {% if '❌' in message %}error-message{% endif %}">
+                    {{ message }}
+                </div>
+            {% endif %}
 
-        <h2>Crear nuevo usuario</h2>
-        <form method="POST">
-            <input type="hidden" name="action" value="create">
-            <div class="form-group">
-                <label>Correo electrónico</label>
-                <input type="email" name="email" required>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ users|length }}</div>
+                    <div class="stat-label">Usuarios Totales</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ users|selectattr('is_admin')|list|length }}</div>
+                    <div class="stat-label">Administradores</div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" required>
+
+            <div class="section">
+                <h2>Crear Nuevo Usuario</h2>
+                <form method="POST">
+                    <input type="hidden" name="action" value="create">
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico *</label>
+                        <input type="email" id="email" name="email" required placeholder="usuario@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña *</label>
+                        <input type="password" id="password" name="password" required placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <button type="submit">Crear Usuario</button>
+                </form>
             </div>
-            <button type="submit">Crear Usuario</button>
-        </form>
 
-        <h2>Usuarios registrados ({{ users|length }})</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Correo</th>
-                    <th>Admin</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.email }}</td>
-                    <td>{% if user.is_admin %}<span class="admin-badge">Sí</span>{% endif %}</td>
-                    <td>
-                        {% if user.email != session.user_email %}
-                        <form method="POST" style="display: inline;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="email" value="{{ user.email }}">
-                            <button type="submit" class="delete" onclick="return confirm('¿Eliminar {{ user.email }}?')">Eliminar</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <div class="section">
+                <h2 style="color: #d32f2f;">Usuarios Registrados</h2>
+                {% if users %}
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Correo Electrónico</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                    <span class="admin-badge">Administrador</span>
+                                {% else %}
+                                    Usuario
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.email != session.user_email %}
+                                <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ user.email }}? Esta acción no se puede deshacer.')">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="email" value="{{ user.email }}">
+                                    <button type="submit" class="delete-btn">Eliminar</button>
+                                </form>
+                                {% else %}
+                                <em>Tú</em>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="text-align: center; color: #666; padding: 20px;">No hay usuarios registrados.</p>
+                {% endif %}
+            </div>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="/" style="color: #2196F3; text-decoration: none;">← Volver al registro</a>
+            <a href="/" class="back-link">← Volver al Registro de Mascotas</a>
         </div>
     </div>
+
+    <script>
+        // Mensaje de confirmación mejorado
+        document.querySelectorAll('form[onsubmit]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const email = this.querySelector('input[name="email"]').value;
+                if (!confirm(`¿Estás seguro de eliminar a ${email}?\n\nEsta acción no se puede deshacer.`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
