@@ -5,136 +5,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Mascota - Pet Rescue QR</title>
     <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 0 15px;
-        background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        backdrop-filter: blur(2px);
-    }
-    .content {
-        background: rgba(255, 255, 255, 0.92);
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
-    input, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 6px; }
-    button {
-        background: #4CAF50;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        width: 100%;
-    }
-    button:hover { background: #45a049; }
-    .qr-section { margin-top: 20px; text-align: center; }
-    .qr-section img { max-width: 200px; margin: 10px 0; border: 2px solid #eee; border-radius: 8px; }
-    .message {
-        padding: 12px;
-        margin: 15px 0;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-    .error { background: #ffebee; color: #c62828; }
-    .success { background: #e8f5e9; color: #2e7d32; }
-    h1 {
-        text-align: center;
-        color: #2c3e50;
-        margin-bottom: 20px;
-    }
-</style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .message {
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .qr-section img {
+            max-width: 200px;
+            border: 2px solid #4CAF50;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1976D2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: right; margin-bottom: 15px;">
-        <a href="/my-pets" style="color: #1976D2; text-decoration: none; margin-right: 15px;">
-            🐾 Mis Mascotas
-        </a>
-        <a href="/logout" style="color: #d32f2f; text-decoration: none; font-weight: bold;">
-        🔒 Cerrar sesión
-        </a>
-    </div>
-
-    <div class="content">
+    <div class="container">
         <div style="text-align: right; margin-bottom: 15px;">
+            <a href="/my-pets" style="color: #1976D2; text-decoration: none; margin-right: 15px;">
+                🐾 Mis Mascotas
+            </a>
             <a href="/logout" style="color: #d32f2f; text-decoration: none; font-weight: bold;">
-                 🔒 Cerrar sesión
-             </a>
+                🔒 Cerrar sesión
+            </a>
         </div>
+
         <h1>🐾 Registrar Mascota Perdida</h1>
 
         {% if success %}
-            <div class="message success">{{ success }}</div>
-            <div class="qr-section">
-                <p><strong>Código QR:</strong></p>
-                <img src="data:image/png;base64,{{ qr }}" alt="QR Code">
-                <p><a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
+            <div class="message success">
+                {{ success }}
             </div>
+            <div class="qr-section">
+                <p><strong>Tu código QR:</strong></p>
+                <img src="data:image/png;base64,{{ qr }}" alt="Código QR">
+                <p style="margin-top: 10px; font-size: 14px;">
+                    Comparte este enlace: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
+                </p>
+            </div>
+            <a href="/" class="back-link">← Registrar otra mascota</a>
+        {% else %}
+            {% if error %}
+                <div class="message error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Nombre de la mascota *</label>
+                    <input type="text" id="name" name="name" required placeholder="Ej: Rocky">
+                </div>
+                <div class="form-group">
+                    <label for="breed">Raza (opcional)</label>
+                    <input type="text" id="breed" name="breed" placeholder="Ej: Labrador">
+                </div>
+                <div class="form-group">
+                    <label for="description">Descripción (señas particulares)</label>
+                    <input type="text" id="description" name="description" placeholder="Ej: Collar rojo, oreja mordida">
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo electrónico del dueño *</label>
+                    <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono de contacto (opcional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Ej: 3001234567">
+                </div>
+                <div class="form-group">
+                    <label for="photo">Foto de la mascota (opcional)</label>
+                    <input type="file" id="photo" name="photo" accept="image/*">
+                </div>
+                <button type="submit">Generar Código QR</button>
+            </form>
         {% endif %}
-
-        {% if error %}
-            <div class="message error">{{ error }}</div>
-        {% endif %}
-
-    {% if not success %}
-
-<!-- Mostrar mascotas registradas por el usuario -->
-{% if pets and pets|length > 0 %}
-<div class="message success" style="margin-bottom: 20px;">
-    <h3>🐾 Tus Mascotas Registradas</h3>
-    <ul style="text-align: left; margin-top: 10px;">
-        {% for pet in pets %}
-        <li>
-            <strong>{{ pet.name }}</strong> 
-            {% if pet.breed %}({{ pet.breed }}){% endif %}
-            - <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50;">Ver QR</a>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %}
-
-    <form method="POST" action="/register" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="name">Nombre de la mascota *</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div class="form-group">
-            <label for="breed">Raza (opcional)</label>
-            <input type="text" id="breed" name="breed">
-        </div>
-        <div class="form-group">
-            <label for="description">Señas particulares (color, tamaño, collar, etc.)</label>
-            <textarea id="description" name="description" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="email">Tu correo electrónico *</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="phone">Número de contacto (opcional)</label>
-            <input type="tel" id="phone" name="phone" placeholder="+57 300 123 4567">
-        </div>
-        <div class="form-group">
-            <label for="photo">Foto de la mascota (opcional)</label>
-            <input type="file" id="photo" name="photo" accept="image/*">
-        </div>
-        <button type="submit">Registrar Mascota</button>
-    </form>
-    {% endif %}
-    <svg style="display: none;">
-  <symbol id="paw-icon" viewBox="0 0 24 24">
-    <path fill="#8B5CF6" d="M12,2C10.7,2 9.4,2.3 8.3,2.8C7.2,3.3 6.3,4 5.5,4.9C4.7,5.8 4.2,6.8 3.9,7.9C3.6,9 3.6,10.1 3.9,11.2C4.2,12.3 4.7,13.3 5.5,14.2C6.3,15.1 7.2,15.8 8.3,16.3C9.4,16.8 10.7,17.1 12,17.1C13.3,17.1 14.6,16.8 15.7,16.3C16.8,15.8 17.7,15.1 18.5,14.2C19.3,13.3 19.8,12.3 20.1,11.2C20.4,10.1 20.4,9 20.1,7.9C19.8,6.8 19.3,5.8 18.5,4.9C17.7,4 16.8,3.3 15.7,2.8C14.6,2.3 13.3,2 12,2M12,4C13,4 14,4.2 14.9,4.6C15.8,5 16.6,5.6 17.3,6.3C18,7 18.5,7.8 18.8,8.7C19.1,9.6 19.2,10.5 19,11.4C18.8,12.3 18.4,13.1 17.8,13.8C17.2,14.5 16.5,15 15.7,15.4C14.9,15.8 14,16 13,16H11C10,16 9.1,15.8 8.3,15.4C7.5,15 6.8,14.5 6.2,13.8C5.6,13.1 5.2,12.3 5,11.4C4.8,10.5 4.9,9.6 5.2,8.7C5.5,7.8 6,7 6.7,6.3C7.4,5.6 8.2,5 9.1,4.6C10,4.2 11,4 12,4M12,6C11.3,6 10.6,6.1 10,6.4C9.4,6.7 8.9,7.1 8.5,7.6C8.1,8.1 7.8,8.7 7.6,9.3C7.4,9.9 7.3,10.5 7.5,11.1C7.7,11.7 8,12.2 8.4,12.6C8.8,13 9.3,13.3 9.9,13.5C10.5,13.7 11.1,13.8 11.7,13.6C12.3,13.4 12.8,13.1 13.2,12.7C13.6,12.3 13.9,11.8 14.1,11.2C14.3,10.6 14.4,10 14.2,9.4C14,8.8 13.7,8.3 13.3,7.9C12.9,7.5 12.4,7.2 11.8,7C11.2,6.8 10.6,6.7 10,6.9C9.4,7.1 8.9,7.4 8.5,7.8C8.1,8.2 7.8,8.7 7.6,9.3C7.4,9.9 7.3,10.5 7.5,11.1C7.7,11.7 8,12.2 8.4,12.6C8.8,13 9.3,13.3 9.9,13.5C10.5,13.7 11.1,13.8 11.7,13.6C12.3,13.4 12.8,13.1 13.2,12.7C13.6,12.3 13.9,11.8 14.1,11.2C14.3,10.6 14.4,10 14.2,9.4C14,8.8 13.7,8.3 13.3,7.9C12.9,7.5 12.4,7.2 11.8,7C11.2,6.8 10.6,6.7 10,6.9C9.4,7.1 8.9,7.4 8.5,7.8C8.1,8.2 7.8,8.7 7.6,9.3C7.4,9.9 7.3,10.5 7.5,11.1C7.7,11.7 8,12.2 8.4,12.6C8.8,13 9.3,13.3 9.9,13.5C10.5,13.7 11.1,13.8 11.7,13.6C12.3,13.4 12.8,13.1 13.2,12.7C13.6,12.3 13.9,11.8 14.1,11.2C14.3,10.6 14.4,10 14.2,9.4C14,8.8 13.7,8.3 13.3,7.9C12.9,7.5 12.4,7.2 11.8,7C11.2,6.8 10.6,6.7 10,6.9"/>
-  </symbol>
-</svg>
+    </div>
 </body>
 </html>
