@@ -61,6 +61,17 @@ def add_security_headers(response):
 # -------------------------------------------------
 # RUTAS DE LOGIN (MULTIUSUARIO)
 # -------------------------------------------------
+# ¡¡¡ RUTA TEMPORAL PARA CREAR USUARIO EN RENDER !!!
+# Eliminar después de usar
+@app.route("/create-first-user")
+def create_first_user():
+    from werkzeug.security import generate_password_hash
+    from database import add_user
+    email = "carlospalta91@hotmail.com"          # ← Cámbialo
+    password = "cc1144150851"      # ← Cámbialo
+    add_user(email, generate_password_hash(password))
+    return f"✅ Usuario creado: {email}. ¡Elimina esta ruta ahora!"
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
