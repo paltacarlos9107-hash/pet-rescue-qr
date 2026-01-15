@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -62,7 +62,6 @@ def check_inactivity(f):
             if time.time() - last_activity > 900:  # 15 minutos
                 session.clear()
                 return redirect("/login?message=timeout")
-        # Actualizar marca de tiempo en cada solicitud
         if session.get("logged_in"):
             session["last_activity"] = time.time()
         return f(*args, **kwargs)
@@ -71,14 +70,6 @@ def check_inactivity(f):
 # -------------------------------------------------
 # MIDDLEWARE
 # -------------------------------------------------
-
-@app.route("/create-admin")
-def create_admin():
-    from werkzeug.security import generate_password_hash
-    from database import add_user
-    add_user("tu@email.com", generate_password_hash("tu_contraseña_segura"))
-    return "✅ Usuario creado. Ahora conviértete en admin."
-
 @app.before_request
 def force_https():
     if IS_PRODUCTION:
@@ -239,17 +230,21 @@ def thanks():
 @admin_required
 @check_inactivity
 def admin_panel():
-    from database import get_db_connection, add_user
+    from database import get_db_connection, add_user, get_all_pets
     
+    # Obtener usuarios
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
         cur.execute("SELECT email, is_admin FROM users ORDER BY created_at DESC")
     else:
-        cur.execute("SELECT email, is_admin FROM users ORDER BY created_at DESC")
+        cur.execute("SELECT email, is_admin FROM users ORDER BY rowid DESC")
     users = cur.fetchall()
     cur.close()
     conn.close()
+
+    # Obtener mascotas
+    pets = get_all_pets()
 
     message = ""
     
@@ -281,7 +276,7 @@ def admin_panel():
             else:
                 message = f"⚠️ Usuario {email} no encontrado."
     
-    return render_template("admin.html", users=users, message=message)
+    return render_template("admin.html", users=users, pets=pets, message=message)
 
 # -------------------------------------------------
 # SERVIDOR
