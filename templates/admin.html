@@ -398,31 +398,6 @@
         {% endif %}
     </div>
 </div>
-``>
-
-> ⚠️ **Importante**: Asegúrate de que el CSS para `.delete-btn` esté definido en tus estilos (ya está incluido en tu versión actual de `admin.html`).
-
----
-
-## ✅ Resultado final
-
-- ✅ **Solo el administrador** ve el botón "Eliminar" en la pestaña de mascotas
-- ✅ **Confirmación antes de eliminar** para evitar errores
-- ✅ **Mensajes de éxito/error** claros
-- ✅ **Compatible con PostgreSQL y SQLite**
-
----
-
-## 🚀 Acción final
-
-1. Agrega `delete_pet()` en `database.py`
-2. Actualiza la ruta `/admin` en `app.py`
-3. Reemplaza la sección de mascotas en `templates/admin.html`
-4. Sube los cambios:
-   ```bash
-   git add database.py app.py templates/admin.html
-   git commit -m "Add delete pet functionality for admin"
-   git push origin main
 
             <a href="/" class="back-link">← Volver al Registro de Mascotas</a>
         </div>
