@@ -159,5 +159,12 @@
             }
         };
     </script>
+    <!-- DEBUG: Verificar si qr existe -->
+<div style="background: yellow; padding: 15px; margin: 20px; border: 2px solid red;">
+    <h3>🔍 Debug Info:</h3>
+    <p><strong>QR variable:</strong> "{{ qr }}"</p>
+    <p><strong>Longitud QR:</strong> {{ qr|length if qr else 'No existe' }}</p>
+    <p><strong>Pet ID:</strong> {{ pet.id }}</p>
+</div>
 </body>
 </html>
