@@ -210,8 +210,9 @@ def thanks():
 @app.route("/admin", methods=["GET", "POST"])
 @admin_required
 def admin_panel():
-    from database import get_db_connection
+    from database import get_db_connection, add_user  # ← ¡Importa add_user aquí!
     
+    # Obtener todos los usuarios
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -231,8 +232,11 @@ def admin_panel():
         
         if action == "create" and email and password:
             from werkzeug.security import generate_password_hash
-            add_user(email, generate_password_hash(password))
-            message = f"✅ Usuario {email} creado."
+            try:
+                add_user(email, generate_password_hash(password))
+                message = f"✅ Usuario {email} creado."
+            except Exception as e:
+                message = f"❌ Error al crear usuario: {str(e)}"
             
         elif action == "delete" and email:
             conn = get_db_connection()
@@ -251,7 +255,6 @@ def admin_panel():
                 message = f"⚠️ Usuario {email} no encontrado."
     
     return render_template("admin.html", users=users, message=message)
-
 
 # -------------------------------------------------
 # SERVIDOR
