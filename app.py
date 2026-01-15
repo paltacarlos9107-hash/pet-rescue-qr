@@ -146,6 +146,64 @@ def register():
 # RUTAS PÚBLICAS
 # -------------------------------------------------
 
+@app.route("/admin", methods=["GET", "POST"])
+@admin_required
+def admin_panel():
+    from database import get_db_connection
+    
+    # Obtener todos los usuarios
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT email, is_admin FROM users ORDER BY created_at DESC")
+    else:
+        cur.execute("SELECT email, is_admin FROM users ORDER BY created_at DESC")
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    message = ""
+    
+    if request.method == "POST":
+        action = request.form.get("action")
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        
+        if action == "create" and email and password:
+            from werkzeug.security import generate_password_hash
+            add_user(email, generate_password_hash(password))
+            message = f"✅ Usuario {email} creado."
+            
+        elif action == "delete" and email:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            if IS_PRODUCTION:
+                cur.execute("DELETE FROM users WHERE email = %s", (email,))
+            else:
+                cur.execute("DELETE FROM users WHERE email = ?", (email,))
+            conn.commit()
+            deleted = cur.rowcount > 0
+            cur.close()
+            conn.close()
+            if deleted:
+                message = f"✅ Usuario {email} eliminado."
+            else:
+                message = f"⚠️ Usuario {email} no encontrado."
+    
+    return render_template("admin.html", users=users, message=message)
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect("/login")
+        # Verificar si es admin
+        user = get_user_by_email(session["user_email"])
+        if not user or not user.get("is_admin"):
+            return "<h2>Acceso denegado</h2>", 403
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ¡¡¡ RUTA TEMPORAL - ELIMINAR DESPUÉS !!!
 @app.route("/make-me-admin")
 def make_me_admin():

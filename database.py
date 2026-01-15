@@ -22,7 +22,7 @@ def get_db_connection():
     return conn
 
 def init_users_table():
-    """Crea la tabla de usuarios si no existe."""
+    """Crea la tabla de usuarios si no existe, con soporte para administradores."""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -33,9 +33,15 @@ def init_users_table():
                 id SERIAL PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                is_admin BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Asegurar que la columna is_admin exista (para tablas existentes)
+        try:
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE")
+        except Exception as e:
+            print("⚠️ Advertencia al agregar is_admin en PostgreSQL:", e)
     else:
         # SQLite
         cur.execute("""
@@ -43,9 +49,16 @@ def init_users_table():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                is_admin BOOLEAN DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Asegurar que la columna is_admin exista (para tablas existentes)
+        try:
+            cur.execute("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0")
+        except Exception as e:
+            # En SQLite, si la columna ya existe, se lanza una excepción
+            pass
     
     conn.commit()
     cur.close()
@@ -94,7 +107,7 @@ def init_db():
     cur.close()
     conn.close()
     
-    # 👇 ¡Importante! Inicializar la tabla de usuarios
+    # 👇 ¡Importante! Inicializar la tabla de usuarios con soporte de admin
     init_users_table()
 
 def add_user(email, password_hash):
@@ -127,6 +140,18 @@ def get_user_by_email(email):
     cur.close()
     conn.close()
     return user
+
+def make_user_admin(email):
+    """Convierte un usuario en administrador."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET is_admin = TRUE WHERE email = %s", (email,))
+    else:
+        cur.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (email,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 # -------------------------------------------------
 # Funciones existentes para mascotas (sin cambios)
