@@ -67,7 +67,7 @@
             <div class="message success">{{ success }}</div>
             <div class="qr-section">
                 <p><strong>Código QR:</strong></p>
-                <img src="image/png;base64,{{ qr }}" alt="QR Code">
+                <img src="data:image/png;base64,{{ qr }}" alt="QR Code">
                 <p><a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a></p>
             </div>
         {% endif %}
