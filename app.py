@@ -71,6 +71,14 @@ def check_inactivity(f):
 # -------------------------------------------------
 # MIDDLEWARE
 # -------------------------------------------------
+
+@app.route("/create-admin")
+def create_admin():
+    from werkzeug.security import generate_password_hash
+    from database import add_user
+    add_user("tu@email.com", generate_password_hash("tu_contraseña_segura"))
+    return "✅ Usuario creado. Ahora conviértete en admin."
+
 @app.before_request
 def force_https():
     if IS_PRODUCTION:
