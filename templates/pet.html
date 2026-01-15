@@ -3,134 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ayudar a {{ pet.name }} - Pet Rescue QR</title>
+    <title>{{ pet.name }} - Pet Rescue QR</title>
     <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 0 15px;
-        text-align: center;
-        background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-    }
-    .content {
-        background: rgba(255, 255, 255, 0.94);
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .pet-photo {
-        max-width: 200px;
-        border-radius: 10px;
-        margin: 10px 0;
-        border: 2px solid #eee;
-    }
-    .contact-info {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 20px 0;
-    }
-    .contact-info a {
-        color: #1976d2;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 18px;
-    }
-    button {
-        background: #2196F3;
-        color: white;
-        padding: 14px 28px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 18px;
-        margin-top: 15px;
-    }
-    button:hover { background: #1976D2; }
-    .loading {
-        display: none;
-        margin-top: 15px;
-        font-weight: bold;
-        color: #555;
-    }
-    h1 {
-        color: #2c3e50;
-        margin-bottom: 20px;
-    }
-</style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .pet-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+        .info {
+            text-align: left;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        .info p {
+            margin: 8px 0;
+            color: #333;
+        }
+        .qr-section {
+            margin: 25px 0;
+        }
+        .qr-section img {
+            max-width: 200px;
+            border: 2px solid #4CAF50;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1976D2;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="content">
-    <h1>🐾 ¿Viste a {{ pet.name }}?</h1>
+    <div class="container">
+        <h1>🐾 ¡Ayuda a encontrar a {{ pet.name }}!</h1>
 
-    {% if pet.photo_url %}
-        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo">
-    {% endif %}
-
-    <p><strong>Raza:</strong> {{ pet.breed or "No especificada" }}</p>
-    <p><strong>Señas particulares:</strong> {{ pet.description or "No especificadas" }}</p>
-
-    <div class="contact-info">
-        <p><strong>📞 Contacto del dueño:</strong></p>
-        {% if pet.owner_phone %}
-            <a href="tel:{{ pet.owner_phone }}">{{ pet.owner_phone }}</a>
-        {% else %}
-            <span>No disponible</span>
+        {% if pet.photo_url %}
+            <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo">
         {% endif %}
-        <br>
-        <small>(Al hacer clic, se inicia una llamada desde tu celular)</small>
+
+        <div class="info">
+            <p><strong>Nombre:</strong> {{ pet.name }}</p>
+            {% if pet.breed %}
+                <p><strong>Raza:</strong> {{ pet.breed }}</p>
+            {% endif %}
+            {% if pet.description %}
+                <p><strong>Señas particulares:</strong> {{ pet.description }}</p>
+            {% endif %}
+            <p><strong>Dueño:</strong> {{ pet.owner_email }}</p>
+            {% if pet.owner_phone %}
+                <p><strong>Teléfono:</strong> {{ pet.owner_phone }}</p>
+            {% endif %}
+        </div>
+
+        <div class="qr-section">
+            <p><strong>Escanea este código QR para reportar su ubicación:</strong></p>
+            <img src="image/png;base64,{{ qr }}" alt="Código QR de {{ pet.name }}">
+            <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                O visita: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
+            </p>
+        </div>
+
+        <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 15px;">
+            📍 Sí, quiero ayudar
+        </button>
+
+        <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold;"></div>
+
+        <a href="/" class="back-link">← Volver al registro</a>
     </div>
 
-    <button id="helpBtn">Sí, quiero ayudar (enviar ubicación)</button>
-    <div class="loading" id="loading">Obteniendo ubicación...</div>
-
-    <!-- Script de geolocalización -->
     <script>
-document.getElementById("helpBtn").onclick = async () => {
-    const button = document.getElementById("helpBtn");
-    const loading = document.getElementById("loading");
-    button.disabled = true;
-    loading.style.display = "block";
-    loading.textContent = "Obteniendo ubicación...";
+        document.getElementById("helpBtn").onclick = async () => {
+            const button = document.getElementById("helpBtn");
+            const loading = document.getElementById("loading");
+            button.disabled = true;
+            loading.style.display = "block";
+            loading.textContent = "Obteniendo ubicación...";
 
-    try {
-        const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000
-            });
-        });
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    });
+                });
 
-        const response = await fetch("/report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                pet_id: "{{ pet.id }}",
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            })
-        });
+                const response = await fetch("/report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pet_id: "{{ pet.id }}",
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
+                });
 
-        const result = await response.json();
-        if (result.status === "success") {
-            // Redirigir directamente a WhatsApp
-            window.location.href = result.whatsapp_url;
-        } else {
-            loading.textContent = result.error || "No se pudo generar el enlace.";
-            button.disabled = false;
-        }
-    } catch (error) {
-        loading.textContent = "No se pudo obtener la ubicación.";
-        console.error(error);
-        button.disabled = false;
-    }
-};
-</script>
-    </div>
+                const result = await response.json();
+                if (result.status === "success") {
+                    window.location.href = result.whatsapp_url;
+                } else {
+                    loading.textContent = result.error || "No se pudo generar el enlace.";
+                    button.disabled = false;
+                }
+            } catch (error) {
+                loading.textContent = "No se pudo obtener la ubicación.";
+                console.error(error);
+                button.disabled = false;
+            }
+        };
+    </script>
 </body>
 </html>

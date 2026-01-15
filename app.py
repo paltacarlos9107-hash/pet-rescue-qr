@@ -194,7 +194,19 @@ def pet_page(pet_id):
     pet = get_pet(pet_id)
     if not pet:
         return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
-    return render_template("pet.html", pet=pet)
+
+    # Generar el QR para esta mascota
+    if IS_PRODUCTION:
+        qr_url = f"https://{request.host}/pet/{pet_id}"
+    else:
+        qr_url = f"{request.url_root}pet/{pet_id}"
+
+    qr_img = qrcode.make(qr_url)
+    buffered = BytesIO()
+    qr_img.save(buffered, format="PNG")
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+    return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url)
 
 @app.route("/report", methods=["POST"])
 def report_location():
