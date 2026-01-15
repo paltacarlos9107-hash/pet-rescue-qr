@@ -176,6 +176,16 @@ def register():
 # -------------------------------------------------
 # RUTAS PÚBLICAS
 # -------------------------------------------------
+
+@app.route("/my-pets")
+@login_required
+@check_inactivity
+def my_pets():
+    """Muestra solo las mascotas del usuario actual."""
+    from database import get_all_pets
+    pets = get_all_pets()
+    return render_template("my_pets.html", pets=pets)
+
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
     pet = get_pet(pet_id)

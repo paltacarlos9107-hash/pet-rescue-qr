@@ -186,16 +186,20 @@ def get_pet(pet_id):
     conn.close()
     return pet
 
-def get_all_pets():
-    """Obtiene todas las mascotas registradas."""
+def get_all_pets(owner_email=None):
+    """Obtiene todas las mascotas o solo las de un usuario específico."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        # PostgreSQL: ordenar por id (más reciente primero)
-        cur.execute("SELECT * FROM pets ORDER BY id DESC")
+        if owner_email:
+            cur.execute("SELECT * FROM pets WHERE owner_email = %s ORDER BY id DESC", (owner_email,))
+        else:
+            cur.execute("SELECT * FROM pets ORDER BY id DESC")
     else:
-        # SQLite: ordenar por rowid (más reciente primero)
-        cur.execute("SELECT * FROM pets ORDER BY rowid DESC")
+        if owner_email:
+            cur.execute("SELECT * FROM pets WHERE owner_email = ? ORDER BY rowid DESC", (owner_email,))
+        else:
+            cur.execute("SELECT * FROM pets ORDER BY rowid DESC")
     pets = cur.fetchall()
     cur.close()
     conn.close()

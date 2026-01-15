@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Mascotas - Pet Rescue QR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 14px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f1f8e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .pet-photo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .no-pets {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Volver al Registro</a>
+        <h1>🐾 Mis Mascotas Registradas</h1>
+        
+        {% if pets %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Foto</th>
+                    <th>Nombre</th>
+                    <th>Raza</th>
+                    <th>Teléfono</th>
+                    <th>QR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pet in pets %}
+                <tr>
+                    <td>
+                        {% if pet.photo_url %}
+                            <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
+                        {% else %}
+                            🐾
+                        {% endif %}
+                    </td>
+                    <td>{{ pet.name }}</td>
+                    <td>{{ pet.breed or '-' }}</td>
+                    <td>{{ pet.owner_phone or '-' }}</td>
+                    <td>
+                        <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50;">
+                            Ver QR
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-pets">
+            <h3>📭 No has registrado ninguna mascota aún</h3>
+            <p><a href="/" style="color: #4CAF50; text-decoration: none;">Registrar mi primera mascota →</a></p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
