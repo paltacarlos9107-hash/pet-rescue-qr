@@ -58,20 +58,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .btn {
-            display: inline-block;
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #45a049;
-        }
         .back-link {
             display: inline-block;
             margin-top: 20px;
@@ -106,7 +92,7 @@
             <p><strong>Escanea este código QR para reportar su ubicación:</strong></p>
             <img src="data:image/png;base64,{{ qr }}" alt="Código QR de {{ pet.name }}">
             <p style="margin-top: 10px; font-size: 14px; color: #666;">
-                 O visita: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
+                O visita: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
             </p>
         </div>
 
@@ -159,12 +145,5 @@
             }
         };
     </script>
-    <!-- DEBUG: Verificar si qr existe -->
-<div style="background: yellow; padding: 15px; margin: 20px; border: 2px solid red;">
-    <h3>🔍 Debug Info:</h3>
-    <p><strong>QR variable:</strong> "{{ qr }}"</p>
-    <p><strong>Longitud QR:</strong> {{ qr|length if qr else 'No existe' }}</p>
-    <p><strong>Pet ID:</strong> {{ pet.id }}</p>
-</div>
 </body>
 </html>
