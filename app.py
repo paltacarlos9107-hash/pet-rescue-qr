@@ -252,40 +252,6 @@ def admin_panel():
     
     return render_template("admin.html", users=users, message=message)
 
-# -------------------------------------------------
-# RUTAS TEMPORALES (PARA PLAN GRATUITO DE RENDER)
-# ¡ELIMINAR DESPUÉS DE USAR!
-# -------------------------------------------------
-
-@app.route("/make-me-admin")
-def make_me_admin():
-    make_user_admin("carlospalta91@hotmail.com")
-    return "✅ ¡Ahora eres administrador! Elimina esta ruta."
-
-@app.route("/add-user/<email>/<password>")
-def add_user_temp(email, password):
-    from werkzeug.security import generate_password_hash
-    from database import add_user
-    add_user(email, generate_password_hash(password))
-    return f"✅ Usuario {email} creado. ¡Elimina esta ruta ahora!"
-
-@app.route("/delete-user/<email>")
-def delete_user_temp(email):
-    from database import get_db_connection
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("DELETE FROM users WHERE email = %s", (email,))
-    else:
-        cur.execute("DELETE FROM users WHERE email = ?", (email,))
-    conn.commit()
-    deleted = cur.rowcount > 0
-    cur.close()
-    conn.close()
-    if deleted:
-        return f"✅ Usuario {email} eliminado."
-    else:
-        return f"⚠️ Usuario {email} no encontrado."
 
 # -------------------------------------------------
 # SERVIDOR
