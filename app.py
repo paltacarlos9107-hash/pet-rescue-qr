@@ -146,13 +146,32 @@ def register():
 # RUTAS PÚBLICAS
 # -------------------------------------------------
 
-# ¡¡¡ RUTA TEMPORAL - ELIMINAR DESPUÉS !!!
+# ¡¡¡ RUTA TEMPORAL PARA AGREGAR USUARIOS- ELIMINAR DESPUÉS !!!
 @app.route("/add-user/<email>/<password>")
 def add_user_temp(email, password):
     from werkzeug.security import generate_password_hash
     from database import add_user
     add_user(email, generate_password_hash(password))
     return f"✅ Usuario {email} creado. ¡Elimina esta ruta ahora!"
+
+# ¡¡¡ RUTA TEMPORAL PARA ELIMINAR USUARIOS - ELIMINAR DESPUÉS !!!
+@app.route("/delete-user/<email>")
+def delete_user_temp(email):
+    from database import get_db_connection
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if os.environ.get("RENDER"):
+        cur.execute("DELETE FROM users WHERE email = %s", (email,))
+    else:
+        cur.execute("DELETE FROM users WHERE email = ?", (email,))
+    conn.commit()
+    deleted = cur.rowcount > 0
+    cur.close()
+    conn.close()
+    if deleted:
+        return f"✅ Usuario {email} eliminado."
+    else:
+        return f"⚠️ Usuario {email} no encontrado."
 
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
