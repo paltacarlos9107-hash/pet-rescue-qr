@@ -132,11 +132,12 @@ def register():
         name = request.form.get("name", "").strip()
         breed = request.form.get("breed", "").strip()
         description = request.form.get("description", "").strip()
+        owner_name = request.form.get("owner_name", "").strip()  # ← Nuevo campo
         owner_email = request.form.get("email", "").strip()
         owner_phone = request.form.get("phone", "").strip()
 
-        if not name or not owner_email:
-            return render_template("register.html", error="El nombre y correo son obligatorios.")
+        if not name or not owner_name or not owner_email:
+            return render_template("register.html", error="El nombre de la mascota, nombre del dueño y correo son obligatorios.")
 
         photo_url = None
         if "photo" in request.files:
@@ -153,7 +154,7 @@ def register():
                     print("📷 Error al subir foto:", str(e))
 
         pet_id = str(uuid.uuid4())[:8].upper()
-        add_pet(pet_id, name, breed, description, owner_email, owner_phone, photo_url)
+        add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url)
 
         if IS_PRODUCTION:
             qr_url = f"https://{request.host}/pet/{pet_id}"
@@ -175,7 +176,7 @@ def register():
     except Exception as e:
         print("❌ Error en /register:", repr(e))
         return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
-
+    
 # -------------------------------------------------
 # RUTAS PÚBLICAS
 # -------------------------------------------------

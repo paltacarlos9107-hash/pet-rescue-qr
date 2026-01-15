@@ -157,19 +157,20 @@ def make_user_admin(email):
 # Funciones existentes para mascotas (sin cambios)
 # -------------------------------------------------
 
-def add_pet(pet_id, name, breed, description, owner_email, owner_phone=None, photo_url=None):
+def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url):
+    """Registra una nueva mascota."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute(
-            "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
-        )
+        cur.execute("""
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, found)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, False))
     else:
-        cur.execute(
-            "INSERT INTO pets (id, name, breed, description, owner_email, owner_phone, photo_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (pet_id, name, breed, description, owner_email, owner_phone, photo_url)
-        )
+        cur.execute("""
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, found)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, False))
     conn.commit()
     cur.close()
     conn.close()
