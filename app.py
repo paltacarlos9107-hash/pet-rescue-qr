@@ -145,6 +145,15 @@ def register():
 # -------------------------------------------------
 # RUTAS PÚBLICAS
 # -------------------------------------------------
+
+# ¡¡¡ RUTA TEMPORAL - ELIMINAR DESPUÉS !!!
+@app.route("/add-user/<email>/<password>")
+def add_user_temp(email, password):
+    from werkzeug.security import generate_password_hash
+    from database import add_user
+    add_user(email, generate_password_hash(password))
+    return f"✅ Usuario {email} creado. ¡Elimina esta ruta ahora!"
+
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
     pet = get_pet(pet_id)
