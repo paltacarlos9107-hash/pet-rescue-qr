@@ -11,6 +11,7 @@ from database import init_db, add_pet, get_pet, get_user_by_email, make_user_adm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
+import time
 
 # -------------------------------------------------
 # CONFIGURACIÓN DE ENTORNO
@@ -53,6 +54,20 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def check_inactivity(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("logged_in"):
+            last_activity = session.get("last_activity", 0)
+            if time.time() - last_activity > 900:  # 15 minutos
+                session.clear()
+                return redirect("/login?message=timeout")
+        # Actualizar marca de tiempo en cada solicitud
+        if session.get("logged_in"):
+            session["last_activity"] = time.time()
+        return f(*args, **kwargs)
+    return decorated_function
+
 # -------------------------------------------------
 # MIDDLEWARE
 # -------------------------------------------------
@@ -74,6 +89,10 @@ def add_security_headers(response):
 # -------------------------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    message = ""
+    if request.args.get("message") == "timeout":
+        message = "Tu sesión expiró por inactividad. Por favor, inicia sesión nuevamente."
+    
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
@@ -82,15 +101,16 @@ def login():
         if user and check_password_hash(user["password_hash"], password):
             session["logged_in"] = True
             session["user_email"] = email
+            session["last_activity"] = time.time()
             return redirect("/")
         else:
-            return render_template("login.html", error="Correo o contraseña incorrectos.")
-    return render_template("login.html")
+            message = "Correo o contraseña incorrectos."
+    
+    return render_template("login.html", error=message)
 
 @app.route("/logout")
 def logout():
-    session.pop("logged_in", None)
-    session.pop("user_email", None)
+    session.clear()
     return redirect("/login")
 
 # -------------------------------------------------
@@ -98,11 +118,13 @@ def logout():
 # -------------------------------------------------
 @app.route("/")
 @login_required
+@check_inactivity
 def home():
     return render_template("register.html")
 
 @app.route("/register", methods=["POST"])
 @login_required
+@check_inactivity
 def register():
     try:
         name = request.form.get("name", "").strip()
@@ -184,12 +206,10 @@ def report_location():
         if not owner_phone:
             return jsonify({"error": "Dueño no tiene número de teléfono registrado"}), 400
 
-        # Limpiar el número: solo dígitos
         clean_phone = ''.join(filter(str.isdigit, owner_phone))
         if not clean_phone.startswith('57') and len(clean_phone) == 10:
             clean_phone = '57' + clean_phone
 
-        # Crear enlace de WhatsApp (¡sin espacios!)
         map_link = f"https://www.google.com/maps?q={lat},{lng}"
         message = f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
         whatsapp_url = f"https://wa.me/{clean_phone}?text={requests.utils.quote(message)}"
@@ -209,10 +229,10 @@ def thanks():
 # -------------------------------------------------
 @app.route("/admin", methods=["GET", "POST"])
 @admin_required
+@check_inactivity
 def admin_panel():
-    from database import get_db_connection, add_user  # ← ¡Importa add_user aquí!
+    from database import get_db_connection, add_user
     
-    # Obtener todos los usuarios
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -231,12 +251,11 @@ def admin_panel():
         password = request.form.get("password", "")
         
         if action == "create" and email and password:
-            from werkzeug.security import generate_password_hash
             try:
                 add_user(email, generate_password_hash(password))
                 message = f"✅ Usuario {email} creado."
             except Exception as e:
-                message = f"❌ Error al crear usuario: {str(e)}"
+                message = f"❌ Error: {str(e)}"
             
         elif action == "delete" and email:
             conn = get_db_connection()
