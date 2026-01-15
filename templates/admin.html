@@ -22,7 +22,7 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.94);
             border-radius: 16px;
@@ -48,7 +48,7 @@
         }
         
         header h1::before {
-            content: "🔐";
+            content: "🐾";
             font-size: 24px;
         }
         
@@ -73,6 +73,36 @@
             border: 1px solid #ffcdd2;
         }
         
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .section {
             margin-bottom: 35px;
             padding: 25px;
@@ -88,11 +118,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        
-        .section h2::before {
-            content: "➕";
-            font-size: 18px;
         }
         
         .form-group {
@@ -117,12 +142,6 @@
             transition: border-color 0.3s;
         }
         
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-        
         button {
             background: linear-gradient(120deg, #4CAF50, #2E7D32);
             color: white;
@@ -136,18 +155,13 @@
             width: 100%;
         }
         
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-        }
-        
-        .users-table {
+        .users-table, .pets-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
         
-        .users-table th {
+        .users-table th, .pets-table th {
             background: #f1f8e9;
             color: #2e7d32;
             text-align: left;
@@ -156,7 +170,7 @@
             border-bottom: 2px solid #c8e6c9;
         }
         
-        .users-table td {
+        .users-table td, .pets-table td {
             padding: 14px 15px;
             border-bottom: 1px solid #eee;
             color: #333;
@@ -171,21 +185,12 @@
             font-weight: 600;
         }
         
-        .delete-btn {
-            background: linear-gradient(120deg, #f44336, #d32f2f);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .delete-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        .pet-photo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #eee;
         }
         
         .stats {
@@ -230,22 +235,19 @@
             color: white;
         }
         
-        @media (max-width: 600px) {
-            .content {
-                padding: 20px 15px;
-            }
-            
-            header h1 {
-                font-size: 22px;
-            }
-            
+        @media (max-width: 768px) {
             .stats {
                 flex-direction: column;
                 gap: 15px;
             }
             
-            button, .delete-btn {
-                width: auto;
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .pet-photo {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -266,7 +268,11 @@
             <div class="stats">
                 <div class="stat-item">
                     <div class="stat-number">{{ users|length }}</div>
-                    <div class="stat-label">Usuarios Totales</div>
+                    <div class="stat-label">Usuarios</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ pets|length }}</div>
+                    <div class="stat-label">Mascotas</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-number">{{ users|selectattr('is_admin')|list|length }}</div>
@@ -274,62 +280,115 @@
                 </div>
             </div>
 
-            <div class="section">
-                <h2>Crear Nuevo Usuario</h2>
-                <form method="POST">
-                    <input type="hidden" name="action" value="create">
-                    <div class="form-group">
-                        <label for="email">Correo Electrónico *</label>
-                        <input type="email" id="email" name="email" required placeholder="usuario@ejemplo.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña *</label>
-                        <input type="password" id="password" name="password" required placeholder="Mínimo 8 caracteres">
-                    </div>
-                    <button type="submit">Crear Usuario</button>
-                </form>
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('users')">👥 Usuarios</button>
+                <button class="tab" onclick="showTab('pets')">🐾 Mascotas</button>
             </div>
 
-            <div class="section">
-                <h2 style="color: #d32f2f;">Usuarios Registrados</h2>
-                {% if users %}
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>Correo Electrónico</th>
-                            <th>Rol</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.email }}</td>
-                            <td>
-                                {% if user.is_admin %}
-                                    <span class="admin-badge">Administrador</span>
-                                {% else %}
-                                    Usuario
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if user.email != session.user_email %}
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ user.email }}? Esta acción no se puede deshacer.')">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="email" value="{{ user.email }}">
-                                    <button type="submit" class="delete-btn">Eliminar</button>
-                                </form>
-                                {% else %}
-                                <em>Tú</em>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p style="text-align: center; color: #666; padding: 20px;">No hay usuarios registrados.</p>
-                {% endif %}
+            <!-- Tab Usuarios -->
+            <div id="users" class="tab-content active">
+                <div class="section">
+                    <h2>Crear Nuevo Usuario</h2>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="create">
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico *</label>
+                            <input type="email" id="email" name="email" required placeholder="usuario@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Contraseña *</label>
+                            <input type="password" id="password" name="password" required placeholder="Mínimo 8 caracteres">
+                        </div>
+                        <button type="submit">Crear Usuario</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2 style="color: #d32f2f;">Usuarios Registrados</h2>
+                    {% if users %}
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Correo Electrónico</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span class="admin-badge">Administrador</span>
+                                    {% else %}
+                                        Usuario
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.email != session.user_email %}
+                                    <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ user.email }}? Esta acción no se puede deshacer.')">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="email" value="{{ user.email }}">
+                                        <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Eliminar</button>
+                                    </form>
+                                    {% else %}
+                                    <em>Tú</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p style="text-align: center; color: #666; padding: 20px;">No hay usuarios registrados.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tab Mascotas -->
+            <div id="pets" class="tab-content">
+                <div class="section">
+                    <h2>Mascotas Registradas</h2>
+                    {% if pets %}
+                    <table class="pets-table">
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Nombre</th>
+                                <th>Raza</th>
+                                <th>Dueño</th>
+                                <th>Teléfono</th>
+                                <th>QR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pet in pets %}
+                            <tr>
+                                <td>
+                                    {% if pet.photo_url %}
+                                        <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
+                                    {% else %}
+                                        🐾
+                                    {% endif %}
+                                </td>
+                                <td>{{ pet.name }}</td>
+                                <td>{{ pet.breed or '-' }}</td>
+                                <td>{{ pet.owner_email }}</td>
+                                <td>{{ pet.owner_phone or '-' }}</td>
+                                <td>
+                                    <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none;">
+                                        Ver QR
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p style="text-align: center; color: #666; padding: 20px;">No hay mascotas registradas.</p>
+                    {% endif %}
+                </div>
             </div>
 
             <a href="/" class="back-link">← Volver al Registro de Mascotas</a>
@@ -337,7 +396,21 @@
     </div>
 
     <script>
-        // Mensaje de confirmación mejorado
+        function showTab(tabName) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar el tab seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Mensaje de confirmación para eliminar usuarios
         document.querySelectorAll('form[onsubmit]').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const email = this.querySelector('input[name="email"]').value;

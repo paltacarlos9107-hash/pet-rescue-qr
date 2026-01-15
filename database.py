@@ -185,3 +185,24 @@ def get_pet(pet_id):
     cur.close()
     conn.close()
     return pet
+
+def get_all_pets():
+    """Obtiene todas las mascotas registradas."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        # PostgreSQL: si tienes columna created_at, úsala; si no, usa id
+        try:
+            cur.execute("SELECT * FROM pets ORDER BY created_at DESC")
+        except:
+            cur.execute("SELECT * FROM pets ORDER BY id DESC")
+    else:
+        # SQLite: no tiene created_at, usamos rowid
+        try:
+            cur.execute("SELECT * FROM pets ORDER BY created_at DESC")
+        except:
+            cur.execute("SELECT * FROM pets ORDER BY rowid DESC")
+    pets = cur.fetchall()
+    cur.close()
+    conn.close()
+    return pets
