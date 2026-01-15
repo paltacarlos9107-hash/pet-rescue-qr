@@ -13,6 +13,7 @@
             background-attachment: fixed;
             min-height: 100vh;
             padding: 20px;
+            margin: 0;
         }
         .container {
             max-width: 1000px;
@@ -63,6 +64,14 @@
             color: #666;
             padding: 40px;
         }
+        .logout-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -95,7 +104,7 @@
                     <td>{{ pet.breed or '-' }}</td>
                     <td>{{ pet.owner_phone or '-' }}</td>
                     <td>
-                        <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50;">
+                        <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none;">
                             Ver QR
                         </a>
                     </td>
