@@ -63,7 +63,7 @@
         🔒 Cerrar sesión
         </a>
     </div>
-    
+
     <div class="content">
         <div style="text-align: right; margin-bottom: 15px;">
             <a href="/logout" style="color: #d32f2f; text-decoration: none; font-weight: bold;">
@@ -86,6 +86,23 @@
         {% endif %}
 
     {% if not success %}
+
+<!-- Mostrar mascotas registradas por el usuario -->
+{% if pets and pets|length > 0 %}
+<div class="message success" style="margin-bottom: 20px;">
+    <h3>🐾 Tus Mascotas Registradas</h3>
+    <ul style="text-align: left; margin-top: 10px;">
+        {% for pet in pets %}
+        <li>
+            <strong>{{ pet.name }}</strong> 
+            {% if pet.breed %}({{ pet.breed }}){% endif %}
+            - <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50;">Ver QR</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
     <form method="POST" action="/register" enctype="multipart/form-data">
         <div class="form-group">
             <label for="name">Nombre de la mascota *</label>

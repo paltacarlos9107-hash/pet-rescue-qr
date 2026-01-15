@@ -119,7 +119,10 @@ def logout():
 @login_required
 @check_inactivity
 def home():
-    return render_template("register.html")
+    from database import get_all_pets
+    # Obtener solo las mascotas del usuario actual
+    pets = get_all_pets(owner_email=session["user_email"])
+    return render_template("register.html", pets=pets)
 
 @app.route("/register", methods=["POST"])
 @login_required
@@ -183,7 +186,7 @@ def register():
 def my_pets():
     """Muestra solo las mascotas del usuario actual."""
     from database import get_all_pets
-    pets = get_all_pets()
+    pets = get_all_pets(session["user_email"])  # Solo las del usuario actual
     return render_template("my_pets.html", pets=pets)
 
 @app.route("/pet/<pet_id>")
