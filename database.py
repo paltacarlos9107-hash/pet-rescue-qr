@@ -204,3 +204,17 @@ def get_all_pets(owner_email=None):
     cur.close()
     conn.close()
     return pets
+
+def delete_pet(pet_id):
+    """Elimina una mascota por su ID."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("DELETE FROM pets WHERE id = %s", (pet_id,))
+    else:
+        cur.execute("DELETE FROM pets WHERE id = ?", (pet_id,))
+    conn.commit()
+    deleted = cur.rowcount > 0
+    cur.close()
+    conn.close()
+    return deleted

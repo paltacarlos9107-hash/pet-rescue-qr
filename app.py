@@ -255,9 +255,51 @@ def thanks():
 @admin_required
 @check_inactivity
 def admin_panel():
-    from database import get_db_connection, add_user, get_all_pets
+    from database import get_db_connection, add_user, get_all_pets, delete_pet
     
-    # Obtener todos los usuarios
+    message = ""
+    
+    if request.method == "POST":
+        action = request.form.get("action")
+        
+        # Crear/eliminar usuarios
+        if action in ["create", "delete"]:
+            email = request.form.get("email", "").strip()
+            password = request.form.get("password", "")
+            
+            if action == "create" and email and password:
+                try:
+                    add_user(email, generate_password_hash(password))
+                    message = f"✅ Usuario {email} creado."
+                except Exception as e:
+                    message = f"❌ Error: {str(e)}"
+                
+            elif action == "delete" and email:
+                conn = get_db_connection()
+                cur = conn.cursor()
+                if IS_PRODUCTION:
+                    cur.execute("DELETE FROM users WHERE email = %s", (email,))
+                else:
+                    cur.execute("DELETE FROM users WHERE email = ?", (email,))
+                conn.commit()
+                deleted = cur.rowcount > 0
+                cur.close()
+                conn.close()
+                if deleted:
+                    message = f"✅ Usuario {email} eliminado."
+                else:
+                    message = f"⚠️ Usuario {email} no encontrado."
+        
+        # Eliminar mascota
+        elif action == "delete_pet":
+            pet_id = request.form.get("pet_id", "").strip()
+            if pet_id:
+                if delete_pet(pet_id):
+                    message = f"✅ Mascota {pet_id} eliminada."
+                else:
+                    message = f"⚠️ Mascota {pet_id} no encontrada."
+
+    # Obtener datos actualizados
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -268,39 +310,8 @@ def admin_panel():
     cur.close()
     conn.close()
 
-    # Obtener TODAS las mascotas (sin filtrar por dueño)
-    pets = get_all_pets()  # ← Sin parámetro = todas las mascotas
+    pets = get_all_pets()  # Todas las mascotas
 
-    message = ""
-    
-    if request.method == "POST":
-        action = request.form.get("action")
-        email = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
-        
-        if action == "create" and email and password:
-            try:
-                add_user(email, generate_password_hash(password))
-                message = f"✅ Usuario {email} creado."
-            except Exception as e:
-                message = f"❌ Error: {str(e)}"
-            
-        elif action == "delete" and email:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            if IS_PRODUCTION:
-                cur.execute("DELETE FROM users WHERE email = %s", (email,))
-            else:
-                cur.execute("DELETE FROM users WHERE email = ?", (email,))
-            conn.commit()
-            deleted = cur.rowcount > 0
-            cur.close()
-            conn.close()
-            if deleted:
-                message = f"✅ Usuario {email} eliminado."
-            else:
-                message = f"⚠️ Usuario {email} no encontrado."
-    
     return render_template("admin.html", users=users, pets=pets, message=message)
 
 # -------------------------------------------------
