@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -32,13 +32,24 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 init_db()
 
 # -------------------------------------------------
-# DECORADOR: Requiere login
+# DECORADORES
 # -------------------------------------------------
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("logged_in"):
             return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect("/login")
+        user = get_user_by_email(session["user_email"])
+        if not user or not user.get("is_admin"):
+            return "<h2>Acceso denegado</h2>", 403
         return f(*args, **kwargs)
     return decorated_function
 
@@ -59,9 +70,8 @@ def add_security_headers(response):
     return response
 
 # -------------------------------------------------
-# RUTAS DE LOGIN (MULTIUSUARIO)
+# RUTAS DE LOGIN
 # -------------------------------------------------
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -145,13 +155,63 @@ def register():
 # -------------------------------------------------
 # RUTAS PÚBLICAS
 # -------------------------------------------------
+@app.route("/pet/<pet_id>")
+def pet_page(pet_id):
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
+    return render_template("pet.html", pet=pet)
 
+@app.route("/report", methods=["POST"])
+def report_location():
+    try:
+        data = request.get_json()
+        if data is None:
+            return jsonify({"error": "No se recibieron datos"}), 400
+
+        pet_id = data.get("pet_id")
+        lat = data.get("lat")
+        lng = data.get("lng")
+
+        if not pet_id or lat is None or lng is None:
+            return jsonify({"error": "Faltan datos requeridos"}), 400
+
+        pet = get_pet(pet_id)
+        if not pet:
+            return jsonify({"error": "Mascota no encontrada"}), 400
+
+        owner_phone = pet.get("owner_phone")
+        if not owner_phone:
+            return jsonify({"error": "Dueño no tiene número de teléfono registrado"}), 400
+
+        # Limpiar el número: solo dígitos
+        clean_phone = ''.join(filter(str.isdigit, owner_phone))
+        if not clean_phone.startswith('57') and len(clean_phone) == 10:
+            clean_phone = '57' + clean_phone
+
+        # Crear enlace de WhatsApp (¡sin espacios!)
+        map_link = f"https://www.google.com/maps?q={lat},{lng}"
+        message = f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
+        whatsapp_url = f"https://wa.me/{clean_phone}?text={requests.utils.quote(message)}"
+
+        return jsonify({"status": "success", "whatsapp_url": whatsapp_url})
+
+    except Exception as e:
+        print("❌ Error en /report:", repr(e))
+        return jsonify({"error": "Error interno"}), 500
+
+@app.route("/thanks")
+def thanks():
+    return render_template("thanks.html")
+
+# -------------------------------------------------
+# RUTA DE ADMINISTRACIÓN
+# -------------------------------------------------
 @app.route("/admin", methods=["GET", "POST"])
 @admin_required
 def admin_panel():
     from database import get_db_connection
     
-    # Obtener todos los usuarios
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -192,26 +252,16 @@ def admin_panel():
     
     return render_template("admin.html", users=users, message=message)
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get("logged_in"):
-            return redirect("/login")
-        # Verificar si es admin
-        user = get_user_by_email(session["user_email"])
-        if not user or not user.get("is_admin"):
-            return "<h2>Acceso denegado</h2>", 403
-        return f(*args, **kwargs)
-    return decorated_function
+# -------------------------------------------------
+# RUTAS TEMPORALES (PARA PLAN GRATUITO DE RENDER)
+# ¡ELIMINAR DESPUÉS DE USAR!
+# -------------------------------------------------
 
-# ¡¡¡ RUTA TEMPORAL - ELIMINAR DESPUÉS !!!
 @app.route("/make-me-admin")
 def make_me_admin():
-    from database import make_user_admin
-    make_user_admin("carlospalta91@hotmail.com")  # ← ¡Cambia esto por tu correo real!
+    make_user_admin("carlospalta91@hotmail.com")
     return "✅ ¡Ahora eres administrador! Elimina esta ruta."
 
-# ¡¡¡ RUTA TEMPORAL PARA AGREGAR USUARIOS- ELIMINAR DESPUÉS !!!
 @app.route("/add-user/<email>/<password>")
 def add_user_temp(email, password):
     from werkzeug.security import generate_password_hash
@@ -219,13 +269,12 @@ def add_user_temp(email, password):
     add_user(email, generate_password_hash(password))
     return f"✅ Usuario {email} creado. ¡Elimina esta ruta ahora!"
 
-# ¡¡¡ RUTA TEMPORAL PARA ELIMINAR USUARIOS - ELIMINAR DESPUÉS !!!
 @app.route("/delete-user/<email>")
 def delete_user_temp(email):
     from database import get_db_connection
     conn = get_db_connection()
     cur = conn.cursor()
-    if os.environ.get("RENDER"):
+    if IS_PRODUCTION:
         cur.execute("DELETE FROM users WHERE email = %s", (email,))
     else:
         cur.execute("DELETE FROM users WHERE email = ?", (email,))
@@ -237,55 +286,6 @@ def delete_user_temp(email):
         return f"✅ Usuario {email} eliminado."
     else:
         return f"⚠️ Usuario {email} no encontrado."
-
-@app.route("/pet/<pet_id>")
-def pet_page(pet_id):
-    pet = get_pet(pet_id)
-    if not pet:
-        return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
-    return render_template("pet.html", pet=pet)
-
-@app.route("/report", methods=["POST"])
-def report_location():
-    try:
-        data = request.get_json()
-        if data is None:
-            return jsonify({"error": "No se recibieron datos"}), 400
-
-        pet_id = data.get("pet_id")
-        lat = data.get("lat")
-        lng = data.get("lng")
-
-        if not pet_id or lat is None or lng is None:
-            return jsonify({"error": "Faltan datos requeridos"}), 400
-
-        pet = get_pet(pet_id)
-        if not pet:
-            return jsonify({"error": "Mascota no encontrada"}), 400
-
-        owner_phone = pet.get("owner_phone")
-        if not owner_phone:
-            return jsonify({"error": "Dueño no tiene número de teléfono registrado"}), 400
-
-        # Limpiar el número: solo dígitos (WhatsApp requiere formato internacional sin + ni espacios)
-        clean_phone = ''.join(filter(str.isdigit, owner_phone))
-        if not clean_phone.startswith('57') and len(clean_phone) == 10:
-            # Asumir Colombia si no tiene prefijo
-            clean_phone = '57' + clean_phone
-
-        # Crear enlace de WhatsApp
-        map_link = f"https://www.google.com/maps?q={lat},{lng}"
-        message = f"¡Tu mascota '{pet['name']}' fue vista!\n\nUbicación:\n{map_link}"
-        whatsapp_url = f"https://wa.me/{clean_phone}?text={requests.utils.quote(message)}"
-
-        return jsonify({"status": "success", "whatsapp_url": whatsapp_url})
-
-    except Exception as e:
-        print("❌ Error en /report:", repr(e))
-        return jsonify({"error": "Error interno"}), 500
-@app.route("/thanks")
-def thanks():
-    return render_template("thanks.html")
 
 # -------------------------------------------------
 # SERVIDOR
