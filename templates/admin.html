@@ -293,7 +293,7 @@
                 height: 40px;
             }
             
-            .delete-btn, .toggle-btn {
+            .delete-btn {
                 padding: 4px 8px;
                 font-size: 12px;
             }
@@ -389,21 +389,29 @@
                                     </td>
                                     <td>
                                         {% if user.email != session.user_email %}
+                                            <!-- Botón de desactivar/activar -->
                                             {% if user.is_active %}
                                             <form method="POST" style="display: inline;" onsubmit="return confirm('¿Desactivar la cuenta de {{ user.email }}?\n\nEl usuario no podrá acceder a la aplicación.')">
                                                 <input type="hidden" name="action" value="toggle_active">
                                                 <input type="hidden" name="email" value="{{ user.email }}">
                                                 <input type="hidden" name="is_active" value="false">
-                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Desactivar</button>
+                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 5px;">Desactivar</button>
                                             </form>
                                             {% else %}
                                             <form method="POST" style="display: inline;" onsubmit="return confirm('¿Activar la cuenta de {{ user.email }}?')">
                                                 <input type="hidden" name="action" value="toggle_active">
                                                 <input type="hidden" name="email" value="{{ user.email }}">
                                                 <input type="hidden" name="is_active" value="true">
-                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #4CAF50, #2E7D32); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Activar</button>
+                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #4CAF50, #2E7D32); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 5px;">Activar</button>
                                             </form>
                                             {% endif %}
+                                            
+                                            <!-- Botón de eliminar usuario -->
+                                            <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar permanentemente a {{ user.email }}?\n\nEsta acción no se puede deshacer y eliminará todas sus mascotas.')">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="email" value="{{ user.email }}">
+                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #9C27B0, #7B1FA2); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Eliminar</button>
+                                            </form>
                                         {% else %}
                                             <em>Tú (Admin)</em>
                                         {% endif %}
