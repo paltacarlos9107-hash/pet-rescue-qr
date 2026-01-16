@@ -90,9 +90,20 @@
             </p>
         </div>
 
-        <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 15px;">
-            📍 Sí, quiero ayudar
-        </button>
+        <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+    <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+        📍 Sí, quiero ayudar
+    </button>
+    
+    {% if pet.owner_phone %}
+    <a href="tel:{{ pet.owner_phone }}" 
+       style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; display: inline-block; text-align: center;">
+        📞 Llamar al dueño
+    </a>
+    {% endif %}
+</div>
+
+<div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
 
         <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold;"></div>
     </div>
