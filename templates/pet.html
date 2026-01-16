@@ -76,11 +76,17 @@
             {% if pet.description %}
                 <p><strong>Señas particulares:</strong> {{ pet.description }}</p>
             {% endif %}
-            <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
+                <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
             {% if pet.owner_phone %}
                 <p><strong>Teléfono:</strong> {{ pet.owner_phone }}</p>
             {% endif %}
-        </div>
+            {% if pet.city %}
+                <p><strong>Ciudad:</strong> {{ pet.city }}</p>
+            {% endif %}
+            {% if pet.address %}
+                <p><strong>Dirección:</strong> {{ pet.address }}</p>
+            {% endif %}
+            </div>
 
         <div class="qr-section">
             <p><strong>Escanea este código QR para reportar su ubicación:</strong></p>

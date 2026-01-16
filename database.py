@@ -183,20 +183,20 @@ def update_user_session_token(email, token):
     cur.close()
     conn.close()
 
-def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url):
+def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address):
     """Registra una nueva mascota."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
         cur.execute("""
-            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, found)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, False))
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False))
     else:
         cur.execute("""
-            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, found)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, False))
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False))
     conn.commit()
     cur.close()
     conn.close()

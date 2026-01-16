@@ -359,6 +359,8 @@
                                 <th>Raza</th>
                                 <th>Dueño</th>
                                 <th>Teléfono</th>
+                                <th>Ciudad</th>
+                                <th>Dirección</th>
                                 <th>QR</th>
                                 <th>Acciones</th>
                             </tr>
@@ -376,6 +378,8 @@
                                 <td>{{ pet.name }}</td>
                                 <td>{{ pet.breed or '-' }}</td>
                                 <td>{{ pet.owner_name }}</td>
+                                <td>{{ pet.city or '-' }}</td>
+                                <td>{{ pet.address or '-' }}</td>
                                 <td>{{ pet.owner_phone or '-' }}</td>
                                 <td>
                                     <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none;">

@@ -173,8 +173,10 @@ def register():
         breed = request.form.get("breed", "").strip()
         description = request.form.get("description", "").strip()
         owner_name = request.form.get("owner_name", "").strip()
-        owner_email = session["user_email"]
+        owner_email = session["user_email"]  # Dueño = usuario logueado
         owner_phone = request.form.get("phone", "").strip()
+        city = request.form.get("city", "").strip()  # ← Nuevo campo
+        address = request.form.get("address", "").strip()  # ← Nuevo campo
 
         if not name or not owner_name:
             return render_template("register.html", error="El nombre de la mascota y del dueño son obligatorios.")
@@ -194,7 +196,7 @@ def register():
                     print("📷 Error al subir foto:", str(e))
 
         pet_id = str(uuid.uuid4())[:8].upper()
-        add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url)
+        add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address)
 
         # Guardar datos en sesión para mostrar en la página de éxito
         session['registration_success'] = f"¡Mascota '{name}' registrada! Usa el QR para ayudar a encontrarla."
@@ -214,7 +216,7 @@ def register():
     except Exception as e:
         print("❌ Error en /register:", repr(e))
         return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
-
+    
 @app.route("/register/success")
 @login_required
 @check_inactivity
