@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -119,10 +119,7 @@ def logout():
 @login_required
 @check_inactivity
 def home():
-    from database import get_all_pets
-    # Obtener solo las mascotas del usuario actual
-    pets = get_all_pets(owner_email=session["user_email"])
-    return render_template("register.html", pets=pets)
+    return render_template("register.html")
 
 @app.route("/register", methods=["POST"])
 @login_required
@@ -137,7 +134,6 @@ def register():
         owner_phone = request.form.get("phone", "").strip()
 
         if not name or not owner_name:
-            # Mostrar error en la misma página
             return render_template("register.html", error="El nombre de la mascota y del dueño son obligatorios.")
 
         photo_url = None
@@ -175,10 +171,6 @@ def register():
     except Exception as e:
         print("❌ Error en /register:", repr(e))
         return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
-       
-# -------------------------------------------------
-# RUTAS PÚBLICAS
-# -------------------------------------------------
 
 @app.route("/register/success")
 @login_required
@@ -193,13 +185,17 @@ def register_success():
         
     return render_template("register.html", success=success, qr=qr, qr_url=qr_url)
 
+# -------------------------------------------------
+# RUTAS PÚBLICAS
+# -------------------------------------------------
+
 @app.route("/my-pets")
 @login_required
 @check_inactivity
 def my_pets():
     """Muestra solo las mascotas del usuario actual."""
     from database import get_all_pets
-    pets = get_all_pets(session["user_email"])  # Solo las del usuario actual
+    pets = get_all_pets(owner_email=session["user_email"])
     return render_template("my_pets.html", pets=pets)
 
 @app.route("/pet/<pet_id>")
@@ -268,7 +264,7 @@ def thanks():
 @admin_required
 @check_inactivity
 def admin_panel():
-    from database import get_db_connection, add_user, get_all_pets, delete_pet
+    from database import get_db_connection, add_user, get_all_pets
     
     message = ""
     
