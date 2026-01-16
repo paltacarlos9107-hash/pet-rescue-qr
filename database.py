@@ -110,6 +110,8 @@ def init_db():
     # 👇 ¡Importante! Inicializar la tabla de usuarios con soporte de admin
     init_users_table()
 
+    
+
 def add_user(email, password_hash):
     """Agrega un nuevo usuario a la base de datos."""
     conn = get_db_connection()
@@ -124,6 +126,18 @@ def add_user(email, password_hash):
             "INSERT INTO users (email, password_hash) VALUES (?, ?)",
             (email, password_hash)
         )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    def update_user_session_token(email, token):
+    '''Actualiza el token de sesión del usuario.'''
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute('UPDATE users SET session_token = %s WHERE email = %s', (token, email))
+    else:
+        cur.execute('UPDATE users SET session_token = ? WHERE email = ?', (token, email))
     conn.commit()
     cur.close()
     conn.close()
