@@ -144,9 +144,14 @@ def login():
 
 @app.route("/logout")
 def logout():
-    # Limpiar token en la base de datos
-    if session.get("logged_in"):
-        update_user_session_token(session["user_email"], None)
+    # Limpiar token en la base de datos si hay un usuario logueado
+    if session.get("logged_in") and session.get("user_email"):
+        try:
+            update_user_session_token(session["user_email"], None)
+        except Exception as e:
+            print(f"Error al limpiar token de sesión: {e}")
+    
+    # Limpiar sesión del navegador
     session.clear()
     return redirect("/login")
 
