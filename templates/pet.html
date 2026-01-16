@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ pet.name }} - Pet Rescue QR</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
@@ -12,9 +23,10 @@
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
             margin: 0;
         }
+        
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -26,10 +38,12 @@
             padding: 30px;
             text-align: center;
         }
+        
         h1 {
             color: #2c3e50;
             margin-bottom: 20px;
         }
+        
         .pet-photo {
             width: 150px;
             height: 150px;
@@ -38,6 +52,7 @@
             border: 2px solid #eee;
             margin-bottom: 20px;
         }
+        
         .info {
             text-align: left;
             margin: 20px 0;
@@ -45,18 +60,48 @@
             background: #f8fafc;
             border-radius: 10px;
         }
+        
         .info p {
             margin: 8px 0;
             color: #333;
         }
+        
         .qr-section {
             margin: 25px 0;
         }
+        
         .qr-section img {
             max-width: 200px;
             border: 2px solid #4CAF50;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                margin: 0 10px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                margin-bottom: 15px;
+            }
+            
+            .pet-photo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .qr-section img {
+                max-width: 180px;
+            }
+            
+            button, a {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
         }
     </style>
 </head>
@@ -76,42 +121,40 @@
             {% if pet.description %}
                 <p><strong>Señas particulares:</strong> {{ pet.description }}</p>
             {% endif %}
-                <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
-            {% if pet.owner_phone %}
-                <p><strong>Teléfono:</strong> {{ pet.owner_phone }}</p>
-            {% endif %}
+            <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
             {% if pet.city %}
                 <p><strong>Ciudad:</strong> {{ pet.city }}</p>
             {% endif %}
             {% if pet.address %}
                 <p><strong>Dirección:</strong> {{ pet.address }}</p>
             {% endif %}
-            </div>
+            {% if pet.owner_phone %}
+                <p><strong>Teléfono:</strong> {{ pet.owner_phone }}</p>
+            {% endif %}
+        </div>
 
         <div class="qr-section">
             <p><strong>Escanea este código QR para reportar su ubicación:</strong></p>
-            <img src="data:image/png;base64,{{ qr }}" alt="Código QR de {{ pet.name }}">
+            <img src="image/png;base64,{{ qr }}" alt="Código QR de {{ pet.name }}">
             <p style="margin-top: 10px; font-size: 14px; color: #666;">
                 O visita: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
             </p>
         </div>
 
         <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-    <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
-        📍 Sí, quiero ayudar
-    </button>
-    
-    {% if pet.owner_phone %}
-    <a href="tel:{{ pet.owner_phone }}" 
-       style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; display: inline-block; text-align: center;">
-        📞 Llamar al dueño
-    </a>
-    {% endif %}
-</div>
+            <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
+                📍 Sí, quiero ayudar
+            </button>
+            
+            {% if pet.owner_phone %}
+            <a href="tel:{{ pet.owner_phone }}" 
+               style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; font-size: 14px;">
+                📞 Llamar al dueño
+            </a>
+            {% endif %}
+        </div>
 
-<div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
-
-        <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold;"></div>
+        <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
 
     <script>

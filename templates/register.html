@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Mascota - Pet Rescue QR</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
@@ -12,9 +23,10 @@
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
             margin: 0;
         }
+        
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -25,20 +37,24 @@
             backdrop-filter: blur(10px);
             padding: 30px;
         }
+        
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 25px;
         }
+        
         .form-group {
             margin-bottom: 20px;
         }
+        
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #2c3e50;
         }
+        
         input[type="text"],
         input[type="email"],
         input[type="tel"] {
@@ -46,15 +62,17 @@
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 16px; /* Evita zoom en iOS */
             transition: border-color 0.3s;
         }
+        
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="tel"]:focus {
             outline: none;
             border-color: #4CAF50;
         }
+        
         button {
             background: linear-gradient(120deg, #4CAF50, #2E7D32);
             color: white;
@@ -67,9 +85,11 @@
             width: 100%;
             transition: transform 0.2s;
         }
+        
         button:hover {
             transform: translateY(-2px);
         }
+        
         .message {
             padding: 14px 20px;
             margin-bottom: 20px;
@@ -77,26 +97,31 @@
             font-weight: 600;
             text-align: center;
         }
+        
         .error {
             background: #ffebee;
             color: #c62828;
             border: 1px solid #ffcdd2;
         }
+        
         .success {
             background: #e8f5e9;
             color: #2e7d32;
             border: 1px solid #c8e6c9;
         }
+        
         .qr-section {
             text-align: center;
             margin: 25px 0;
         }
+        
         .qr-section img {
             max-width: 200px;
             border: 2px solid #4CAF50;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        
         .back-link {
             display: inline-block;
             margin-top: 20px;
@@ -104,15 +129,41 @@
             text-decoration: none;
             font-weight: 600;
         }
+        
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                margin: 0 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            
+            .form-group input,
+            .form-group button {
+                font-size: 16px;
+            }
+            
+            .qr-section img {
+                max-width: 180px;
+            }
+            
+            .back-link {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div style="text-align: right; margin-bottom: 15px;">
-            <a href="/my-pets" style="color: #1976D2; text-decoration: none; margin-right: 15px;">
+            <a href="/my-pets" style="color: #1976D2; text-decoration: none; margin-right: 15px; font-size: 14px;">
                 🐾 Mis Mascotas
             </a>
-            <a href="/logout" style="color: #d32f2f; text-decoration: none; font-weight: bold;">
+            <a href="/logout" style="color: #d32f2f; text-decoration: none; font-weight: bold; font-size: 14px;">
                 🔒 Cerrar sesión
             </a>
         </div>
@@ -125,7 +176,7 @@
             </div>
             <div class="qr-section">
                 <p><strong>Tu código QR:</strong></p>
-                <img src="data:image/png;base64,{{ qr }}" alt="Código QR">
+                <img src="image/png;base64,{{ qr }}" alt="Código QR">
                 <p style="margin-top: 10px; font-size: 14px;">
                     Comparte este enlace: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
                 </p>
@@ -156,20 +207,20 @@
                     <input type="text" id="owner_name" name="owner_name" required placeholder="Ej: Carlos Palta">
                 </div>
                 <div class="form-group">
-                    <label for="email">Correo electrónico (opcional)</label>
-                    <input type="email" id="email" name="email" placeholder="tu@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="phone">Teléfono de contacto (opcional)</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Ej: 3001234567">
-                </div>
-                <div class="form-group">
                     <label for="city">Ciudad *</label>
                     <input type="text" id="city" name="city" required placeholder="Ej: Bogotá, Medellín, Cali">
                 </div>
                 <div class="form-group">
                     <label for="address">Dirección de domicilio (opcional)</label>
                     <input type="text" id="address" name="address" placeholder="Ej: Carrera 15 # 123-45">
+                </div>
+                <div class="form-group">
+                    <label for="email">Correo electrónico (opcional)</label>
+                    <input type="email" id="email" name="email" placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono de contacto (opcional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Ej: 3001234567">
                 </div>
                 <div class="form-group">
                     <label for="photo">Foto de la mascota (opcional)</label>

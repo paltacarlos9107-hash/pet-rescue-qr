@@ -11,6 +11,13 @@
             box-sizing: border-box;
         }
         
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
@@ -18,7 +25,7 @@
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
         
         .container {
@@ -235,19 +242,65 @@
             color: white;
         }
         
+        /* Responsive mobile */
         @media (max-width: 768px) {
+            .container {
+                margin: 0 5px;
+                padding: 0;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            header h1 {
+                font-size: 22px;
+            }
+            
+            .content {
+                padding: 20px 10px;
+            }
+            
             .stats {
                 flex-direction: column;
-                gap: 15px;
+                gap: 10px;
             }
             
             .tabs {
                 flex-direction: column;
+                gap: 5px;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .section {
+                padding: 20px 10px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px 5px;
             }
             
             .pet-photo {
                 width: 40px;
                 height: 40px;
+            }
+            
+            .delete-btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            
+            .back-link {
+                font-size: 14px;
+                padding: 8px 16px;
             }
         }
     </style>
@@ -306,40 +359,42 @@
                 <div class="section">
                     <h2 style="color: #d32f2f;">Usuarios Registrados</h2>
                     {% if users %}
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th>Correo Electrónico</th>
-                                <th>Rol</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users %}
-                            <tr>
-                                <td>{{ user.email }}</td>
-                                <td>
-                                    {% if user.is_admin %}
-                                        <span class="admin-badge">Administrador</span>
-                                    {% else %}
-                                        Usuario
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if user.email != session.user_email %}
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ user.email }}? Esta acción no se puede deshacer.')">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="email" value="{{ user.email }}">
-                                        <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Eliminar</button>
-                                    </form>
-                                    {% else %}
-                                    <em>Tú</em>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table class="users-table" style="min-width: 600px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Correo Electrónico</th>
+                                    <th>Rol</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                            <span class="admin-badge">Administrador</span>
+                                        {% else %}
+                                            Usuario
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.email != session.user_email %}
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar a {{ user.email }}? Esta acción no se puede deshacer.')">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="email" value="{{ user.email }}">
+                                            <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Eliminar</button>
+                                        </form>
+                                        {% else %}
+                                        <em>Tú</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                     <p style="text-align: center; color: #666; padding: 20px;">No hay usuarios registrados.</p>
                     {% endif %}
@@ -351,52 +406,52 @@
                 <div class="section">
                     <h2>Mascotas Registradas</h2>
                     {% if pets %}
-                    <table class="pets-table">
-                        <thead>
-                            <tr>
-                                <th>Foto</th>
-                                <th>Nombre</th>
-                                <th>Raza</th>
-                                <th>Dueño</th>
-                                <th>Teléfono</th>
-                                <th>Ciudad</th>
-                                <th>Dirección</th>
-                                <th>QR</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pet in pets %}
-                            <tr>
-                                <td>
-                                    {% if pet.photo_url %}
-                                        <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
-                                    {% else %}
-                                        🐾
-                                    {% endif %}
-                                </td>
-                                <td>{{ pet.name }}</td>
-                                <td>{{ pet.breed or '-' }}</td>
-                                <td>{{ pet.owner_name }}</td>
-                                <td>{{ pet.city or '-' }}</td>
-                                <td>{{ pet.address or '-' }}</td>
-                                <td>{{ pet.owner_phone or '-' }}</td>
-                                <td>
-                                    <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none;">
-                                        Ver QR
-                                    </a>
-                                </td>
-                                <td>
-                                    <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar mascota {{ pet.name }} (ID: {{ pet.id }})?\n\nEsta acción no se puede deshacer.')">
-                                        <input type="hidden" name="action" value="delete_pet">
-                                        <input type="hidden" name="pet_id" value="{{ pet.id }}">
-                                        <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Eliminar</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table class="pets-table" style="min-width: 800px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombre</th>
+                                    <th>Raza</th>
+                                    <th>Dueño</th>
+                                    <th>Ciudad</th>
+                                    <th>Teléfono</th>
+                                    <th>QR</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pet in pets %}
+                                <tr>
+                                    <td>
+                                        {% if pet.photo_url %}
+                                            <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
+                                        {% else %}
+                                            🐾
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ pet.name }}</td>
+                                    <td>{{ pet.breed or '-' }}</td>
+                                    <td>{{ pet.owner_name }}</td>
+                                    <td>{{ pet.city or '-' }}</td>
+                                    <td>{{ pet.owner_phone or '-' }}</td>
+                                    <td>
+                                        <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none; font-size: 14px;">
+                                            Ver QR
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar mascota {{ pet.name }} (ID: {{ pet.id }})?\n\nEsta acción no se puede deshacer.')">
+                                            <input type="hidden" name="action" value="delete_pet">
+                                            <input type="hidden" name="pet_id" value="{{ pet.id }}">
+                                            <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                     <p style="text-align: center; color: #666; padding: 20px;">No hay mascotas registradas.</p>
                     {% endif %}
