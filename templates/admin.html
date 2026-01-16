@@ -390,14 +390,14 @@
                                     <td>
                                         {% if user.email != session.user_email %}
                                             {% if user.is_active %}
-                                            <form method="POST" action="toggle_active" style="display: inline;" onsubmit="return confirm('¿Desactivar la cuenta de {{ user.email }}?\n\nEl usuario no podrá acceder a la aplicación.')">
+                                            <form method="POST" style="display: inline;" onsubmit="return confirm('¿Desactivar la cuenta de {{ user.email }}?\n\nEl usuario no podrá acceder a la aplicación.')">
                                                 <input type="hidden" name="action" value="toggle_active">
                                                 <input type="hidden" name="email" value="{{ user.email }}">
                                                 <input type="hidden" name="is_active" value="false">
                                                 <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Desactivar</button>
                                             </form>
                                             {% else %}
-                                            <form method="POST" action="toggle_active" style="display: inline;" onsubmit="return confirm('¿Activar la cuenta de {{ user.email }}?')">
+                                            <form method="POST" style="display: inline;" onsubmit="return confirm('¿Activar la cuenta de {{ user.email }}?')">
                                                 <input type="hidden" name="action" value="toggle_active">
                                                 <input type="hidden" name="email" value="{{ user.email }}">
                                                 <input type="hidden" name="is_active" value="true">
@@ -459,7 +459,7 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <form method="POST" action="delete_pet" style="display: inline;" onsubmit="return confirm('¿Eliminar mascota {{ pet.name }} (ID: {{ pet.id }})?\n\nEsta acción no se puede deshacer.')">
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar mascota {{ pet.name }} (ID: {{ pet.id }})?\n\nEsta acción no se puede deshacer.')">
                                             <input type="hidden" name="action" value="delete_pet">
                                             <input type="hidden" name="pet_id" value="{{ pet.id }}">
                                             <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Eliminar</button>
@@ -494,29 +494,6 @@
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
-
-        // Confirmación específica para ACTIVAR/DESACTIVAR
-        document.querySelectorAll('form[action="toggle_active"]').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const email = this.querySelector('input[name="email"]').value;
-                const isActivating = this.querySelector('input[name="is_active"]').value === 'true';
-                const action = isActivating ? 'activar' : 'desactivar';
-                if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} la cuenta de ${email}?\n\nEl usuario ${isActivating ? 'podrá' : 'no podrá'} acceder a la aplicación.`)) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // Confirmación para ELIMINAR MASCOTAS
-        document.querySelectorAll('form[action="delete_pet"]').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                const petName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
-                const petId = this.querySelector('input[name="pet_id"]').value;
-                if (!confirm(`¿Eliminar mascota ${petName} (ID: ${petId})?\n\nEsta acción no se puede deshacer.`)) {
-                    e.preventDefault();
-                }
-            });
-        });
     </script>
 </body>
 </html>
