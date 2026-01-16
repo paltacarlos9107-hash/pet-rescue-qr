@@ -120,27 +120,33 @@ def login():
         password = request.form.get("password", "")
         
         user = get_user_by_email(email)
-        if user and check_password_hash(user["password_hash"], password):
-            # Generar token de sesión único
-            session_token = secrets.token_urlsafe(32)
-            
-            # Guardar en base de datos
-            update_user_session_token(email, session_token)
-            
-            # Guardar en sesión
-            session["logged_in"] = True
-            session["user_email"] = email
-            session["session_token"] = session_token  # ← Token único
-            session["last_activity"] = time.time()
-            
-            return redirect("/")
-        else:
+        if not user:
             message = "Correo o contraseña incorrectos."
+        elif not check_password_hash(user["password_hash"], password):
+            message = "Correo o contraseña incorrectos."
+        else:
+            # Verificar si ya hay una sesión activa
+            if user.get("session_token"):
+                message = "Ya hay una sesión activa para esta cuenta. No se permiten múltiples accesos simultáneos."
+            else:
+                # Generar y guardar token de sesión
+                session_token = secrets.token_urlsafe(32)
+                update_user_session_token(email, session_token)
+                
+                session["logged_in"] = True
+                session["user_email"] = email
+                session["session_token"] = session_token
+                session["last_activity"] = time.time()
+                
+                return redirect("/")
     
     return render_template("login.html", error=message)
 
 @app.route("/logout")
 def logout():
+    # Limpiar token en la base de datos
+    if session.get("logged_in"):
+        update_user_session_token(session["user_email"], None)
     session.clear()
     return redirect("/login")
 
