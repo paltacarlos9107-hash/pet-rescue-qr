@@ -156,9 +156,9 @@ def get_user_by_email(email):
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT email, password_hash, is_admin, session_token FROM users WHERE email = %s", (email,))
+        cur.execute("SELECT email, password_hash, is_admin, session_token, is_active FROM users WHERE email = %s", (email,))
     else:
-        cur.execute("SELECT email, password_hash, is_admin, session_token FROM users WHERE email = ?", (email,))
+        cur.execute("SELECT email, password_hash, is_admin, session_token, is_active FROM users WHERE email = ?", (email,))
     user = cur.fetchone()
     cur.close()
     conn.close()
@@ -267,3 +267,28 @@ def delete_pet(pet_id):
     cur.close()
     conn.close()
     return deleted
+
+def toggle_user_active_status(email, is_active):
+    """Activa o desactiva una cuenta de usuario."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET is_active = %s WHERE email = %s", (is_active, email))
+    else:
+        cur.execute("UPDATE users SET is_active = ? WHERE email = ?", (is_active, email))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_user_by_email_full(email):
+    """Obtiene un usuario completo por su correo (incluyendo is_active)."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT email, password_hash, is_admin, session_token, is_active FROM users WHERE email = %s", (email,))
+    else:
+        cur.execute("SELECT email, password_hash, is_admin, session_token, is_active FROM users WHERE email = ?", (email,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user

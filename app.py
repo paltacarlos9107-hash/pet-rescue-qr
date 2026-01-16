@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token, clear_user_session_token
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token, clear_user_session_token, toggle_user_active_status
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -56,11 +56,14 @@ def login_required(f):
         if not session.get("logged_in"):
             return redirect("/login")
         
-        # Verificar token de sesión
+        # Verificar token de sesión y estado de la cuenta
         user = get_user_by_email(session["user_email"])
         if not user or user.get("session_token") != session.get("session_token"):
             clear_user_session()
             return redirect("/login?message=invalid_session")
+        elif not user.get("is_active", True):
+            clear_user_session()
+            return redirect("/login?message=account_disabled")
         
         return f(*args, **kwargs)
     return decorated_function
@@ -71,11 +74,14 @@ def admin_required(f):
         if not session.get("logged_in"):
             return redirect("/login")
         
-        # Verificar token de sesión
+        # Verificar token de sesión y estado de la cuenta
         user = get_user_by_email(session["user_email"])
         if not user or user.get("session_token") != session.get("session_token"):
             clear_user_session()
             return redirect("/login?message=invalid_session")
+        elif not user.get("is_active", True):
+            clear_user_session()
+            return redirect("/login?message=account_disabled")
         
         if not user.get("is_admin"):
             return "<h2>Acceso denegado</h2>", 403
@@ -87,11 +93,14 @@ def check_inactivity(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("logged_in"):
-            # Verificar token válido
+            # Verificar token válido y estado de la cuenta
             user = get_user_by_email(session["user_email"])
             if not user or user.get("session_token") != session.get("session_token"):
                 clear_user_session()
                 return redirect("/login?message=invalid_session")
+            elif not user.get("is_active", True):
+                clear_user_session()
+                return redirect("/login?message=account_disabled")
             
             # Verificar inactividad
             last_activity = session.get("last_activity", 0)
@@ -131,6 +140,8 @@ def login():
         message = "Tu sesión expiró por inactividad. Por favor, inicia sesión nuevamente."
     elif request.args.get("message") == "invalid_session":
         message = "Sesión inválida. Por favor, inicia sesión nuevamente."
+    elif request.args.get("message") == "account_disabled":
+        message = "Esta cuenta ha sido desactivada por el administrador."
     
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -139,6 +150,8 @@ def login():
         user = get_user_by_email(email)
         if not user:
             message = "Correo o contraseña incorrectos."
+        elif not user.get("is_active", True):  # ← Verificar si está activa
+            message = "Esta cuenta ha sido desactivada por el administrador."
         elif not check_password_hash(user["password_hash"], password):
             message = "Correo o contraseña incorrectos."
         else:
@@ -358,6 +371,17 @@ def admin_panel():
                 else:
                     message = f"⚠️ Usuario {email} no encontrado."
         
+        # Activar/desactivar usuario
+        elif action == "toggle_active":
+            email = request.form.get("email", "").strip()
+            is_active = request.form.get("is_active") == "true"
+            if email and email != session["user_email"]:  # No permitir desactivar su propia cuenta
+                toggle_user_active_status(email, is_active)
+                status = "activada" if is_active else "desactivada"
+                message = f"✅ Cuenta {email} {status}."
+            else:
+                message = "⚠️ No puedes modificar tu propia cuenta o el correo es inválido."
+        
         # Eliminar mascota
         elif action == "delete_pet":
             pet_id = request.form.get("pet_id", "").strip()
@@ -371,9 +395,9 @@ def admin_panel():
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT email, is_admin FROM users ORDER BY created_at DESC")
+        cur.execute("SELECT email, is_admin, is_active FROM users ORDER BY created_at DESC")
     else:
-        cur.execute("SELECT email, is_admin FROM users ORDER BY rowid DESC")
+        cur.execute("SELECT email, is_admin, is_active FROM users ORDER BY rowid DESC")
     users = cur.fetchall()
     cur.close()
     conn.close()
