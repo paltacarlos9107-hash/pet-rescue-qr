@@ -73,22 +73,16 @@ def check_inactivity(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("logged_in"):
-            # Verificar token primero
+            # Verificar token válido
             user = get_user_by_email(session["user_email"])
             if not user or user.get("session_token") != session.get("session_token"):
-                session.clear()
+                clear_user_session()
                 return redirect("/login?message=invalid_session")
             
+            # Verificar inactividad
             last_activity = session.get("last_activity", 0)
             if time.time() - last_activity > 900:  # 15 minutos
-                # Limpiar token en la base de datos
-                try:
-                    update_user_session_token(session["user_email"], None)
-                except Exception as e:
-                    print(f"Error al limpiar token por inactividad: {e}")
-                
-                # Limpiar sesión del navegador
-                session.clear()
+                clear_user_session()
                 return redirect("/login?message=timeout")
         
         if session.get("logged_in"):
@@ -96,6 +90,16 @@ def check_inactivity(f):
         
         return f(*args, **kwargs)
     return decorated_function
+
+def clear_user_session():
+    """Limpia la sesión del usuario actual de forma segura."""
+    try:
+        if session.get("logged_in") and session.get("user_email"):
+            clear_user_session_token(session["user_email"])
+    except Exception as e:
+        print(f"Error al limpiar sesión: {e}")
+    finally:
+        session.clear()
 
 # -------------------------------------------------
 # MIDDLEWARE
@@ -121,6 +125,8 @@ def login():
     message = ""
     if request.args.get("message") == "timeout":
         message = "Tu sesión expiró por inactividad. Por favor, inicia sesión nuevamente."
+    elif request.args.get("message") == "invalid_session":
+        message = "Sesión inválida. Por favor, inicia sesión nuevamente."
     
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -151,15 +157,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    # Limpiar token en la base de datos si hay un usuario logueado
-    if session.get("logged_in") and session.get("user_email"):
-        try:
-            update_user_session_token(session["user_email"], None)
-        except Exception as e:
-            print(f"Error al limpiar token de sesión: {e}")
-    
-    # Limpiar sesión del navegador
-    session.clear()
+    clear_user_session()
     return redirect("/login")
 
 # -------------------------------------------------

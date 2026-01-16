@@ -167,6 +167,17 @@ def make_user_admin(email):
     cur.close()
     conn.close()
 
+def clear_user_session_token(email):
+    """Limpia el token de sesión de un usuario."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = %s", (email,))
+    else:
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = ?", (email,))
+    conn.commit()
+    cur.close()
+    conn.close()
 # -------------------------------------------------
 # Funciones existentes para mascotas (sin cambios)
 # -------------------------------------------------
