@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets

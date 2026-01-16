@@ -131,7 +131,7 @@ def add_user(email, password_hash):
     conn.close()
 
     def update_user_session_token(email, token):
-        """Actualiza el token de sesión del usuario."""
+        '''Actualiza el token de sesión del usuario.'''
         conn = get_db_connection()
         cur = conn.cursor()
         if IS_PRODUCTION:
