@@ -81,6 +81,13 @@ def check_inactivity(f):
             
             last_activity = session.get("last_activity", 0)
             if time.time() - last_activity > 900:  # 15 minutos
+                # Limpiar token en la base de datos
+                try:
+                    update_user_session_token(session["user_email"], None)
+                except Exception as e:
+                    print(f"Error al limpiar token por inactividad: {e}")
+                
+                # Limpiar sesión del navegador
                 session.clear()
                 return redirect("/login?message=timeout")
         
