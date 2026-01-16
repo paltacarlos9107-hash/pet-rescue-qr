@@ -35,11 +35,19 @@ init_db()
 # -------------------------------------------------
 # DECORADORES
 # -------------------------------------------------
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get("logged_in"):
             return redirect("/login")
+        
+        # Verificar token de sesión
+        user = get_user_by_email(session["user_email"])
+        if not user or user.get("session_token") != session.get("session_token"):
+            session.clear()
+            return redirect("/login?message=invalid_session")
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -48,9 +56,16 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if not session.get("logged_in"):
             return redirect("/login")
+        
+        # Verificar token de sesión
         user = get_user_by_email(session["user_email"])
-        if not user or not user.get("is_admin"):
+        if not user or user.get("session_token") != session.get("session_token"):
+            session.clear()
+            return redirect("/login?message=invalid_session")
+        
+        if not user.get("is_admin"):
             return "<h2>Acceso denegado</h2>", 403
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -58,12 +73,20 @@ def check_inactivity(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("logged_in"):
+            # Verificar token primero
+            user = get_user_by_email(session["user_email"])
+            if not user or user.get("session_token") != session.get("session_token"):
+                session.clear()
+                return redirect("/login?message=invalid_session")
+            
             last_activity = session.get("last_activity", 0)
             if time.time() - last_activity > 900:  # 15 minutos
                 session.clear()
                 return redirect("/login?message=timeout")
+        
         if session.get("logged_in"):
             session["last_activity"] = time.time()
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -98,9 +121,18 @@ def login():
         
         user = get_user_by_email(email)
         if user and check_password_hash(user["password_hash"], password):
+            # Generar token de sesión único
+            session_token = secrets.token_urlsafe(32)
+            
+            # Guardar en base de datos
+            update_user_session_token(email, session_token)
+            
+            # Guardar en sesión
             session["logged_in"] = True
             session["user_email"] = email
+            session["session_token"] = session_token  # ← Token único
             session["last_activity"] = time.time()
+            
             return redirect("/")
         else:
             message = "Correo o contraseña incorrectos."

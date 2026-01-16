@@ -129,13 +129,13 @@ def add_user(email, password_hash):
     conn.close()
 
 def get_user_by_email(email):
-    """Obtiene un usuario por su correo electrónico."""
+    """Obtiene un usuario por su correo."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        cur.execute("SELECT email, password_hash, is_admin, session_token FROM users WHERE email = %s", (email,))
     else:
-        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
+        cur.execute("SELECT email, password_hash, is_admin, session_token FROM users WHERE email = ?", (email,))
     user = cur.fetchone()
     cur.close()
     conn.close()
@@ -156,6 +156,18 @@ def make_user_admin(email):
 # -------------------------------------------------
 # Funciones existentes para mascotas (sin cambios)
 # -------------------------------------------------
+
+def update_user_session_token(email, token):
+    """Actualiza el token de sesión del usuario."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET session_token = %s WHERE email = %s", (token, email))
+    else:
+        cur.execute("UPDATE users SET session_token = ? WHERE email = ?", (token, email))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url):
     """Registra una nueva mascota."""
