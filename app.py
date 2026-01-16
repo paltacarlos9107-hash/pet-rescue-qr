@@ -130,7 +130,7 @@ def register():
         breed = request.form.get("breed", "").strip()
         description = request.form.get("description", "").strip()
         owner_name = request.form.get("owner_name", "").strip()
-        owner_email = request.form.get("email", "").strip()
+        owner_email = session["user_email"]
         owner_phone = request.form.get("phone", "").strip()
 
         if not name or not owner_name:
