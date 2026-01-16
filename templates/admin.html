@@ -384,4 +384,128 @@
                                         {% if user.is_active %}
                                             <span style="background: #4CAF50; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Activo</span>
                                         {% else %}
-                                            <span style="background: #f44336; color: white; padding: 4 p
+                                            <span style="background: #f44336; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.email != session.user_email %}
+                                            {% if user.is_active %}
+                                            <form method="POST" style="display: inline;" onsubmit="return confirm('¿Desactivar la cuenta de {{ user.email }}?\n\nEl usuario no podrá acceder a la aplicación.')">
+                                                <input type="hidden" name="action" value="toggle_active">
+                                                <input type="hidden" name="email" value="{{ user.email }}">
+                                                <input type="hidden" name="is_active" value="false">
+                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Desactivar</button>
+                                            </form>
+                                            {% else %}
+                                            <form method="POST" style="display: inline;" onsubmit="return confirm('¿Activar la cuenta de {{ user.email }}?')">
+                                                <input type="hidden" name="action" value="toggle_active">
+                                                <input type="hidden" name="email" value="{{ user.email }}">
+                                                <input type="hidden" name="is_active" value="true">
+                                                <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #4CAF50, #2E7D32); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Activar</button>
+                                            </form>
+                                            {% endif %}
+                                        {% else %}
+                                            <em>Tú (Admin)</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #666; padding: 20px;">No hay usuarios registrados.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tab Mascotas -->
+            <div id="pets" class="tab-content">
+                <div class="section">
+                    <h2>Mascotas Registradas</h2>
+                    {% if pets %}
+                    <div style="overflow-x: auto;">
+                        <table class="pets-table" style="min-width: 800px; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Foto</th>
+                                    <th>Nombre</th>
+                                    <th>Raza</th>
+                                    <th>Dueño</th>
+                                    <th>Ciudad</th>
+                                    <th>Teléfono</th>
+                                    <th>QR</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pet in pets %}
+                                <tr>
+                                    <td>
+                                        {% if pet.photo_url %}
+                                            <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
+                                        {% else %}
+                                            🐾
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ pet.name }}</td>
+                                    <td>{{ pet.breed or '-' }}</td>
+                                    <td>{{ pet.owner_name }}</td>
+                                    <td>{{ pet.city or '-' }}</td>
+                                    <td>{{ pet.owner_phone or '-' }}</td>
+                                    <td>
+                                        <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none; font-size: 14px;">
+                                            Ver QR
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <form method="POST" style="display: inline;" onsubmit="return confirm('¿Eliminar mascota {{ pet.name }} (ID: {{ pet.id }})?\n\nEsta acción no se puede deshacer.')">
+                                            <input type="hidden" name="action" value="delete_pet">
+                                            <input type="hidden" name="pet_id" value="{{ pet.id }}">
+                                            <button type="submit" class="delete-btn" style="background: linear-gradient(120deg, #f44336, #d32f2f); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: #666; padding: 20px;">No hay mascotas registradas.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="/" class="back-link">← Volver al Registro de Mascotas</a>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar el tab seleccionado
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Mensaje de confirmación para eliminar usuarios
+        document.querySelectorAll('form[onsubmit]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const email = this.querySelector('input[name="email"]');
+                if (email) {
+                    if (!confirm(`¿Estás seguro de eliminar a ${email.value}?\n\nEsta acción no se puede deshacer.`)) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
