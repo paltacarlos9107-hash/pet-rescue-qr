@@ -131,16 +131,16 @@ def add_user(email, password_hash):
     conn.close()
 
     def update_user_session_token(email, token):
-    '''Actualiza el token de sesión del usuario.'''
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute('UPDATE users SET session_token = %s WHERE email = %s', (token, email))
-    else:
-        cur.execute('UPDATE users SET session_token = ? WHERE email = ?', (token, email))
-    conn.commit()
-    cur.close()
-    conn.close()
+        """Actualiza el token de sesión del usuario."""
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if IS_PRODUCTION:
+            cur.execute('UPDATE users SET session_token = %s WHERE email = %s', (token, email))
+        else:
+            cur.execute('UPDATE users SET session_token = ? WHERE email = ?', (token, email))
+        conn.commit()
+        cur.close()
+        conn.close()
 
 def get_user_by_email(email):
     """Obtiene un usuario por su correo."""
