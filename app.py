@@ -132,12 +132,13 @@ def register():
         name = request.form.get("name", "").strip()
         breed = request.form.get("breed", "").strip()
         description = request.form.get("description", "").strip()
-        owner_name = request.form.get("owner_name", "").strip()  # ← Nuevo campo
+        owner_name = request.form.get("owner_name", "").strip()
         owner_email = request.form.get("email", "").strip()
         owner_phone = request.form.get("phone", "").strip()
 
-        if not name or not owner_name or not owner_email:
-            return render_template("register.html", error="El nombre de la mascota, nombre del dueño y correo son obligatorios.")
+        if not name or not owner_name:
+            # Mostrar error en la misma página
+            return render_template("register.html", error="El nombre de la mascota y del dueño son obligatorios.")
 
         photo_url = None
         if "photo" in request.files:
@@ -156,30 +157,41 @@ def register():
         pet_id = str(uuid.uuid4())[:8].upper()
         add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url)
 
+        # Guardar datos en sesión para mostrar en la página de éxito
+        session['registration_success'] = f"¡Mascota '{name}' registrada! Usa el QR para ayudar a encontrarla."
+        
         if IS_PRODUCTION:
-            qr_url = f"https://{request.host}/pet/{pet_id}"
+            session['qr_url'] = f"https://{request.host}/pet/{pet_id}"
         else:
-            qr_url = f"{request.url_root}pet/{pet_id}"
+            session['qr_url'] = f"{request.url_root}pet/{pet_id}"
 
-        qr_img = qrcode.make(qr_url)
+        qr_img = qrcode.make(session['qr_url'])
         buffered = BytesIO()
         qr_img.save(buffered, format="PNG")
-        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+        session['qr_base64'] = base64.b64encode(buffered.getvalue()).decode()
 
-        return render_template(
-            "register.html",
-            qr=qr_base64,
-            qr_url=qr_url,
-            success=f"¡Mascota '{name}' registrada! Usa el QR para ayudar a encontrarla."
-        )
+        return redirect("/register/success")
 
     except Exception as e:
         print("❌ Error en /register:", repr(e))
         return render_template("register.html", error="Ocurrió un error. Inténtalo de nuevo.")
-    
+       
 # -------------------------------------------------
 # RUTAS PÚBLICAS
 # -------------------------------------------------
+
+@app.route("/register/success")
+@login_required
+@check_inactivity
+def register_success():
+    success = session.pop('registration_success', None)
+    qr = session.pop('qr_base64', None)
+    qr_url = session.pop('qr_url', None)
+    
+    if not success:
+        return redirect("/")
+        
+    return render_template("register.html", success=success, qr=qr, qr_url=qr_url)
 
 @app.route("/my-pets")
 @login_required
