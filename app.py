@@ -7,7 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
-from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token
+from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token, clear_user_session_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
@@ -33,6 +33,20 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 init_db()
 
 # -------------------------------------------------
+# FUNCIONES AUXILIARES
+# -------------------------------------------------
+
+def clear_user_session():
+    """Limpia la sesión del usuario actual de forma segura."""
+    try:
+        if session.get("logged_in") and session.get("user_email"):
+            clear_user_session_token(session["user_email"])
+    except Exception as e:
+        print(f"Error al limpiar sesión: {e}")
+    finally:
+        session.clear()
+
+# -------------------------------------------------
 # DECORADORES
 # -------------------------------------------------
 
@@ -45,7 +59,7 @@ def login_required(f):
         # Verificar token de sesión
         user = get_user_by_email(session["user_email"])
         if not user or user.get("session_token") != session.get("session_token"):
-            session.clear()
+            clear_user_session()
             return redirect("/login?message=invalid_session")
         
         return f(*args, **kwargs)
@@ -60,7 +74,7 @@ def admin_required(f):
         # Verificar token de sesión
         user = get_user_by_email(session["user_email"])
         if not user or user.get("session_token") != session.get("session_token"):
-            session.clear()
+            clear_user_session()
             return redirect("/login?message=invalid_session")
         
         if not user.get("is_admin"):
@@ -90,16 +104,6 @@ def check_inactivity(f):
         
         return f(*args, **kwargs)
     return decorated_function
-
-def clear_user_session():
-    """Limpia la sesión del usuario actual de forma segura."""
-    try:
-        if session.get("logged_in") and session.get("user_email"):
-            clear_user_session_token(session["user_email"])
-    except Exception as e:
-        print(f"Error al limpiar sesión: {e}")
-    finally:
-        session.clear()
 
 # -------------------------------------------------
 # MIDDLEWARE
@@ -180,8 +184,8 @@ def register():
         owner_name = request.form.get("owner_name", "").strip()
         owner_email = session["user_email"]  # Dueño = usuario logueado
         owner_phone = request.form.get("phone", "").strip()
-        city = request.form.get("city", "").strip()  # ← Nuevo campo
-        address = request.form.get("address", "").strip()  # ← Nuevo campo
+        city = request.form.get("city", "").strip()
+        address = request.form.get("address", "").strip()
 
         if not name or not owner_name:
             return render_template("register.html", error="El nombre de la mascota y del dueño son obligatorios.")
@@ -250,22 +254,27 @@ def my_pets():
 
 @app.route("/pet/<pet_id>")
 def pet_page(pet_id):
-    pet = get_pet(pet_id)
-    if not pet:
-        return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
+    try:
+        pet = get_pet(pet_id)
+        if not pet:
+            return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
 
-    # Generar el QR para esta mascota
-    if IS_PRODUCTION:
-        qr_url = f"https://{request.host}/pet/{pet_id}"
-    else:
-        qr_url = f"{request.url_root}pet/{pet_id}"
+        # Generar el QR para esta mascota
+        if IS_PRODUCTION:
+            qr_url = f"https://{request.host}/pet/{pet_id}"
+        else:
+            qr_url = f"{request.url_root}pet/{pet_id}"
 
-    qr_img = qrcode.make(qr_url)
-    buffered = BytesIO()
-    qr_img.save(buffered, format="PNG")
-    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+        qr_img = qrcode.make(qr_url)
+        buffered = BytesIO()
+        qr_img.save(buffered, format="PNG")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-    return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url)
+        return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url)
+    
+    except Exception as e:
+        print(f"❌ Error en /pet/{pet_id}: {repr(e)}")
+        return "<h2>❌ Error al cargar la mascota.</h2>", 500
 
 @app.route("/report", methods=["POST"])
 def report_location():

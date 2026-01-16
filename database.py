@@ -34,14 +34,15 @@ def init_users_table():
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 is_admin BOOLEAN DEFAULT FALSE,
+                session_token TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        # Asegurar que la columna is_admin exista (para tablas existentes)
+        # Asegurar que la columna session_token exista
         try:
-            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE")
+            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS session_token TEXT")
         except Exception as e:
-            print("⚠️ Advertencia al agregar is_admin en PostgreSQL:", e)
+            print("⚠️ Advertencia al agregar session_token en PostgreSQL:", e)
     else:
         # SQLite
         cur.execute("""
@@ -50,12 +51,13 @@ def init_users_table():
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 is_admin BOOLEAN DEFAULT 0,
+                session_token TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        # Asegurar que la columna is_admin exista (para tablas existentes)
+        # Asegurar que la columna session_token exista
         try:
-            cur.execute("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0")
+            cur.execute("ALTER TABLE users ADD COLUMN session_token TEXT")
         except Exception as e:
             # En SQLite, si la columna ya existe, se lanza una excepción
             pass
@@ -77,18 +79,28 @@ def init_db():
                 name TEXT NOT NULL,
                 breed TEXT,
                 description TEXT,
+                owner_name TEXT,
                 owner_email TEXT NOT NULL,
                 owner_phone TEXT,
                 photo_url TEXT,
+                city TEXT,
+                address TEXT,
                 found BOOLEAN DEFAULT FALSE
             )
         """)
         # Asegurar columnas adicionales
-        try:
-            cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS owner_phone TEXT")
-            cur.execute("ALTER TABLE pets ADD COLUMN IF NOT EXISTS photo_url TEXT")
-        except Exception as e:
-            print("⚠️ Advertencia al agregar columnas en pets:", e)
+        columns_to_add = [
+            ("owner_name", "TEXT"),
+            ("owner_phone", "TEXT"),
+            ("photo_url", "TEXT"),
+            ("city", "TEXT"),
+            ("address", "TEXT")
+        ]
+        for col_name, col_type in columns_to_add:
+            try:
+                cur.execute(f"ALTER TABLE pets ADD COLUMN IF NOT EXISTS {col_name} {col_type}")
+            except Exception as e:
+                print(f"⚠️ Advertencia al agregar {col_name} en pets:", e)
     else:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pets (
@@ -96,21 +108,30 @@ def init_db():
                 name TEXT NOT NULL,
                 breed TEXT,
                 description TEXT,
+                owner_name TEXT,
                 owner_email TEXT NOT NULL,
                 owner_phone TEXT,
                 photo_url TEXT,
+                city TEXT,
+                address TEXT,
                 found BOOLEAN DEFAULT 0
             )
         """)
+        # Asegurar columnas adicionales en SQLite
+        columns_to_add = ["owner_name", "owner_phone", "photo_url", "city", "address"]
+        for col_name in columns_to_add:
+            try:
+                cur.execute(f"ALTER TABLE pets ADD COLUMN {col_name} TEXT")
+            except Exception as e:
+                # Columna ya existe
+                pass
     
     conn.commit()
     cur.close()
     conn.close()
     
-    # 👇 ¡Importante! Inicializar la tabla de usuarios con soporte de admin
+    # 👇 ¡Importante! Inicializar la tabla de usuarios con soporte de admin y tokens
     init_users_table()
-
-    
 
 def add_user(email, password_hash):
     """Agrega un nuevo usuario a la base de datos."""
@@ -129,18 +150,6 @@ def add_user(email, password_hash):
     conn.commit()
     cur.close()
     conn.close()
-
-    def update_user_session_token(email, token):
-        '''Actualiza el token de sesión del usuario.'''
-        conn = get_db_connection()
-        cur = conn.cursor()
-        if IS_PRODUCTION:
-            cur.execute('UPDATE users SET session_token = %s WHERE email = %s', (token, email))
-        else:
-            cur.execute('UPDATE users SET session_token = ? WHERE email = ?', (token, email))
-        conn.commit()
-        cur.close()
-        conn.close()
 
 def get_user_by_email(email):
     """Obtiene un usuario por su correo."""
@@ -167,21 +176,6 @@ def make_user_admin(email):
     cur.close()
     conn.close()
 
-def clear_user_session_token(email):
-    """Limpia el token de sesión de un usuario."""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("UPDATE users SET session_token = NULL WHERE email = %s", (email,))
-    else:
-        cur.execute("UPDATE users SET session_token = NULL WHERE email = ?", (email,))
-    conn.commit()
-    cur.close()
-    conn.close()
-# -------------------------------------------------
-# Funciones existentes para mascotas (sin cambios)
-# -------------------------------------------------
-
 def update_user_session_token(email, token):
     """Actualiza el token de sesión del usuario."""
     conn = get_db_connection()
@@ -193,6 +187,22 @@ def update_user_session_token(email, token):
     conn.commit()
     cur.close()
     conn.close()
+
+def clear_user_session_token(email):
+    """Limpia el token de sesión de un usuario."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = %s", (email,))
+    else:
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = ?", (email,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# -------------------------------------------------
+# Funciones para mascotas
+# -------------------------------------------------
 
 def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address):
     """Registra una nueva mascota."""
@@ -213,6 +223,7 @@ def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_pho
     conn.close()
 
 def get_pet(pet_id):
+    """Obtiene una mascota por su ID."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
