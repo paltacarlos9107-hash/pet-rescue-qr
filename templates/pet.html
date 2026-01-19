@@ -41,78 +41,103 @@
             text-align: center;
         }
         
-        /* Foto de mascota como encabezado */
-        .pet-header {
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        
-        .pet-photo-container {
+        /* Hero Banner con Foto de Mascota */
+        .pet-hero {
+            position: relative;
             width: 100%;
             height: 300px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .pet-hero:hover {
+            transform: scale(1.02);
+        }
+        
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .hero-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 3px solid #4CAF50;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
         
-        .pet-photo-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        .hero-icon {
+            font-size: 80px;
+            color: white;
+            opacity: 0.8;
         }
         
-        .pet-photo {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: block;
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            color: white;
+        }
+        
+        .hero-content {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        
+        .lost-badge {
+            background: #e91e63;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        
+        .hero-content h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero-content p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin: 0;
         }
         
         .click-hint {
             position: absolute;
             bottom: 10px;
             right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
+            background: rgba(255,255,255,0.8);
+            color: #333;
             padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
+            font-weight: bold;
             opacity: 0;
             transition: opacity 0.3s;
         }
         
-        .pet-photo-container:hover .click-hint {
+        .pet-hero:hover .click-hint {
             opacity: 1;
-        }
-        
-        .lost-badge {
-            background: #e91e63;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin: 10px 0;
-            font-size: 28px;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 15px;
         }
         
         .info {
@@ -148,7 +173,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.9);
+            background-color: rgba(0,0,0,0.95);
             animation: fadeIn 0.3s;
         }
         
@@ -193,15 +218,15 @@
                 margin: 0 10px;
             }
             
-            .pet-photo-container {
+            .pet-hero {
                 height: 250px;
             }
             
-            h1 {
-                font-size: 24px;
+            .hero-content h1 {
+                font-size: 26px;
             }
             
-            .subtitle {
+            .hero-content p {
                 font-size: 16px;
             }
             
@@ -219,22 +244,22 @@
 </head>
 <body>
     <div class="container">
-        <div class="pet-header">
-            <!-- Badge de alerta -->
-            <div class="lost-badge">¡MASCOTA PERDIDA!</div>
-            
-            <!-- Nombre de la mascota -->
-            <h1>🐾 {{ pet.name }}</h1>
-            <p class="subtitle">Ayúdanos a encontrarla</p>
-            
-            <!-- Contenedor de la foto -->
-            <div class="pet-photo-container" id="photoContainer">
-                {% if pet.photo_url %}
-                    <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo" id="petPhoto">
-                    <div class="click-hint">👆 Haz clic para ampliar</div>
-                {% else %}
-                    <span style="font-size: 80px; color: #999;">🐾</span>
-                {% endif %}
+        <!-- Hero Banner con Foto de Mascota -->
+        <div class="pet-hero" id="heroContainer">
+            {% if pet.photo_url %}
+                <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="hero-image">
+                <div class="click-hint">👆 Clic para ampliar</div>
+            {% else %}
+                <div class="hero-placeholder">
+                    <span class="hero-icon">🐾</span>
+                </div>
+            {% endif %}
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <span class="lost-badge">¡MASCOTA PERDIDA!</span>
+                    <h1>{{ pet.name }}</h1>
+                    <p>Ayúdanos a encontrarla</p>
+                </div>
             </div>
         </div>
 
@@ -316,7 +341,7 @@
         
         // Asignar evento de clic solo si hay foto
         {% if pet.photo_url %}
-        document.getElementById("photoContainer").onclick = openModal;
+        document.getElementById("heroContainer").onclick = openModal;
         {% endif %}
         
         // Funcionalidad del botón de ayuda
