@@ -177,16 +177,51 @@ def make_user_admin(email):
     conn.close()
 
 def update_user_session_token(email, token):
-    """Actualiza el token de sesión del usuario."""
+    """Actualiza el token de sesión del usuario con expiración de 24 horas."""
+    from datetime import datetime, timedelta
+    expires_at = datetime.utcnow() + timedelta(hours=24)  # Token válido 24h
+    
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("UPDATE users SET session_token = %s WHERE email = %s", (token, email))
+        cur.execute(
+            "UPDATE users SET session_token = %s, token_expires_at = %s WHERE email = %s", 
+            (token, expires_at, email)
+        )
     else:
-        cur.execute("UPDATE users SET session_token = ? WHERE email = ?", (token, email))
+        cur.execute(
+            "UPDATE users SET session_token = ?, token_expires_at = ? WHERE email = ?", 
+            (token, expires_at, email)
+        )
     conn.commit()
     cur.close()
     conn.close()
+
+def clear_user_session_token(email):
+    """Limpia el token de sesión de un usuario."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("UPDATE users SET session_token = NULL, token_expires_at = NULL WHERE email = %s", (email,))
+    else:
+        cur.execute("UPDATE users SET session_token = NULL, token_expires_at = NULL WHERE email = ?", (email,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def is_token_valid(user):
+    """Verifica si el token del usuario es válido y no ha expirado."""
+    from datetime import datetime
+    if not user or not user.get("session_token") or not user.get("token_expires_at"):
+        return False
+    
+    # Convertir a datetime si es string
+    expires_at = user["token_expires_at"]
+    if isinstance(expires_at, str):
+        from datetime import datetime
+        expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+    
+    return datetime.utcnow() < expires_at
 
 def clear_user_session_token(email):
     """Limpia el token de sesión de un usuario."""

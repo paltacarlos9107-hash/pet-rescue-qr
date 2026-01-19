@@ -56,14 +56,63 @@ def login_required(f):
         if not session.get("logged_in"):
             return redirect("/login")
         
-        # Verificar token de sesión y estado de la cuenta
         user = get_user_by_email(session["user_email"])
-        if not user or user.get("session_token") != session.get("session_token"):
+        if not user:
             clear_user_session()
             return redirect("/login?message=invalid_session")
-        elif not user.get("is_active", True):
+        
+        # Verificar token y expiración
+        if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
             clear_user_session()
-            return redirect("/login?message=account_disabled")
+            return redirect("/login?message=expired_session")
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect("/login")
+        
+        user = get_user_by_email(session["user_email"])
+        if not user:
+            clear_user_session()
+            return redirect("/login?message=invalid_session")
+        
+        # Verificar token y expiración
+        if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
+            clear_user_session()
+            return redirect("/login?message=expired_session")
+        
+        if not user.get("is_admin"):
+            return "<h2>Acceso denegado</h2>", 403
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def check_inactivity(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("logged_in"):
+            user = get_user_by_email(session["user_email"])
+            if not user:
+                clear_user_session()
+                return redirect("/login?message=invalid_session")
+            
+            # Verificar token y expiración
+            if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
+                clear_user_session()
+                return redirect("/login?message=expired_session")
+            
+            # Verificar inactividad de 15 minutos
+            last_activity = session.get("last_activity", 0)
+            if time.time() - last_activity > 900:
+                clear_user_session()
+                return redirect("/login?message=timeout")
+        
+        if session.get("logged_in"):
+            session["last_activity"] = time.time()
         
         return f(*args, **kwargs)
     return decorated_function
@@ -140,6 +189,8 @@ def login():
         message = "Tu sesión expiró por inactividad. Por favor, inicia sesión nuevamente."
     elif request.args.get("message") == "invalid_session":
         message = "Sesión inválida. Por favor, inicia sesión nuevamente."
+    elif request.args.get("message") == "expired_session":
+        message = "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
     elif request.args.get("message") == "account_disabled":
         message = "Esta cuenta ha sido desactivada por el administrador."
     
