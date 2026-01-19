@@ -315,6 +315,12 @@ def register_success():
 # RUTAS PÚBLICAS
 # -------------------------------------------------
 
+@app.route("/register", methods=["GET"])
+@login_required
+@check_inactivity
+def show_register_form():
+    return render_template("register.html")
+
 @app.route("/my-pets")
 @login_required
 @check_inactivity
