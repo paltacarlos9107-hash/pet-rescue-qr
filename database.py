@@ -177,22 +177,13 @@ def make_user_admin(email):
     conn.close()
 
 def update_user_session_token(email, token):
-    """Actualiza el token de sesión del usuario con expiración de 24 horas."""
-    from datetime import datetime, timedelta
-    expires_at = datetime.utcnow() + timedelta(hours=24)  # Token válido 24h
-    
+    """Actualiza el token de sesión del usuario."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute(
-            "UPDATE users SET session_token = %s, token_expires_at = %s WHERE email = %s", 
-            (token, expires_at, email)
-        )
+        cur.execute("UPDATE users SET session_token = %s WHERE email = %s", (token, email))
     else:
-        cur.execute(
-            "UPDATE users SET session_token = ?, token_expires_at = ? WHERE email = ?", 
-            (token, expires_at, email)
-        )
+        cur.execute("UPDATE users SET session_token = ? WHERE email = ?", (token, email))
     conn.commit()
     cur.close()
     conn.close()
@@ -210,7 +201,7 @@ def clear_user_session_token(email):
     conn.close()
 
 def is_token_valid(user):
-    """Verifica si el token del usuario es válido (solo verifica que exista)."""
+    """Verifica si el token del usuario es válido."""
     return user and user.get("session_token") is not None
 
 def clear_user_session_token(email):
