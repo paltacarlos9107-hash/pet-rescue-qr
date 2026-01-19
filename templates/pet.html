@@ -59,6 +59,13 @@
             border-radius: 12px;
             overflow: hidden;
             border: 3px solid #4CAF50;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .pet-photo-container:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
         }
         
         .pet-photo {
@@ -66,6 +73,23 @@
             max-height: 100%;
             object-fit: contain;
             display: block;
+        }
+        
+        .click-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .pet-photo-container:hover .click-hint {
+            opacity: 1;
         }
         
         .lost-badge {
@@ -115,6 +139,53 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
+        /* Modal de imagen completa */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            display: block;
+            margin: auto;
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            animation: zoomIn 0.3s;
+        }
+        
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .close:hover {
+            color: #ccc;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
         /* Responsive mobile */
         @media (max-width: 768px) {
             .container {
@@ -138,6 +209,11 @@
                 font-size: 14px;
                 padding: 10px 15px;
             }
+            
+            .modal-content {
+                width: 95%;
+                height: 85%;
+            }
         }
     </style>
 </head>
@@ -152,9 +228,10 @@
             <p class="subtitle">Ayúdanos a encontrarla</p>
             
             <!-- Contenedor de la foto -->
-            <div class="pet-photo-container">
+            <div class="pet-photo-container" id="photoContainer">
                 {% if pet.photo_url %}
-                    <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo">
+                    <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="pet-photo" id="petPhoto">
+                    <div class="click-hint">👆 Haz clic para ampliar</div>
                 {% else %}
                     <span style="font-size: 80px; color: #999;">🐾</span>
                 {% endif %}
@@ -204,7 +281,45 @@
         <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
 
+    <!-- Modal de imagen completa -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        {% if pet.photo_url %}
+        <img class="modal-content" id="modalImage" src="{{ pet.photo_url }}">
+        {% endif %}
+    </div>
+
     <script>
+        // Funcionalidad de modal
+        function openModal() {
+            document.getElementById("imageModal").style.display = "block";
+        }
+        
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+        
+        // Cerrar modal al hacer clic fuera de la imagen
+        window.onclick = function(event) {
+            const modal = document.getElementById("imageModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Tecla ESC para cerrar
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+        
+        // Asignar evento de clic solo si hay foto
+        {% if pet.photo_url %}
+        document.getElementById("photoContainer").onclick = openModal;
+        {% endif %}
+        
+        // Funcionalidad del botón de ayuda
         document.getElementById("helpBtn").onclick = async () => {
             const button = document.getElementById("helpBtn");
             const loading = document.getElementById("loading");
