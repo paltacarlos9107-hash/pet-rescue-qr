@@ -235,7 +235,15 @@ def logout():
 @login_required
 @check_inactivity
 def home():
-    return render_template("register.html")
+    # Obtener información del usuario para mostrar en el dashboard
+    user = get_user_by_email(session["user_email"])
+    is_admin = user.get("is_admin", False) if user else False
+    
+    return render_template(
+        "dashboard.html", 
+        user_email=session["user_email"],
+        is_admin=is_admin
+    )
 
 @app.route("/register", methods=["POST"])
 @login_required

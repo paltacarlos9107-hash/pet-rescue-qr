@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Principal - Pet Rescue QR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin: 0;
+        }
+        
+        .logout-link {
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .welcome {
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .option-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: #2c3e50;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .option-card.register {
+            border-top: 4px solid #4CAF50;
+        }
+        
+        .option-card.mypets {
+            border-top: 4px solid #2196F3;
+        }
+        
+        .option-card.admin {
+            border-top: 4px solid #9C27B0;
+        }
+        
+        .option-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .option-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .option-desc {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 0 10px;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐾 Pet Rescue QR</h1>
+            <a href="/logout" class="logout-link">🔒 Cerrar sesión</a>
+        </header>
+        
+        <div class="welcome">
+            <h2>¡Hola, {{ user_email }}!</h2>
+            <p>¿Qué deseas hacer hoy?</p>
+        </div>
+        
+        <div class="options">
+            <a href="/register" class="option-card register">
+                <div class="option-icon">➕</div>
+                <div class="option-title">Registrar Mascota</div>
+                <div class="option-desc">Registra una nueva mascota perdida y genera su código QR único</div>
+            </a>
+            
+            <a href="/my-pets" class="option-card mypets">
+                <div class="option-icon">📋</div>
+                <div class="option-title">Mis Mascotas</div>
+                <div class="option-desc">Ver y gestionar todas tus mascotas registradas</div>
+            </a>
+            
+            {% if is_admin %}
+            <a href="/admin" class="option-card admin">
+                <div class="option-icon">⚙️</div>
+                <div class="option-title">Panel de Administración</div>
+                <div class="option-desc">Gestionar usuarios y todas las mascotas del sistema</div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
