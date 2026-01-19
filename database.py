@@ -210,18 +210,8 @@ def clear_user_session_token(email):
     conn.close()
 
 def is_token_valid(user):
-    """Verifica si el token del usuario es válido y no ha expirado."""
-    from datetime import datetime
-    if not user or not user.get("session_token") or not user.get("token_expires_at"):
-        return False
-    
-    # Convertir a datetime si es string
-    expires_at = user["token_expires_at"]
-    if isinstance(expires_at, str):
-        from datetime import datetime
-        expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
-    
-    return datetime.utcnow() < expires_at
+    """Verifica si el token del usuario es válido (solo verifica que exista)."""
+    return user and user.get("session_token") is not None
 
 def clear_user_session_token(email):
     """Limpia el token de sesión de un usuario."""
