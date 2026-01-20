@@ -257,7 +257,7 @@ def register():
 @check_inactivity
 def register_success():
     success = session.pop('registration_success', None)
-    qr = session.pop('qr_base64', None)
+    qr = session.pop('data:qr_base64', None)
     qr_url = session.pop('qr_url', None)
     
     if not success:
