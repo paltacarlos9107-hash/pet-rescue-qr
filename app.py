@@ -117,52 +117,6 @@ def check_inactivity(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get("logged_in"):
-            return redirect("/login")
-        
-        # Verificar token de sesión y estado de la cuenta
-        user = get_user_by_email(session["user_email"])
-        if not user or user.get("session_token") != session.get("session_token"):
-            clear_user_session()
-            return redirect("/login?message=invalid_session")
-        elif not user.get("is_active", True):
-            clear_user_session()
-            return redirect("/login?message=account_disabled")
-        
-        if not user.get("is_admin"):
-            return "<h2>Acceso denegado</h2>", 403
-        
-        return f(*args, **kwargs)
-    return decorated_function
-
-def check_inactivity(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("logged_in"):
-            # Verificar token válido y estado de la cuenta
-            user = get_user_by_email(session["user_email"])
-            if not user or user.get("session_token") != session.get("session_token"):
-                clear_user_session()
-                return redirect("/login?message=invalid_session")
-            elif not user.get("is_active", True):
-                clear_user_session()
-                return redirect("/login?message=account_disabled")
-            
-            # Verificar inactividad
-            last_activity = session.get("last_activity", 0)
-            if time.time() - last_activity > 900:  # 15 minutos
-                clear_user_session()
-                return redirect("/login?message=timeout")
-        
-        if session.get("logged_in"):
-            session["last_activity"] = time.time()
-        
-        return f(*args, **kwargs)
-    return decorated_function
-
 # -------------------------------------------------
 # MIDDLEWARE
 # -------------------------------------------------
@@ -220,7 +174,7 @@ def login():
                 session["last_activity"] = time.time()
                 
                 return redirect("/")
-    
+
     return render_template("login.html", error=message)
 
 @app.route("/logout")
@@ -322,19 +276,22 @@ def generate_qr():
     """Genera un QR vacío con ID único para futura activación."""
     pet_id = str(uuid.uuid4())[:8].upper()
     
+    # Email temporal para QR vacíos
+    temp_email = "unregistered@petrescue.qr"
+    
     # Crear registro vacío en la base de datos
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
         cur.execute("""
-            INSERT INTO pets (id, name, owner_name, is_registered) 
-            VALUES (%s, %s, %s, %s)
-        """, (pet_id, "", "", False))
+            INSERT INTO pets (id, name, owner_name, is_registered, owner_email) 
+            VALUES (%s, %s, %s, %s, %s)
+        """, (pet_id, "", "", False, temp_email))
     else:
         cur.execute("""
-            INSERT INTO pets (id, name, owner_name, is_registered) 
-            VALUES (?, ?, ?, ?)
-        """, (pet_id, "", "", False))
+            INSERT INTO pets (id, name, owner_name, is_registered, owner_email) 
+            VALUES (?, ?, ?, ?, ?)
+        """, (pet_id, "", "", False, temp_email))
     conn.commit()
     cur.close()
     conn.close()
@@ -392,6 +349,7 @@ def activate_pet(pet_id):
                         name = %s, breed = %s, description = %s, 
                         owner_name = %s, owner_phone = %s, 
                         city = %s, address = %s, 
+                        owner_email = 'activated@petrescue.qr',
                         is_registered = TRUE, registration_password = %s
                     WHERE id = %s
                 """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
@@ -401,6 +359,7 @@ def activate_pet(pet_id):
                         name = ?, breed = ?, description = ?, 
                         owner_name = ?, owner_phone = ?, 
                         city = ?, address = ?, 
+                        owner_email = 'activated@petrescue.qr',
                         is_registered = TRUE, registration_password = ?
                     WHERE id = ?
                 """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
