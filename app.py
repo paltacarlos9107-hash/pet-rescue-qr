@@ -315,6 +315,111 @@ def register_success():
 # RUTAS PÚBLICAS
 # -------------------------------------------------
 
+@app.route("/generate-qr")
+@login_required
+@check_inactivity
+def generate_qr():
+    """Genera un QR vacío con ID único para futura activación."""
+    pet_id = str(uuid.uuid4())[:8].upper()
+    
+    # Crear registro vacío en la base de datos
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("""
+            INSERT INTO pets (id, name, owner_name, is_registered) 
+            VALUES (%s, %s, %s, %s)
+        """, (pet_id, "", "", False))
+    else:
+        cur.execute("""
+            INSERT INTO pets (id, name, owner_name, is_registered) 
+            VALUES (?, ?, ?, ?)
+        """, (pet_id, "", "", False))
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    # Generar QR
+    if IS_PRODUCTION:
+        qr_url = f"https://{request.host}/activate/{pet_id}"
+    else:
+        qr_url = f"{request.url_root}activate/{pet_id}"
+
+    qr_img = qrcode.make(qr_url)
+    buffered = BytesIO()
+    qr_img.save(buffered, format="PNG")
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+    return render_template("generate_qr.html", qr=qr_base64, qr_url=qr_url, pet_id=pet_id)
+
+@app.route("/activate/<pet_id>", methods=["GET", "POST"])
+def activate_pet(pet_id):
+    """Activa un QR vacío con los datos de la mascota."""
+    try:
+        # Verificar si ya está registrado
+        pet = get_pet(pet_id)
+        if not pet:
+            return "<h2>❌ QR no válido o ya eliminado.</h2>", 404
+        
+        if pet.get("is_registered"):
+            # Si ya está registrado, redirigir a la página normal
+            if IS_PRODUCTION:
+                qr_url = f"https://{request.host}/pet/{pet_id}"
+            else:
+                qr_url = f"{request.url_root}pet/{pet_id}"
+            return redirect(qr_url)
+
+        if request.method == "POST":
+            # Procesar el registro
+            name = request.form.get("name", "").strip()
+            breed = request.form.get("breed", "").strip()
+            description = request.form.get("description", "").strip()
+            owner_name = request.form.get("owner_name", "").strip()
+            owner_phone = request.form.get("phone", "").strip()
+            city = request.form.get("city", "").strip()
+            address = request.form.get("address", "").strip()
+            password = request.form.get("password", "")
+
+            if not name or not owner_name or not password:
+                return render_template("activate_form.html", pet_id=pet_id, error="Todos los campos son obligatorios.")
+
+            # Guardar en base de datos
+            conn = get_db_connection()
+            cur = conn.cursor()
+            if IS_PRODUCTION:
+                cur.execute("""
+                    UPDATE pets SET 
+                        name = %s, breed = %s, description = %s, 
+                        owner_name = %s, owner_phone = %s, 
+                        city = %s, address = %s, 
+                        is_registered = TRUE, registration_password = %s
+                    WHERE id = %s
+                """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
+            else:
+                cur.execute("""
+                    UPDATE pets SET 
+                        name = ?, breed = ?, description = ?, 
+                        owner_name = ?, owner_phone = ?, 
+                        city = ?, address = ?, 
+                        is_registered = TRUE, registration_password = ?
+                    WHERE id = ?
+                """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            # Redirigir a la página de la mascota
+            if IS_PRODUCTION:
+                return redirect(f"https://{request.host}/pet/{pet_id}")
+            else:
+                return redirect(f"{request.url_root}pet/{pet_id}")
+
+        return render_template("activate_form.html", pet_id=pet_id)
+        
+    except Exception as e:
+        print(f"❌ Error en /activate/{pet_id}: {repr(e)}")
+        return "<h2>❌ Error al activar el QR.</h2>", 500
+
 @app.route("/register", methods=["GET"])
 @login_required
 @check_inactivity

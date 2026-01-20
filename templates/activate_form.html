@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar QR - Pet Rescue QR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .error {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐾 Activar Código QR</h1>
+        
+        <div class="note">
+            <strong>ℹ️ Este es el primer escaneo de este QR.</strong><br>
+            Por favor, completa la información de la mascota que has encontrado.
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <input type="hidden" name="pet_id" value="{{ pet_id }}">
+            
+            <div class="form-group">
+                <label for="name">Nombre de la mascota *</label>
+                <input type="text" id="name" name="name" required placeholder="Ej: Rocky">
+            </div>
+            
+            <div class="form-group">
+                <label for="breed">Raza (opcional)</label>
+                <input type="text" id="breed" name="breed" placeholder="Ej: Labrador">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Señas particulares</label>
+                <input type="text" id="description" name="description" placeholder="Ej: Collar rojo, oreja mordida">
+            </div>
+            
+            <div class="form-group">
+                <label for="owner_name">Tu nombre (como tutor temporal) *</label>
+                <input type="text" id="owner_name" name="owner_name" required placeholder="Ej: María López">
+            </div>
+            
+            <div class="form-group">
+                <label for="city">Ciudad *</label>
+                <input type="text" id="city" name="city" required placeholder="Ej: Bogotá">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Dirección aproximada</label>
+                <input type="text" id="address" name="address" placeholder="Ej: Parque central">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Teléfono de contacto</label>
+                <input type="tel" id="phone" name="phone" placeholder="Ej: 3001234567">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña para futuras ediciones *</label>
+                <input type="password" id="password" name="password" required placeholder="Crea una contraseña segura">
+                <small style="color: #666;">Esta contraseña te permitirá editar la información después</small>
+            </div>
+            
+            <button type="submit">✅ Activar QR y Registrar Mascota</button>
+        </form>
+    </div>
+</body>
+</html>
