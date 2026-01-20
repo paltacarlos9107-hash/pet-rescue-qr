@@ -392,6 +392,82 @@ def activate_pet(pet_id):
     except Exception as e:
         print(f"❌ Error en /activate/{pet_id}: {repr(e)}")
         return "<h2>❌ Error al activar el QR.</h2>", 500
+    
+@app.route("/edit/<pet_id>", methods=["GET", "POST"])
+def edit_pet(pet_id):
+    """Permite editar una mascota activada si se proporciona la contraseña correcta."""
+    pet = get_pet(pet_id)
+    if not pet or not pet.get("is_registered"):
+        return "<h2>❌ Mascota no encontrada o no activada.</h2>", 404
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if not password:
+            return render_template("edit_form.html", pet_id=pet_id, error="Contraseña requerida.")
+        
+        # Verificar contraseña
+        if password != pet.get("registration_password"):
+            return render_template("edit_form.html", pet_id=pet_id, error="❌ Contraseña incorrecta.")
+        
+        # Procesar la subida de foto (si existe)
+        photo_url = pet.get("photo_url")  # Mantener la foto existente por defecto
+        if "photo" in request.files:
+            photo = request.files["photo"]
+            if photo and photo.filename:
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        photo,
+                        folder="pet_rescue_qr/edited",
+                        resource_type="image"
+                    )
+                    photo_url = upload_result.get("secure_url")
+                except Exception as e:
+                    print("📷 Error al subir foto en edición:", str(e))
+
+        # Obtener y actualizar todos los campos
+        name = request.form.get("name", pet["name"]).strip()
+        breed = request.form.get("breed", pet["breed"] or "").strip()
+        description = request.form.get("description", pet["description"] or "").strip()
+        owner_name = request.form.get("owner_name", pet["owner_name"]).strip()
+        owner_email = request.form.get("email", pet["owner_email"]).strip()
+        owner_phone = request.form.get("phone", pet["owner_phone"] or "").strip()
+        city = request.form.get("city", pet["city"] or "").strip()
+        address = request.form.get("address", pet["address"] or "").strip()
+
+        # Validación básica
+        if not name or not owner_name or not owner_email:
+            return render_template("edit_form.html", pet_id=pet_id, error="Nombre, dueño y correo son obligatorios.")
+
+        # Actualizar en la base de datos
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if IS_PRODUCTION:
+            cur.execute("""
+                UPDATE pets SET 
+                    name=%s, breed=%s, description=%s, owner_name=%s, 
+                    owner_email=%s, owner_phone=%s, city=%s, address=%s, photo_url=%s
+                WHERE id=%s
+            """, (name, breed, description, owner_name, owner_email, owner_phone, city, address, photo_url, pet_id))
+        else:
+            cur.execute("""
+                UPDATE pets SET 
+                    name=?, breed=?, description=?, owner_name=?, 
+                    owner_email=?, owner_phone=?, city=?, address=?, photo_url=?
+                WHERE id=?
+            """, (name, breed, description, owner_name, owner_email, owner_phone, city, address, photo_url, pet_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return f"""
+        <script>
+            alert('✅ Información actualizada exitosamente.');
+            window.location.href='/pet/{pet_id}';
+        </script>
+        """
+
+    # Mostrar formulario de edición (GET request)
+    return render_template("edit_form.html", pet_id=pet_id, pet=pet)
 
 @app.route("/register", methods=["GET"])
 @login_required

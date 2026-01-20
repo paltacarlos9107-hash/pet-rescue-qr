@@ -41,17 +41,17 @@
             text-align: center;
         }
         
-        /* Logo header - alineado horizontalmente */
+        /* Logo header */
         .app-logo {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             margin-bottom: 20px;
-            justify-content: center;
         }
         
         .logo-img {
-            width: 120px;
+            width: 40px;
             height: auto;
         }
         
@@ -241,7 +241,7 @@
             }
             
             .logo-img {
-                width: 80px;
+                width: 32px;
             }
             
             .logo-text {
@@ -329,8 +329,8 @@
         </div>
 
         <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <button id="helpBtn" style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
-                📍 Enviar Ubicacion
+            <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
+                📍 Sí, quiero ayudar
             </button>
             
             {% if pet.owner_phone %}
@@ -340,6 +340,18 @@
             </a>
             {% endif %}
         </div>
+
+        <!-- Botón de edición para mascotas activadas -->
+        {% if pet.is_registered %}
+        <div style="margin-top: 15px;">
+            <a href="/edit/{{ pet.id }}" 
+               style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
+                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                      text-align: center; font-size: 14px;">
+                ✏️ Editar Información
+            </a>
+        </div>
+        {% endif %}
 
         <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
