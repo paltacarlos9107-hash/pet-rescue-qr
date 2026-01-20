@@ -43,13 +43,16 @@
         
         /* Logo */
         .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             margin-bottom: 30px;
         }
         
         .logo-img {
-            width: 80px;
+            width: 40px;
             height: auto;
-            margin: 0 auto 15px;
         }
         
         .logo-text {
@@ -57,6 +60,7 @@
             font-weight: 700;
             color: #2c3e50;
             margin: 0;
+            line-height: 1;
         }
         
         h1 {
@@ -141,11 +145,11 @@
             }
             
             .logo-img {
-                width: 60px;
+                width: 32px;
             }
             
             .logo-text {
-                font-size: 20px;
+                font-size: 18px;
             }
         }
     </style>
@@ -157,7 +161,7 @@
             <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" 
                  alt="Pet Rescue QR Logo" 
                  class="logo-img">
-            <p class="logo-text">Pet Rescue QR</p>
+            <span class="logo-text">Pet Rescue QR</span>
         </div>
 
         <h1>🔐 Iniciar Sesión</h1>

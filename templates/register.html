@@ -38,10 +38,26 @@
             padding: 30px;
         }
         
-        h1 {
-            text-align: center;
-            color: #2c3e50;
+        /* Logo header */
+        .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             margin-bottom: 25px;
+        }
+        
+        .logo-img {
+            width: 40px;
+            height: auto;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1;
         }
         
         .form-group {
@@ -62,7 +78,7 @@
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px; /* Evita zoom en iOS */
+            font-size: 16px;
             transition: border-color 0.3s;
         }
         
@@ -137,9 +153,12 @@
                 margin: 0 10px;
             }
             
-            h1 {
-                font-size: 24px;
-                margin-bottom: 20px;
+            .logo-img {
+                width: 32px;
+            }
+            
+            .logo-text {
+                font-size: 18px;
             }
             
             .form-group input,
@@ -168,7 +187,13 @@
             </a>
         </div>
 
-        <h1>🐾 Registrar Mascota</h1>
+        <!-- Logo -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <span class="logo-text">Pet Rescue QR</span>
+        </div>
 
         {% if success %}
             <div class="message success">
@@ -176,7 +201,7 @@
             </div>
             <div class="qr-section">
                 <p><strong>Tu código QR:</strong></p>
-                <img src="data:image/png;base64,{{ qr }}" alt="Código QR">
+                <img src="image/png;base64,{{ qr }}" alt="Código QR">
                 <p style="margin-top: 10px; font-size: 14px;">
                     Comparte este enlace: <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
                 </p>
