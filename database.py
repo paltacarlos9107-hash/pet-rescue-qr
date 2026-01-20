@@ -22,7 +22,7 @@ def get_db_connection():
     return conn
 
 def init_users_table():
-    """Crea la tabla de usuarios si no existe, con soporte para administradores."""
+    """Crea la tabla de usuarios si no existe, con soporte para administradores y estado activo."""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -34,15 +34,21 @@ def init_users_table():
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 is_admin BOOLEAN DEFAULT FALSE,
+                is_active BOOLEAN DEFAULT TRUE,
                 session_token TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        # Asegurar que la columna session_token exista
-        try:
-            cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS session_token TEXT")
-        except Exception as e:
-            print("⚠️ Advertencia al agregar session_token en PostgreSQL:", e)
+        # Asegurar que todas las columnas existan
+        columns_to_add = [
+            ("session_token", "TEXT"),
+            ("is_active", "BOOLEAN DEFAULT TRUE")
+        ]
+        for col_name, col_type in columns_to_add:
+            try:
+                cur.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col_name} {col_type}")
+            except Exception as e:
+                print(f"⚠️ Advertencia al agregar {col_name} en users:", e)
     else:
         # SQLite
         cur.execute("""
@@ -51,15 +57,22 @@ def init_users_table():
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 is_admin BOOLEAN DEFAULT 0,
+                is_active BOOLEAN DEFAULT 1,
                 session_token TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        # Asegurar que la columna session_token exista
+        # Asegurar que todas las columnas existan
         try:
             cur.execute("ALTER TABLE users ADD COLUMN session_token TEXT")
         except Exception as e:
-            # En SQLite, si la columna ya existe, se lanza una excepción
+            # Columna ya existe
+            pass
+        
+        try:
+            cur.execute("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT 1")
+        except Exception as e:
+            # Columna ya existe
             pass
     
     conn.commit()
@@ -85,7 +98,9 @@ def init_db():
                 photo_url TEXT,
                 city TEXT,
                 address TEXT,
-                found BOOLEAN DEFAULT FALSE
+                found BOOLEAN DEFAULT FALSE,
+                is_registered BOOLEAN DEFAULT FALSE,
+                registration_password TEXT
             )
         """)
         # Asegurar columnas adicionales
@@ -94,7 +109,10 @@ def init_db():
             ("owner_phone", "TEXT"),
             ("photo_url", "TEXT"),
             ("city", "TEXT"),
-            ("address", "TEXT")
+            ("address", "TEXT"),
+            ("found", "BOOLEAN DEFAULT FALSE"),
+            ("is_registered", "BOOLEAN DEFAULT FALSE"),
+            ("registration_password", "TEXT")
         ]
         for col_name, col_type in columns_to_add:
             try:
@@ -114,14 +132,19 @@ def init_db():
                 photo_url TEXT,
                 city TEXT,
                 address TEXT,
-                found BOOLEAN DEFAULT 0
+                found BOOLEAN DEFAULT 0,
+                is_registered BOOLEAN DEFAULT 0,
+                registration_password TEXT
             )
         """)
         # Asegurar columnas adicionales en SQLite
-        columns_to_add = ["owner_name", "owner_phone", "photo_url", "city", "address"]
+        columns_to_add = ["owner_name", "owner_phone", "photo_url", "city", "address", "found", "is_registered", "registration_password"]
         for col_name in columns_to_add:
             try:
-                cur.execute(f"ALTER TABLE pets ADD COLUMN {col_name} TEXT")
+                if col_name in ["found", "is_registered"]:
+                    cur.execute(f"ALTER TABLE pets ADD COLUMN {col_name} BOOLEAN DEFAULT 0")
+                else:
+                    cur.execute(f"ALTER TABLE pets ADD COLUMN {col_name} TEXT")
             except Exception as e:
                 # Columna ya existe
                 pass
@@ -193,9 +216,9 @@ def clear_user_session_token(email):
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("UPDATE users SET session_token = NULL, token_expires_at = NULL WHERE email = %s", (email,))
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = %s", (email,))
     else:
-        cur.execute("UPDATE users SET session_token = NULL, token_expires_at = NULL WHERE email = ?", (email,))
+        cur.execute("UPDATE users SET session_token = NULL WHERE email = ?", (email,))
     conn.commit()
     cur.close()
     conn.close()
@@ -204,36 +227,20 @@ def is_token_valid(user):
     """Verifica si el token del usuario es válido."""
     return user and user.get("session_token") is not None
 
-def clear_user_session_token(email):
-    """Limpia el token de sesión de un usuario."""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("UPDATE users SET session_token = NULL WHERE email = %s", (email,))
-    else:
-        cur.execute("UPDATE users SET session_token = NULL WHERE email = ?", (email,))
-    conn.commit()
-    cur.close()
-    conn.close()
-
-# -------------------------------------------------
-# Funciones para mascotas
-# -------------------------------------------------
-
-def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address):
+def add_pet(pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, is_registered=False, registration_password=None):
     """Registra una nueva mascota."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
         cur.execute("""
-            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False))
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found, is_registered, registration_password)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False, is_registered, registration_password))
     else:
         cur.execute("""
-            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False))
+            INSERT INTO pets (id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, found, is_registered, registration_password)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (pet_id, name, breed, description, owner_name, owner_email, owner_phone, photo_url, city, address, False, is_registered, registration_password))
     conn.commit()
     cur.close()
     conn.close()
@@ -243,9 +250,9 @@ def get_pet(pet_id):
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT * FROM pets WHERE id = %s AND found = FALSE", (pet_id,))
+        cur.execute("SELECT * FROM pets WHERE id = %s", (pet_id,))
     else:
-        cur.execute("SELECT * FROM pets WHERE id = ? AND found = 0", (pet_id,))
+        cur.execute("SELECT * FROM pets WHERE id = ?", (pet_id,))
     pet = cur.fetchone()
     cur.close()
     conn.close()
