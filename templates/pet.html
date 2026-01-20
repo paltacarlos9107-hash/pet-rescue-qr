@@ -41,6 +41,24 @@
             text-align: center;
         }
         
+        /* Logo header */
+        .app-logo {
+            margin-bottom: 20px;
+        }
+        
+        .logo-img {
+            width: 80px;
+            height: auto;
+            margin: 0 auto 10px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
         /* Hero Banner con Foto de Mascota */
         .pet-hero {
             position: relative;
@@ -218,6 +236,10 @@
                 margin: 0 10px;
             }
             
+            .logo-img {
+                width: 60px;
+            }
+            
             .pet-hero {
                 height: 250px;
             }
@@ -244,6 +266,14 @@
 </head>
 <body>
     <div class="container">
+        <!-- Logo de la app -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768920081/ChatGPT_Image_20_ene_2026_09_35_29_ncoemo.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <p class="logo-text">Pet Rescue QR</p>
+        </div>
+
         <!-- Hero Banner con Foto de Mascota -->
         <div class="pet-hero" id="heroContainer">
             {% if pet.photo_url %}
