@@ -38,6 +38,7 @@
             color: #2c3e50;
         }
         input[type="text"],
+        input[type="email"],
         input[type="tel"],
         input[type="password"] {
             width: 100%;
@@ -79,14 +80,14 @@
         
         <div class="note">
             <strong>ℹ️ Este es el primer escaneo de este QR.</strong><br>
-            Por favor, completa la información de la mascota que has encontrado.
+            Por favor, completa toda la información de la mascota que has encontrado.
         </div>
 
         {% if error %}
             <div class="error">{{ error }}</div>
         {% endif %}
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="pet_id" value="{{ pet_id }}">
             
             <div class="form-group">
@@ -110,6 +111,11 @@
             </div>
             
             <div class="form-group">
+                <label for="email">Tu correo electrónico *</label>
+                <input type="email" id="email" name="email" required placeholder="tu@email.com">
+            </div>
+            
+            <div class="form-group">
                 <label for="city">Ciudad *</label>
                 <input type="text" id="city" name="city" required placeholder="Ej: Bogotá">
             </div>
@@ -120,8 +126,13 @@
             </div>
             
             <div class="form-group">
-                <label for="phone">Teléfono de contacto</label>
+                <label for="phone">Teléfono de contacto (opcional)</label>
                 <input type="tel" id="phone" name="phone" placeholder="Ej: 3001234567">
+            </div>
+            
+            <div class="form-group">
+                <label for="photo">Foto de la mascota (opcional)</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
             </div>
             
             <div class="form-group">

@@ -311,7 +311,7 @@ def generate_qr():
 
 @app.route("/activate/<pet_id>", methods=["GET", "POST"])
 def activate_pet(pet_id):
-    """Activa un QR vacío con los datos de la mascota."""
+    """Activa un QR vacío con los datos completos de la mascota."""
     try:
         # Verificar si ya está registrado
         pet = get_pet(pet_id)
@@ -327,18 +327,34 @@ def activate_pet(pet_id):
             return redirect(qr_url)
 
         if request.method == "POST":
-            # Procesar el registro
+            # Procesar el registro completo
             name = request.form.get("name", "").strip()
             breed = request.form.get("breed", "").strip()
             description = request.form.get("description", "").strip()
             owner_name = request.form.get("owner_name", "").strip()
+            owner_email = request.form.get("email", "").strip()  # ← ¡Correo electrónico!
             owner_phone = request.form.get("phone", "").strip()
             city = request.form.get("city", "").strip()
             address = request.form.get("address", "").strip()
             password = request.form.get("password", "")
 
-            if not name or not owner_name or not password:
-                return render_template("activate_form.html", pet_id=pet_id, error="Todos los campos son obligatorios.")
+            if not name or not owner_name or not owner_email or not password:
+                return render_template("activate_form.html", pet_id=pet_id, error="Nombre, dueño, correo y contraseña son obligatorios.")
+
+            # Subir foto si existe
+            photo_url = None
+            if "photo" in request.files:
+                photo = request.files["photo"]
+                if photo and photo.filename:
+                    try:
+                        upload_result = cloudinary.uploader.upload(
+                            photo,
+                            folder="pet_rescue_qr/activated",
+                            resource_type="image"
+                        )
+                        photo_url = upload_result.get("secure_url")
+                    except Exception as e:
+                        print("📷 Error al subir foto en activación:", str(e))
 
             # Guardar en base de datos
             conn = get_db_connection()
@@ -347,22 +363,20 @@ def activate_pet(pet_id):
                 cur.execute("""
                     UPDATE pets SET 
                         name = %s, breed = %s, description = %s, 
-                        owner_name = %s, owner_phone = %s, 
-                        city = %s, address = %s, 
-                        owner_email = 'activated@petrescue.qr',
+                        owner_name = %s, owner_email = %s, owner_phone = %s, 
+                        city = %s, address = %s, photo_url = %s,
                         is_registered = TRUE, registration_password = %s
                     WHERE id = %s
-                """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
+                """, (name, breed, description, owner_name, owner_email, owner_phone, city, address, photo_url, password, pet_id))
             else:
                 cur.execute("""
                     UPDATE pets SET 
                         name = ?, breed = ?, description = ?, 
-                        owner_name = ?, owner_phone = ?, 
-                        city = ?, address = ?, 
-                        owner_email = 'activated@petrescue.qr',
+                        owner_name = ?, owner_email = ?, owner_phone = ?, 
+                        city = ?, address = ?, photo_url = ?,
                         is_registered = TRUE, registration_password = ?
                     WHERE id = ?
-                """, (name, breed, description, owner_name, owner_phone, city, address, password, pet_id))
+                """, (name, breed, description, owner_name, owner_email, owner_phone, city, address, photo_url, password, pet_id))
             conn.commit()
             cur.close()
             conn.close()
