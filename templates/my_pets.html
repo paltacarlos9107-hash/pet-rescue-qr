@@ -50,7 +50,7 @@
         }
         
         .logo-img {
-            width: 120px;
+            width: 40px;
             height: auto;
         }
         
@@ -110,7 +110,7 @@
             }
             
             .logo-img {
-                width: 80px;
+                width: 32px;
             }
             
             .logo-text {
@@ -158,7 +158,7 @@
                         <th>Raza</th>
                         <th>Ciudad</th>
                         <th>Teléfono</th>
-                        <th>QR</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,6 +178,11 @@
                         <td>
                             <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none; font-size: 14px;">
                                 Ver QR
+                            </a>
+                            <br>
+                            <a href="/edit-my-pet/{{ pet.id }}" 
+                               style="color: #FF9800; text-decoration: none; font-size: 14px; margin-top: 5px; display: inline-block;">
+                                ✏️ Editar
                             </a>
                         </td>
                     </tr>
