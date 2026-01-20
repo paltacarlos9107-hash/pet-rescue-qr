@@ -45,18 +45,23 @@
             text-align: center;
         }
         
-        header h1 {
-            font-size: 28px;
-            font-weight: 600;
+        /* Logo en header */
+        .header-logo {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 12px;
         }
         
-        header h1::before {
-            content: "🐾";
+        .logo-img {
+            width: 90px;
+            height: auto;
+        }
+        
+        .logo-text {
             font-size: 24px;
+            font-weight: 700;
+            margin: 0;
         }
         
         .content {
@@ -253,8 +258,12 @@
                 padding: 20px 15px;
             }
             
-            header h1 {
-                font-size: 22px;
+            .logo-img {
+                width: 70px;
+            }
+            
+            .logo-text {
+                font-size: 20px;
             }
             
             .content {
@@ -308,7 +317,12 @@
 <body>
     <div class="container">
         <header>
-            <h1>Panel de Administración</h1>
+            <div class="header-logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768920081/ChatGPT_Image_20_ene_2026_09_35_29_ncoemo.png" 
+                     alt="Pet Rescue QR Logo" 
+                     class="logo-img">
+                <p class="logo-text">Pet Rescue QR</p>
+            </div>
         </header>
         
         <div class="content">
