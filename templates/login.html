@@ -3,103 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Pet Rescue QR</title>
+    <title>Iniciar Sesión - Pet Rescue QR</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .login-box {
+        
+        .login-container {
             background: rgba(255, 255, 255, 0.94);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 420px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
             text-align: center;
         }
-        h2 {
+        
+        /* Logo */
+        .app-logo {
+            margin-bottom: 30px;
+        }
+        
+        .logo-img {
+            width: 80px;
+            height: auto;
+            margin: 0 auto 15px;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        h1 {
             color: #2c3e50;
             margin-bottom: 25px;
             font-size: 24px;
         }
+        
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             text-align: left;
         }
+        
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #2c3e50;
         }
-        input {
+        
+        input[type="email"],
+        input[type="password"] {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            box-sizing: border-box;
             font-size: 16px;
+            transition: border-color 0.3s;
         }
+        
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
         button {
-            width: 100%;
-            padding: 12px;
-            background: #4CAF50;
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
             color: white;
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
-            font-size: 18px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s;
         }
+        
         button:hover {
-            background: #45a049;
+            transform: translateY(-2px);
         }
+        
+        .message {
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
         .error {
             background: #ffebee;
             color: #c62828;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
+            border: 1px solid #ffcdd2;
         }
-        .icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: #4CAF50;
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #1976D2;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 0 10px;
+            }
+            
+            .logo-img {
+                width: 60px;
+            }
+            
+            .logo-text {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <div class="icon">🔒</div>
-        <h2>Acceso Restringido</h2>
-        
+    <div class="login-container">
+        <!-- Logo de la app -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768920081/ChatGPT_Image_20_ene_2026_09_35_29_ncoemo.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <p class="logo-text">Pet Rescue QR</p>
+        </div>
+
+        <h1>🔐 Iniciar Sesión</h1>
+
         {% if error %}
-            <div class="error">{{ error }}</div>
+            <div class="message error">
+                {{ error }}
+            </div>
         {% endif %}
 
         <form method="POST">
             <div class="form-group">
-                <label for="email">Correo electrónico</label>
-                <input type="email" id="email" name="email" required autocomplete="username">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required placeholder="tu@email.com">
             </div>
             <div class="form-group">
                 <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <input type="password" id="password" name="password" required placeholder="••••••••">
             </div>
             <button type="submit">Iniciar Sesión</button>
         </form>
+
+        <a href="/" class="back-link">← Volver al Registro</a>
     </div>
 </body>
 </html>
