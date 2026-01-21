@@ -5,45 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR - {{ pet.name }} - Pet Rescue QR</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
         }
+        
         .container {
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.94);
             border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
             padding: 30px;
             text-align: center;
         }
+        
+        /* Logo header */
+        .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-img {
+            width: 120px;
+            height: auto;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        
         .qr-section {
             margin: 25px 0;
         }
+        
         .qr-section img {
             max-width: 250px;
             border: 2px solid #4CAF50;
             border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        
         .back-link {
             display: inline-block;
             margin-top: 20px;
             color: #1976D2;
             text-decoration: none;
             font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid #1976D2;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .back-link:hover {
+            background: #1976D2;
+            color: white;
+        }
+        
+        /* Responsive mobile */
+        @media (max-width: 768px) {
+            .container {
+                margin: 0 10px;
+                padding: 20px 15px;
+            }
+            
+            .logo-img {
+                width: 60px;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            .qr-section img {
+                max-width: 200px;
+            }
+            
+            .back-link {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Logo de la app -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <span class="logo-text">Pet Rescue QR</span>
+        </div>
+
         <h2>🐾 QR de {{ pet.name }}</h2>
         
         <div class="qr-section">
             <p><strong>Escanea para reportar ubicación:</strong></p>
             <img src="data:image/png;base64,{{ qr }}" alt="Código QR">
-            <p style="margin-top: 10px; font-size: 14px;">
+            <p style="margin-top: 10px; font-size: 14px; color: #666;">
                 <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
             </p>
         </div>
