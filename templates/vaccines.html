@@ -139,13 +139,9 @@
                         {% endif %}
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     {% for vaccine in vaccines %}
-                    <tr class="
-                        {% if vaccine.next_due_date and vaccine.next_due_date < now() %}overdue
-                        {% elif vaccine.next_due_date and vaccine.next_due_date <= date.today() + timedelta(days=30) %}due-soon
-                        {% endif %}
-                    ">
+                    <tr>
                         <td>{{ vaccine.vaccine_name }}</td>
                         <td>{{ vaccine.date_administered }}</td>
                         <td>{{ vaccine.next_due_date or '-' }}</td>
