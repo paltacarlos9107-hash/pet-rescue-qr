@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacunas - {{ pet.name }} - Pet Rescue QR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        /* Logo header */
+        .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .logo-img {
+            width: 40px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .add-vaccine-btn {
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f1f8e9;
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .no-vaccines {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .due-soon {
+            background: #fff3cd;
+        }
+        .overdue {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <span class="logo-text">Pet Rescue QR</span>
+        </div>
+
+        <a href="/pet/{{ pet.id }}" class="back-link">← Volver a {{ pet.name }}</a>
+        
+        <h1>💉 Historial de Vacunas - {{ pet.name }}</h1>
+        
+        <a href="/pet/{{ pet.id }}/vaccines/add" class="add-vaccine-btn">➕ Agregar Vacuna</a>
+        
+        {% if vaccines %}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vacuna</th>
+                        <th>Fecha</th>
+                        <th>Próxima</th>
+                        <th>Veterinario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vaccine in vaccines %}
+                    <tr class="
+                        {% if vaccine.next_due_date and vaccine.next_due_date < now() %}overdue
+                        {% elif vaccine.next_due_date and vaccine.next_due_date <= date.today() + timedelta(days=30) %}due-soon
+                        {% endif %}
+                    ">
+                        <td>{{ vaccine.vaccine_name }}</td>
+                        <td>{{ vaccine.date_administered }}</td>
+                        <td>{{ vaccine.next_due_date or '-' }}</td>
+                        <td>{{ vaccine.veterinarian or '-' }}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteVaccine({{ vaccine.id }})">🗑️</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-vaccines">
+            <h3>📭 No hay registros de vacunas</h3>
+            <p><a href="/pet/{{ pet.id }}/vaccines/add" style="color: #4CAF50; text-decoration: none;">Agregar primera vacuna →</a></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function deleteVaccine(vaccineId) {
+            if (confirm('¿Eliminar este registro de vacuna?')) {
+                fetch(`/vaccine/${vaccineId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error de conexión');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

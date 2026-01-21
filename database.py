@@ -325,3 +325,48 @@ def get_user_by_email_full(email):
     cur.close()
     conn.close()
     return user
+
+def add_vaccine(pet_id, vaccine_name, date_administered, next_due_date=None, veterinarian=None, notes=None):
+    """Registra una nueva vacuna para una mascota."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("""
+            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+            VALUES (%s, % s, %s, %s, %s, %s)
+        """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
+    else:
+        cur.execute("""
+            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_vaccines_by_pet(pet_id):
+    """Obtiene todas las vacunas de una mascota."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? ORDER BY date_administered DESC", (pet_id,))
+    vaccines = cur.fetchall()
+    cur.close()
+    conn.close()
+    return vaccines
+
+def delete_vaccine(vaccine_id):
+    """Elimina un registro de vacuna."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("DELETE FROM vaccines WHERE id = %s", (vaccine_id,))
+    else:
+        cur.execute("DELETE FROM vaccines WHERE id = ?", (vaccine_id,))
+    conn.commit()
+    deleted = cur.rowcount > 0
+    cur.close()
+    conn.close()
+    return deleted
