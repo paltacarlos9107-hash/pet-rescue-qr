@@ -332,9 +332,9 @@
         💉 Ver Vacunas
     </a>
     
-    <!-- Gestionar Vacunas (solo dueños) -->
-    {% if pet.owner_email == user_email %}
-    <a href="/my-pet/{{ pet.id }}/vaccines" 
+    <!-- Gestionar Vacunas (QR activados) -->
+    {% if pet.is_registered and pet.registration_password %}
+    <a href="/pet/{{ pet.id }}/vaccines/manage" 
        style="background: #9C27B0; padding: 10px 15px; border: none; border-radius: 8px; 
               color: white; font-weight: bold; text-decoration: none; display: inline-block; 
               text-align: center; font-size: 14px;">
@@ -342,7 +342,7 @@
     </a>
     {% endif %}
     
-    <!-- Editar Información (solo QR activados) -->
+    <!-- Editar Información (QR activados) -->
     {% if pet.is_registered and pet.registration_password %}
     <a href="/edit/{{ pet.id }}" 
        style="background: #FF9800; padding: 10px 15px; border: none; border-radius: 8px; 
