@@ -775,34 +775,6 @@ def add_vaccine_record(pet_id):
     
     return render_template("add_vaccine.html", pet=pet)
 
-@app.route("/pet/<pet_id>/vaccines/add", methods=["GET", "POST"])
-@login_required
-@check_inactivity
-def add_vaccine_record(pet_id):
-    """Agrega un nuevo registro de vacuna."""
-    pet = get_pet(pet_id)
-    if not pet or pet["owner_email"] != session["user_email"]:
-        return "<h2>❌ No tienes permiso para editar esta mascota.</h2>", 403
-    
-    if request.method == "POST":
-        try:
-            vaccine_name = request.form.get("vaccine_name", "").strip()
-            date_administered = request.form.get("date_administered", "").strip()
-            next_due_date = request.form.get("next_due_date", "").strip() or None
-            veterinarian = request.form.get("veterinarian", "").strip() or None
-            notes = request.form.get("notes", "").strip() or None
-
-            if not vaccine_name or not date_administered:
-                return render_template("add_vaccine.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
-
-            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            return redirect(f"/pet/{pet_id}/vaccines")
-            
-        except Exception as e:
-            return render_template("add_vaccine.html", pet=pet, error=f"Error al guardar: {str(e)}")
-    
-    return render_template("add_vaccine.html", pet=pet)
-
 @app.route("/vaccine/<int:vaccine_id>/delete", methods=["POST"])
 @login_required
 @check_inactivity
