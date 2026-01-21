@@ -176,12 +176,16 @@
                         <td>{{ pet.city or '-' }}</td>
                         <td>{{ pet.owner_phone or '-' }}</td>
                         <td>
-                            <a href="/pet/{{ pet.id }}" target="_blank" style="color: #4CAF50; text-decoration: none; font-size: 14px;">
-                                Ver QR
+                            <a href="/qr/{{ pet.id }}" 
+                            style="display: block; color: #4CAF50; text-decoration: none; font-size: 14px; margin-bottom: 8px;">
+                                📱 Ver QR
                             </a>
-                            <br>
+                            <a href="/pet/{{ pet.id }}" 
+                            style="display: block; color: #2196F3; text-decoration: none; font-size: 14px; margin-bottom: 8px;">
+                                ℹ️ Ver Información
+                            </a>
                             <a href="/edit-my-pet/{{ pet.id }}" 
-                               style="color: #FF9800; text-decoration: none; font-size: 14px; margin-top: 5px; display: inline-block;">
+                            style="display: block; color: #FF9800; text-decoration: none; font-size: 14px;">
                                 ✏️ Editar
                             </a>
                         </td>

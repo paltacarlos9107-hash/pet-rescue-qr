@@ -309,6 +309,26 @@ def generate_qr():
 
     return render_template("generate_qr.html", qr=qr_base64, qr_url=qr_url, pet_id=pet_id)
 
+@app.route("/qr/<pet_id>")
+def qr_only(pet_id):
+    """Muestra solo el código QR de una mascota."""
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+
+    # Generar el QR
+    if IS_PRODUCTION:
+        qr_url = f"https://{request.host}/pet/{pet_id}"
+    else:
+        qr_url = f"{request.url_root}pet/{pet_id}"
+
+    qr_img = qrcode.make(qr_url)
+    buffered = BytesIO()
+    qr_img.save(buffered, format="PNG")
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+    return render_template("qr_only.html", pet=pet, qr=qr_base64, qr_url=qr_url)
+
 @app.route("/activate/<pet_id>", methods=["GET", "POST"])
 def activate_pet(pet_id):
     """Activa un QR vacío con los datos completos de la mascota."""
