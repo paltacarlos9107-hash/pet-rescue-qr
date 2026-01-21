@@ -808,7 +808,7 @@ def delete_vaccine_record(vaccine_id):
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
     
-    @app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
+@app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
 def manage_vaccines_password(pet_id):
     """Gestiona vacunas para mascotas activadas desde QR vacío (con contraseña)."""
     pet = get_pet(pet_id)
@@ -821,7 +821,8 @@ def manage_vaccines_password(pet_id):
         if password != pet.get("registration_password"):
             return render_template("manage_vaccines_password.html", pet=pet, error="❌ Contraseña incorrecta.")
         
-        # Redirigir a gestión completa
+        # Crear sesión temporal para acceso a vacunas
+        session[f"vaccine_access_{pet_id}"] = True
         return redirect(f"/pet/{pet_id}/vaccines/edit")
     
     # Mostrar formulario de contraseña
