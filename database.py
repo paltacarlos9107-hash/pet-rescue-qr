@@ -333,7 +333,7 @@ def add_vaccine(pet_id, vaccine_name, date_administered, next_due_date=None, vet
     if IS_PRODUCTION:
         cur.execute("""
             INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            VALUES (%s, % s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
     else:
         cur.execute("""
