@@ -51,7 +51,7 @@
         }
         
         .logo-img {
-            width: 120px;
+            width: 40px;
             height: auto;
         }
         
@@ -230,7 +230,7 @@
             }
             
             .logo-img {
-                width: 60px;
+                width: 32px;
             }
             
             .logo-text {
@@ -310,8 +310,8 @@
         </div>
 
         <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <button id="helpBtn" style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
-                📍 Enviar ubicacion
+            <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
+                📍 Sí, quiero ayudar
             </button>
             
             {% if pet.owner_phone %}
@@ -326,20 +326,20 @@
         {% if pet.is_registered and pet.registration_password %}
         <div style="margin-top: 15px;">
             <a href="/edit/{{ pet.id }}" 
-            style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
-                    color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                    text-align: center; font-size: 14px;">
+               style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
+                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                      text-align: center; font-size: 14px;">
                 ✏️ Editar Información
             </a>
         </div>
         {% endif %}
 
-        <!-- Botón de vacunas -->
+        <!-- Botón de vacunas (visible para todos) -->
         <div style="margin-top: 15px;">
             <a href="/pet/{{ pet.id }}/vaccines" 
-            style="background: #9C27B0; padding: 10px 20px; border: none; border-radius: 8px; 
-                    color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                    text-align: center; font-size: 14px;">
+               style="background: #9C27B0; padding: 10px 20px; border: none; border-radius: 8px; 
+                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                      text-align: center; font-size: 14px;">
                 💉 Ver Vacunas
             </a>
         </div>

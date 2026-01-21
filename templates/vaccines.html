@@ -121,7 +121,9 @@
         
         <h1>💉 Historial de Vacunas - {{ pet.name }}</h1>
         
-        <a href="/pet/{{ pet.id }}/vaccines/add" class="add-vaccine-btn">➕ Agregar Vacuna</a>
+        {% if is_owner %}
+        <a href="/my-pet/{{ pet.id }}/vaccines/add" class="add-vaccine-btn">➕ Agregar Vacuna</a>
+        {% endif %}
         
         {% if vaccines %}
         <div style="overflow-x: auto;">
@@ -132,7 +134,9 @@
                         <th>Fecha</th>
                         <th>Próxima</th>
                         <th>Veterinario</th>
+                        {% if is_owner %}
                         <th>Acciones</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -146,9 +150,11 @@
                         <td>{{ vaccine.date_administered }}</td>
                         <td>{{ vaccine.next_due_date or '-' }}</td>
                         <td>{{ vaccine.veterinarian or '-' }}</td>
+                        {% if is_owner %}
                         <td>
                             <button class="delete-btn" onclick="deleteVaccine({{ vaccine.id }})">🗑️</button>
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -157,7 +163,9 @@
         {% else %}
         <div class="no-vaccines">
             <h3>📭 No hay registros de vacunas</h3>
-            <p><a href="/pet/{{ pet.id }}/vaccines/add" style="color: #4CAF50; text-decoration: none;">Agregar primera vacuna →</a></p>
+            {% if is_owner %}
+            <p><a href="/my-pet/{{ pet.id }}/vaccines/add" style="color: #4CAF50; text-decoration: none;">Agregar primera vacuna →</a></p>
+            {% endif %}
         </div>
         {% endif %}
     </div>

@@ -726,16 +726,54 @@ def admin_panel():
     return render_template("admin.html", users=users, pets=pets, message=message)
 
 @app.route("/pet/<pet_id>/vaccines")
+def view_vaccines(pet_id):
+    """Muestra el historial de vacunas de una mascota (público)."""
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+    
+    vaccines = get_vaccines_by_pet(pet_id)
+    return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=False)
+
+@app.route("/my-pet/<pet_id>/vaccines")
 @login_required
 @check_inactivity
-def view_vaccines(pet_id):
-    """Muestra el historial de vacunas de una mascota."""
+def view_my_vaccines(pet_id):
+    """Muestra el historial de vacunas con opción de edición (solo dueños)."""
     pet = get_pet(pet_id)
     if not pet or pet["owner_email"] != session["user_email"]:
         return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
     
     vaccines = get_vaccines_by_pet(pet_id)
-    return render_template("vaccines.html", pet=pet, vaccines=vaccines)
+    return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=True)
+
+@app.route("/my-pet/<pet_id>/vaccines/add", methods=["GET", "POST"])
+@login_required
+@check_inactivity
+def add_vaccine_record(pet_id):
+    """Agrega un nuevo registro de vacuna (solo dueños)."""
+    pet = get_pet(pet_id)
+    if not pet or pet["owner_email"] != session["user_email"]:
+        return "<h2>❌ No tienes permiso para editar esta mascota.</h2>", 403
+    
+    if request.method == "POST":
+        try:
+            vaccine_name = request.form.get("vaccine_name", "").strip()
+            date_administered = request.form.get("date_administered", "").strip()
+            next_due_date = request.form.get("next_due_date", "").strip() or None
+            veterinarian = request.form.get("veterinarian", "").strip() or None
+            notes = request.form.get("notes", "").strip() or None
+
+            if not vaccine_name or not date_administered:
+                return render_template("add_vaccine.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
+
+            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+            return redirect(f"/my-pet/{pet_id}/vaccines")
+            
+        except Exception as e:
+            return render_template("add_vaccine.html", pet=pet, error=f"Error al guardar: {str(e)}")
+    
+    return render_template("add_vaccine.html", pet=pet)
 
 @app.route("/pet/<pet_id>/vaccines/add", methods=["GET", "POST"])
 @login_required
@@ -769,8 +807,8 @@ def add_vaccine_record(pet_id):
 @login_required
 @check_inactivity
 def delete_vaccine_record(vaccine_id):
-    """Elimina un registro de vacuna."""
-    # Primero obtener el pet_id para verificar permisos
+    """Elimina un registro de vacuna (solo dueños)."""
+    # Obtener el pet_id y verificar permisos
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
