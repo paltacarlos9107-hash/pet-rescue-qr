@@ -322,7 +322,7 @@
             {% endif %}
         </div>
 
-        <!-- Botón de edición SOLO para mascotas activadas desde QR vacíos -->
+        <!-- Botón de edición para mascotas activadas -->
         {% if pet.is_registered and pet.registration_password %}
         <div style="margin-top: 15px;">
             <a href="/edit/{{ pet.id }}" 
@@ -334,10 +334,22 @@
         </div>
         {% endif %}
 
-        <!-- Botón de vacunas (visible para todos) -->
+        <!-- Botón de vacunas para dueños -->
+        {% if pet.owner_email == user_email %}
+        <div style="margin-top: 15px;">
+            <a href="/my-pet/{{ pet.id }}/vaccines" 
+               style="background: #9C27B0; padding: 10px 20px; border: none; border-radius: 8px; 
+                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                      text-align: center; font-size: 14px;">
+                💉 Gestionar Vacunas
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Botón de vacunas público (siempre visible) -->
         <div style="margin-top: 15px;">
             <a href="/pet/{{ pet.id }}/vaccines" 
-               style="background: #9C27B0; padding: 10px 20px; border: none; border-radius: 8px; 
+               style="background: #7B1FA2; padding: 10px 20px; border: none; border-radius: 8px; 
                       color: white; font-weight: bold; text-decoration: none; display: inline-block; 
                       text-align: center; font-size: 14px;">
                 💉 Ver Vacunas
