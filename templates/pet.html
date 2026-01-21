@@ -310,51 +310,48 @@
         </div>
 
         <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <button id="helpBtn" style="background: #e91e63; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
-                📍 Sí, quiero ayudar
-            </button>
-            
-            {% if pet.owner_phone %}
-            <a href="tel:{{ pet.owner_phone }}" 
-               style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; font-size: 14px;">
-                📞 Llamar al dueño
-            </a>
-            {% endif %}
-        </div>
+    <button id="helpBtn" style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 14px;">
+        📍 Enviar ubicación
+    </button>
+    
+    {% if pet.owner_phone %}
+    <a href="tel:{{ pet.owner_phone }}" 
+       style="background: #2196F3; padding: 12px 24px; border: none; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; font-size: 14px;">
+        📞 Llamar al dueño
+    </a>
+    {% endif %}
+</div>
 
-        <!-- Botón de edición para mascotas activadas -->
-        {% if pet.is_registered and pet.registration_password %}
-        <div style="margin-top: 15px;">
-            <a href="/edit/{{ pet.id }}" 
-               style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
-                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                      text-align: center; font-size: 14px;">
-                ✏️ Editar Información
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- Botón de vacunas para dueños -->
-        {% if pet.owner_email == user_email %}
-        <div style="margin-top: 15px;">
-            <a href="/my-pet/{{ pet.id }}/vaccines" 
-               style="background: #9C27B0; padding: 10px 20px; border: none; border-radius: 8px; 
-                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                      text-align: center; font-size: 14px;">
-                💉 Gestionar Vacunas
-            </a>
-        </div>
-        {% endif %}
-
-        <!-- Botón de vacunas público (siempre visible) -->
-        <div style="margin-top: 15px;">
-            <a href="/pet/{{ pet.id }}/vaccines" 
-               style="background: #7B1FA2; padding: 10px 20px; border: none; border-radius: 8px; 
-                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                      text-align: center; font-size: 14px;">
-                💉 Ver Vacunas
-            </a>
-        </div>
+<!-- Botones de vacunas en la misma línea -->
+<div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+    <!-- Ver Vacunas (público) -->
+    <a href="/pet/{{ pet.id }}/vaccines" 
+       style="background: #9C27B0; padding: 10px 15px; border: none; border-radius: 8px; 
+              color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+              text-align: center; font-size: 14px;">
+        💉 Ver Vacunas
+    </a>
+    
+    <!-- Gestionar Vacunas (solo dueños) -->
+    {% if pet.owner_email == user_email %}
+    <a href="/my-pet/{{ pet.id }}/vaccines" 
+       style="background: #9C27B0; padding: 10px 15px; border: none; border-radius: 8px; 
+              color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+              text-align: center; font-size: 14px;">
+        💉 Gestionar Vacunas
+    </a>
+    {% endif %}
+    
+    <!-- Editar Información (solo QR activados) -->
+    {% if pet.is_registered and pet.registration_password %}
+    <a href="/edit/{{ pet.id }}" 
+       style="background: #FF9800; padding: 10px 15px; border: none; border-radius: 8px; 
+              color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+              text-align: center; font-size: 14px;">
+        ✏️ Editar Información
+    </a>
+    {% endif %}
+</div>
 
         <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
