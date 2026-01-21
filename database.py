@@ -292,13 +292,23 @@ def delete_pet(pet_id):
     return deleted
 
 def toggle_user_active_status(email, is_active):
-    """Activa o desactiva una cuenta de usuario."""
+    """Activa o desactiva una cuenta de usuario e invalida su sesión."""
     conn = get_db_connection()
     cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("UPDATE users SET is_active = %s WHERE email = %s", (is_active, email))
+    
+    if is_active:
+        # Activar usuario
+        if IS_PRODUCTION:
+            cur.execute("UPDATE users SET is_active = TRUE WHERE email = %s", (email,))
+        else:
+            cur.execute("UPDATE users SET is_active = 1 WHERE email = ?", (email,))
     else:
-        cur.execute("UPDATE users SET is_active = ? WHERE email = ?", (is_active, email))
+        # Desactivar usuario e invalidar sesión
+        if IS_PRODUCTION:
+            cur.execute("UPDATE users SET is_active = FALSE, session_token = NULL WHERE email = %s", (email,))
+        else:
+            cur.execute("UPDATE users SET is_active = 0, session_token = NULL WHERE email = ?", (email,))
+    
     conn.commit()
     cur.close()
     conn.close()

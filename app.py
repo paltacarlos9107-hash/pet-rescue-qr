@@ -61,10 +61,12 @@ def login_required(f):
             clear_user_session()
             return redirect("/login?message=invalid_session")
         
-        # Verificar token y expiración
-        if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
+        # Verificar token, expiración Y estado activo
+        if (user.get("session_token") != session.get("session_token") or 
+            not is_token_valid(user) or 
+            not user.get("is_active", True)):
             clear_user_session()
-            return redirect("/login?message=expired_session")
+            return redirect("/login?message=account_disabled")
         
         return f(*args, **kwargs)
     return decorated_function
@@ -80,10 +82,12 @@ def admin_required(f):
             clear_user_session()
             return redirect("/login?message=invalid_session")
         
-        # Verificar token y expiración
-        if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
+        # Verificar token, expiración Y estado activo
+        if (user.get("session_token") != session.get("session_token") or 
+            not is_token_valid(user) or 
+            not user.get("is_active", True)):
             clear_user_session()
-            return redirect("/login?message=expired_session")
+            return redirect("/login?message=account_disabled")
         
         if not user.get("is_admin"):
             return "<h2>Acceso denegado</h2>", 403
@@ -100,12 +104,14 @@ def check_inactivity(f):
                 clear_user_session()
                 return redirect("/login?message=invalid_session")
             
-            # Verificar token y expiración
-            if user.get("session_token") != session.get("session_token") or not is_token_valid(user):
+            # Verificar token, expiración Y estado activo
+            if (user.get("session_token") != session.get("session_token") or 
+                not is_token_valid(user) or 
+                not user.get("is_active", True)):
                 clear_user_session()
-                return redirect("/login?message=expired_session")
+                return redirect("/login?message=account_disabled")
             
-            # Verificar inactividad de 15 minutos
+            # Verificar inactividad
             last_activity = session.get("last_activity", 0)
             if time.time() - last_activity > 900:
                 clear_user_session()
@@ -704,7 +710,7 @@ def admin_panel():
                 else:
                     message = f"⚠️ Mascota {pet_id} no encontrada."
 
-    # Obtener datos actualizados
+    # Obtener datos actualizados - ASEGURAR QUE OBTIENE is_active
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
