@@ -322,13 +322,13 @@
             {% endif %}
         </div>
 
-        <!-- Botón de edición para mascotas activadas -->
-        {% if pet.is_registered %}
+        <!-- Botón de edición SOLO para mascotas activadas desde QR vacíos -->
+        {% if pet.is_registered and pet.registration_password %}
         <div style="margin-top: 15px;">
             <a href="/edit/{{ pet.id }}" 
-               style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
-                      color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-                      text-align: center; font-size: 14px;">
+            style="background: #FF9800; padding: 10px 20px; border: none; border-radius: 8px; 
+                    color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                    text-align: center; font-size: 14px;">
                 ✏️ Editar Información
             </a>
         </div>
