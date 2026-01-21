@@ -602,7 +602,10 @@ def pet_page(pet_id):
         qr_img.save(buffered, format="PNG")
         qr_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-        return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url)
+        # Obtener email del usuario logueado (si existe)
+        user_email = session.get("user_email") if session.get("logged_in") else None
+
+        return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url, user_email=user_email)
     
     except Exception as e:
         print(f"❌ Error en /pet/{pet_id}: {repr(e)}")
