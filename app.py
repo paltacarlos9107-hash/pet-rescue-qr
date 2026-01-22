@@ -473,7 +473,7 @@ def edit_pet_form(pet_id):
         city = request.form.get("city", pet["city"] or "").strip()
         address = request.form.get("address", pet["address"] or "").strip()
 
-        # Validación básica
+        # Validación básica (SIN contraseña)
         if not name or not owner_name or not owner_email:
             return render_template("edit_form.html", pet_id=pet_id, pet=pet, error="Nombre, dueño y correo son obligatorios.")
 
