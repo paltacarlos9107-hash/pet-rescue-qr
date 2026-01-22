@@ -342,13 +342,12 @@
     </a>
     {% endif %}
     
-    <!-- Editar Información (QR activados) -->
     {% if pet.is_registered and pet.registration_password %}
-    <a href="/edit/{{ pet.id }}" 
-       style="background: #FF9800; padding: 10px 15px; border: none; border-radius: 8px; 
-              color: white; font-weight: bold; text-decoration: none; display: inline-block; 
-              text-align: center; font-size: 14px;">
-        ✏️ Editar Información
+    <a href="/edit/{{ pet.id }}/password" 
+        style="background: #FF9800; padding: 10px 15px; border: none; border-radius: 8px; 
+                color: white; font-weight: bold; text-decoration: none; display: inline-block; 
+                text-align: center; font-size: 14px;">
+            ✏️ Editar Información
     </a>
     {% endif %}
 </div>

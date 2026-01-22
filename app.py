@@ -419,22 +419,35 @@ def activate_pet(pet_id):
         print(f"❌ Error en /activate/{pet_id}: {repr(e)}")
         return "<h2>❌ Error al activar el QR.</h2>", 500
     
-@app.route("/edit/<pet_id>", methods=["GET", "POST"])
-def edit_pet(pet_id):
-    """Permite editar una mascota activada si se proporciona la contraseña correcta."""
+@app.route("/edit/<pet_id>/password", methods=["GET", "POST"])
+def edit_pet_password(pet_id):
+    """Verifica la contraseña antes de permitir editar la mascota."""
     pet = get_pet(pet_id)
-    if not pet or not pet.get("is_registered"):
-        return "<h2>❌ Mascota no encontrada o no activada.</h2>", 404
+    if not pet or not pet.get("is_registered") or not pet.get("registration_password"):
+        return "<h2>❌ Esta mascota no tiene edición habilitada.</h2>", 403
 
     if request.method == "POST":
         password = request.form.get("password", "")
-        if not password:
-            return render_template("edit_form.html", pet_id=pet_id, error="Contraseña requerida.")
-        
-        # Verificar contraseña
         if password != pet.get("registration_password"):
-            return render_template("edit_form.html", pet_id=pet_id, error="❌ Contraseña incorrecta.")
+            return render_template("edit_password.html", pet=pet, error="❌ Contraseña incorrecta.")
         
+        # Crear sesión temporal para acceso a edición
+        session[f"edit_access_{pet_id}"] = True
+        return redirect(f"/edit/{pet_id}/form")
+    
+    return render_template("edit_password.html", pet=pet)
+
+@app.route("/edit/<pet_id>/form", methods=["GET", "POST"])
+def edit_pet_form(pet_id):
+    """Formulario de edición (requiere sesión temporal)."""
+    if not session.get(f"edit_access_{pet_id}"):
+        return redirect(f"/edit/{pet_id}/password")
+    
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+
+    if request.method == "POST":
         # Procesar la subida de foto (si existe)
         photo_url = pet.get("photo_url")  # Mantener la foto existente por defecto
         if "photo" in request.files:
@@ -462,7 +475,7 @@ def edit_pet(pet_id):
 
         # Validación básica
         if not name or not owner_name or not owner_email:
-            return render_template("edit_form.html", pet_id=pet_id, error="Nombre, dueño y correo son obligatorios.")
+            return render_template("edit_form.html", pet_id=pet_id, pet=pet, error="Nombre, dueño y correo son obligatorios.")
 
         # Actualizar en la base de datos
         conn = get_db_connection()
@@ -492,7 +505,6 @@ def edit_pet(pet_id):
         </script>
         """
 
-    # Mostrar formulario de edición (GET request)
     return render_template("edit_form.html", pet_id=pet_id, pet=pet)
 
 @app.route("/edit-my-pet/<pet_id>", methods=["GET", "POST"])
