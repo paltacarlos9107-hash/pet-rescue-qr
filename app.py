@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, session
+from flask import Flask, render_template, request, jsonify, redirect, session, send_file
 import uuid
 import qrcode
 from io import BytesIO
@@ -7,6 +7,7 @@ import os
 import requests
 import cloudinary
 import cloudinary.uploader
+import zipfile
 from database import init_db, add_pet, get_pet, get_user_by_email, make_user_admin, get_all_pets, delete_pet, update_user_session_token, clear_user_session_token, toggle_user_active_status, get_db_connection, is_token_valid, add_vaccine, get_vaccines_by_pet, delete_vaccine
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -315,6 +316,80 @@ def generate_qr():
 
     return render_template("generate_qr.html", qr=qr_base64, qr_url=qr_url, pet_id=pet_id)
 
+@app.route("/generate-qr-bulk", methods=["GET", "POST"])
+@login_required
+@check_inactivity
+def generate_qr_bulk():
+    """Genera múltiples códigos QR vacíos y los descarga en un ZIP."""
+    if request.method == "POST":
+        try:
+            quantity = int(request.form.get("quantity", 1))
+            if quantity < 1 or quantity > 50:  # Límite razonable
+                return render_template("generate_qr_bulk.html", error="Cantidad debe estar entre 1 y 50.")
+            
+            # Crear buffer en memoria para el ZIP
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                qr_data = []
+                
+                for i in range(quantity):
+                    pet_id = str(uuid.uuid4())[:8].upper()
+                    temp_email = "unregistered@petrescue.qr"
+                    
+                    # Guardar en base de datos
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    if IS_PRODUCTION:
+                        cur.execute("""
+                            INSERT INTO pets (id, name, owner_name, is_registered, owner_email) 
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, (pet_id, "", "", False, temp_email))
+                    else:
+                        cur.execute("""
+                            INSERT INTO pets (id, name, owner_name, is_registered, owner_email) 
+                            VALUES (?, ?, ?, ?, ?)
+                        """, (pet_id, "", "", False, temp_email))
+                    conn.commit()
+                    cur.close()
+                    conn.close()
+                    
+                    # Generar QR
+                    if IS_PRODUCTION:
+                        qr_url = f"https://{request.host}/activate/{pet_id}"
+                    else:
+                        qr_url = f"{request.url_root}activate/{pet_id}"
+                    
+                    qr_img = qrcode.make(qr_url)
+                    img_buffer = BytesIO()
+                    qr_img.save(img_buffer, format="PNG")
+                    img_buffer.seek(0)
+                    
+                    # Agregar al ZIP
+                    filename = f"QR_{pet_id}.png"
+                    zip_file.writestr(filename, img_buffer.getvalue())
+                    qr_data.append({"id": pet_id, "filename": filename})
+                
+                # Agregar archivo de texto con IDs
+                ids_text = "\n".join([f"{item['id']} -> {item['filename']}" for item in qr_data])
+                zip_file.writestr("IDs_de_QR.txt", ids_text)
+            
+            # Preparar respuesta de descarga
+            zip_buffer.seek(0)
+            return send_file(
+                zip_buffer,
+                mimetype='application/zip',
+                as_attachment=True,
+                download_name=f'QR_vacios_{quantity}_unidades.zip'
+            )
+            
+        except ValueError:
+            return render_template("generate_qr_bulk.html", error="Cantidad inválida.")
+        except Exception as e:
+            print(f"❌ Error en generación masiva: {repr(e)}")
+            return render_template("generate_qr_bulk.html", error="Error al generar QRs.")
+    
+    return render_template("generate_qr_bulk.html")
+
 @app.route("/qr/<pet_id>")
 def qr_only(pet_id):
     """Muestra solo el código QR de una mascota."""
@@ -473,7 +548,7 @@ def edit_pet_form(pet_id):
         city = request.form.get("city", pet["city"] or "").strip()
         address = request.form.get("address", pet["address"] or "").strip()
 
-        # Validación básica (SIN contraseña)
+        # Validación básica
         if not name or not owner_name or not owner_email:
             return render_template("edit_form.html", pet_id=pet_id, pet=pet, error="Nombre, dueño y correo son obligatorios.")
 
@@ -814,97 +889,6 @@ def delete_vaccine_record(vaccine_id):
     
     if not pet or pet["owner_email"] != session["user_email"]:
         return jsonify({"error": "No tienes permiso"}), 403
-    
-    if delete_vaccine(vaccine_id):
-        return jsonify({"success": True})
-    else:
-        return jsonify({"error": "No se pudo eliminar"}), 400
-    
-@app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
-def manage_vaccines_password(pet_id):
-    """Gestiona vacunas para mascotas activadas desde QR vacío (con contraseña)."""
-    pet = get_pet(pet_id)
-    if not pet or not pet.get("is_registered") or not pet.get("registration_password"):
-        return "<h2>❌ Esta mascota no tiene gestión de vacunas habilitada.</h2>", 403
-
-    # Si es POST, verificar contraseña
-    if request.method == "POST":
-        password = request.form.get("password", "")
-        if password != pet.get("registration_password"):
-            return render_template("manage_vaccines_password.html", pet=pet, error="❌ Contraseña incorrecta.")
-        
-        # Crear sesión temporal para acceso a vacunas
-        session[f"vaccine_access_{pet_id}"] = True
-        return redirect(f"/pet/{pet_id}/vaccines/edit")
-    
-    # Mostrar formulario de contraseña
-    return render_template("manage_vaccines_password.html", pet=pet)
-
-@app.route("/pet/<pet_id>/vaccines/edit")
-def edit_vaccines_session(pet_id):
-    """Página de edición de vacunas (requiere sesión de contraseña)."""
-    # Verificar si hay sesión de gestión temporal
-    if not session.get(f"vaccine_access_{pet_id}"):
-        return redirect(f"/pet/{pet_id}/vaccines/manage")
-    
-    pet = get_pet(pet_id)
-    if not pet:
-        return "<h2>❌ Mascota no encontrada.</h2>", 404
-    
-    vaccines = get_vaccines_by_pet(pet_id)
-    return render_template("vaccines_edit.html", pet=pet, vaccines=vaccines)
-
-@app.route("/pet/<pet_id>/vaccines/add", methods=["GET", "POST"])
-def add_vaccine_password(pet_id):
-    """Agrega vacuna para mascotas activadas (con sesión de gestión)."""
-    if not session.get(f"vaccine_access_{pet_id}"):
-        return redirect(f"/pet/{pet_id}/vaccines/manage")
-    
-    pet = get_pet(pet_id)
-    if not pet:
-        return "<h2>❌ Mascota no encontrada.</h2>", 404
-    
-    if request.method == "POST":
-        try:
-            vaccine_name = request.form.get("vaccine_name", "").strip()
-            date_administered = request.form.get("date_administered", "").strip()
-            next_due_date = request.form.get("next_due_date", "").strip() or None
-            veterinarian = request.form.get("veterinarian", "").strip() or None
-            notes = request.form.get("notes", "").strip() or None
-
-            if not vaccine_name or not date_administered:
-                return render_template("add_vaccine_simple.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
-
-            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            return redirect(f"/pet/{pet_id}/vaccines/edit")
-            
-        except Exception as e:
-            return render_template("add_vaccine_simple.html", pet=pet, error=f"Error al guardar: {str(e)}")
-    
-    return render_template("add_vaccine_simple.html", pet=pet)
-
-@app.route("/vaccine/<int:vaccine_id>/delete/simple", methods=["POST"])
-def delete_vaccine_simple(vaccine_id):
-    """Elimina vacuna para mascotas activadas."""
-    # Obtener pet_id
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT pet_id FROM vaccines WHERE id = %s", (vaccine_id,))
-    else:
-        cur.execute("SELECT pet_id FROM vaccines WHERE id = ?", (vaccine_id,))
-    result = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not result:
-        return jsonify({"error": "Vacuna no encontrada"}), 404
-    
-    pet_id = result["pet_id"]
-    
-    # Verificar sesión de gestión
-    if not session.get(f"vaccine_access_{pet_id}"):
-        return jsonify({"error": "Acceso no autorizado"}), 403
     
     if delete_vaccine(vaccine_id):
         return jsonify({"success": True})
