@@ -433,14 +433,17 @@ def activate_pet(pet_id):
             breed = request.form.get("breed", "").strip()
             description = request.form.get("description", "").strip()
             owner_name = request.form.get("owner_name", "").strip()
-            owner_email = request.form.get("email", "").strip()  # ← ¡Correo electrónico!
+            owner_email = request.form.get("email", "").strip()  # ← Opcional
             owner_phone = request.form.get("phone", "").strip()
             city = request.form.get("city", "").strip()
             address = request.form.get("address", "").strip()
             password = request.form.get("password", "")
 
-            if not name or not owner_name or not owner_email or not password:
-                return render_template("activate_form.html", pet_id=pet_id, error="Nombre, dueño, correo y contraseña son obligatorios.")
+            # Validación: correo ya NO es obligatorio
+            if not name or not owner_name or not password:
+                return render_template("activate_form.html", pet_id=pet_id, error="Nombre, dueño y contraseña son obligatorios.")
+
+            # ... resto del código igual ...
 
             # Subir foto si existe
             photo_url = None
@@ -549,8 +552,8 @@ def edit_pet_form(pet_id):
         address = request.form.get("address", pet["address"] or "").strip()
 
         # Validación básica
-        if not name or not owner_name or not owner_email:
-            return render_template("edit_form.html", pet_id=pet_id, pet=pet, error="Nombre, dueño y correo son obligatorios.")
+        if not name or not owner_name:
+            return render_template("edit_form.html", pet_id=pet_id, pet=pet, error="Nombre y dueño son obligatorios.")
 
         # Actualizar en la base de datos
         conn = get_db_connection()
