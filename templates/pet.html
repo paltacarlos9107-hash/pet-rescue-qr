@@ -423,23 +423,33 @@
             {% endif %}
         </div>
 
-        <!-- Botones secundarios -->
+       <!-- Botones secundarios -->
         <div class="secondary-actions">
             <a href="/pet/{{ pet.id }}/vaccines" 
-               class="btn-secondary-small">
+            class="btn-secondary-small">
                 💉 Ver Vacunas
             </a>
             
-            {% if pet.owner_email == user_email %}
+            <!-- Gestionar Vacunas para usuarios registrados -->
+            {% if pet.owner_email == user_email and not pet.is_registered %}
             <a href="/my-pet/{{ pet.id }}/vaccines" 
-               class="btn-secondary-small">
+            class="btn-secondary-small">
                 🛠️ Gestionar Vacunas
             </a>
             {% endif %}
             
+            <!-- Gestionar Vacunas para QR activados -->
+            {% if pet.is_registered and pet.registration_password %}
+            <a href="/pet/{{ pet.id }}/vaccines/manage" 
+            class="btn-secondary-small">
+                🛠️ Gestionar Vacunas
+            </a>
+            {% endif %}
+            
+            <!-- Editar Información (solo QR activados) -->
             {% if pet.is_registered and pet.registration_password %}
             <a href="/edit/{{ pet.id }}/password" 
-               class="btn-secondary-small btn-edit">
+            class="btn-secondary-small btn-edit">
                 ✏️ Editar Información
             </a>
             {% endif %}
