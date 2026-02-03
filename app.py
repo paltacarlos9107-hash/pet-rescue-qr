@@ -897,6 +897,94 @@ def delete_vaccine_record(vaccine_id):
         return jsonify({"success": True})
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
+    
+    @app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
+def manage_vaccines_password(pet_id):
+    """Verifica la contraseña antes de permitir gestionar vacunas."""
+    pet = get_pet(pet_id)
+    if not pet or not pet.get("is_registered") or not pet.get("registration_password"):
+        return "<h2>❌ Esta mascota no tiene gestión de vacunas habilitada.</h2>", 403
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if password != pet.get("registration_password"):
+            return render_template("manage_vaccines_password.html", pet=pet, error="❌ Contraseña incorrecta.")
+        
+        # Crear sesión temporal para acceso a vacunas
+        session[f"vaccine_access_{pet_id}"] = True
+        return redirect(f"/pet/{pet_id}/vaccines/edit")
+    
+    return render_template("manage_vaccines_password.html", pet=pet)
+
+@app.route("/pet/<pet_id>/vaccines/edit")
+def edit_vaccines_session(pet_id):
+    """Página de edición de vacunas (requiere sesión temporal)."""
+    if not session.get(f"vaccine_access_{pet_id}"):
+        return redirect(f"/pet/{pet_id}/vaccines/manage")
+    
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+    
+    vaccines = get_vaccines_by_pet(pet_id)
+    return render_template("vaccines_edit.html", pet=pet, vaccines=vaccines)
+
+@app.route("/pet/<pet_id>/vaccines/add", methods=["GET", "POST"])
+def add_vaccine_password(pet_id):
+    """Agrega vacuna para mascotas activadas (con sesión de gestión)."""
+    if not session.get(f"vaccine_access_{pet_id}"):
+        return redirect(f"/pet/{pet_id}/vaccines/manage")
+    
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+    
+    if request.method == "POST":
+        try:
+            vaccine_name = request.form.get("vaccine_name", "").strip()
+            date_administered = request.form.get("date_administered", "").strip()
+            next_due_date = request.form.get("next_due_date", "").strip() or None
+            veterinarian = request.form.get("veterinarian", "").strip() or None
+            notes = request.form.get("notes", "").strip() or None
+
+            if not vaccine_name or not date_administered:
+                return render_template("add_vaccine_simple.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
+
+            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+            return redirect(f"/pet/{pet_id}/vaccines/edit")
+            
+        except Exception as e:
+            return render_template("add_vaccine_simple.html", pet=pet, error=f"Error al guardar: {str(e)}")
+    
+    return render_template("add_vaccine_simple.html", pet=pet)
+
+@app.route("/vaccine/<int:vaccine_id>/delete/simple", methods=["POST"])
+def delete_vaccine_simple(vaccine_id):
+    """Elimina vacuna para mascotas activadas."""
+    # Obtener pet_id
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT pet_id FROM vaccines WHERE id = %s", (vaccine_id,))
+    else:
+        cur.execute("SELECT pet_id FROM vaccines WHERE id = ?", (vaccine_id,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not result:
+        return jsonify({"error": "Vacuna no encontrada"}), 404
+    
+    pet_id = result["pet_id"]
+    
+    # Verificar sesión de gestión
+    if not session.get(f"vaccine_access_{pet_id}"):
+        return jsonify({"error": "Acceso no autorizado"}), 403
+    
+    if delete_vaccine(vaccine_id):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"error": "No se pudo eliminar"}), 400
 
 # -------------------------------------------------
 # SERVIDOR
