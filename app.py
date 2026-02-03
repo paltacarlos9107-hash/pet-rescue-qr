@@ -898,7 +898,7 @@ def delete_vaccine_record(vaccine_id):
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
     
-    @app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
+@app.route("/pet/<pet_id>/vaccines/manage", methods=["GET", "POST"])
 def manage_vaccines_password(pet_id):
     """Verifica la contraseña antes de permitir gestionar vacunas."""
     pet = get_pet(pet_id)
