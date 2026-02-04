@@ -1,207 +1,450 @@
+<!-- templates/dashboard.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Principal - Pet Rescue QR</title>
+    <title>Dashboard - Pet Rescue QR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-800: #343a40;
+            --card-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             min-height: 100vh;
-            padding: 0;
-            margin: 0;
+            padding: 20px;
+            color: var(--gray-800);
         }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            text-align: center;
         }
-        
-        /* Logo header */
-        .app-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        
-        .logo-img {
-            width: 120px;
-            height: auto;
-        }
-        
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1;
-        }
-        
+
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
+            padding: 20px 0;
+            color: white;
         }
-        
-        .logout-link {
-            color: #d32f2f;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        
-        .welcome {
-            margin-bottom: 40px;
-            color: #2c3e50;
+
+        .logo img {
+            width: 50px;
+            height: 50px;
         }
-        
-        .options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        
-        .option-card {
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
         }
-        
-        .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+
+        .welcome {
+            text-align: right;
         }
-        
-        .option-card.register {
-            border-top: 4px solid #4CAF50;
+
+        .welcome h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
         }
-        
-        .option-card.mypets {
-            border-top: 4px solid #2196F3;
-        }
-        
-        .option-card.admin {
-            border-top: 4px solid #9C27B0;
-        }
-        
-        .option-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        
-        .option-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .option-desc {
-            color: #666;
+
+        .welcome p {
             font-size: 14px;
-            line-height: 1.5;
+            opacity: 0.9;
         }
-        
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .stat-primary { background: rgba(33, 150, 243, 0.1); color: var(--primary); }
+        .stat-success { background: rgba(76, 175, 80, 0.1); color: var(--success); }
+        .stat-warning { background: rgba(255, 152, 0, 0.1); color: var(--warning); }
+        .stat-purple { background: rgba(156, 39, 176, 0.1); color: var(--purple); }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        /* Actions Grid */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        }
+
+        .action-card i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .action-card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--gray-800);
+        }
+
+        .action-card p {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #1976D2;
+            transform: scale(1.03);
+        }
+
+        /* Admin-only section */
+        .admin-section {
+            margin-top: 40px;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .admin-section h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-section h2 i {
+            color: var(--purple);
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .admin-stat {
+            background: var(--gray-100);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .admin-stat .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .admin-stat .label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .container {
-                padding: 20px;
-                margin: 0 10px;
+                padding: 10px;
             }
-            
-            .logo-img {
-                width: 80px;
+
+            header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
             }
-            
-            .logo-text {
-                font-size: 18px;
+
+            .user-info {
+                justify-content: center;
             }
-            
-            .options {
+
+            .stats-grid,
+            .actions-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .action-card {
+                padding: 20px 16px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Logo -->
-        <div class="app-logo">
-            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" 
-                 alt="Pet Rescue QR Logo" 
-                 class="logo-img">
-            <span class="logo-text">Pet Rescue QR</span>
-        </div>
-
+        <!-- Header -->
         <header>
-            <h1 style="display: none;">Pet Rescue QR</h1>
-            <a href="/logout" class="logout-link">🔒 Cerrar sesión</a>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" alt="Pet Rescue QR">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">C</div>
+                <div class="welcome">
+                    <h1>¡Hola, {{ user_email }}!</h1>
+                    <p>Tu cuenta está activa</p>
+                </div>
+            </div>
         </header>
-        
-        <div class="welcome">
-            <h2>¡Hola, {{ user_email }}!</h2>
-            <p>¿Qué deseas hacer hoy?</p>
-        </div>
-        
-        <div class="options">
-            <a href="/register" class="option-card register">
-                <div class="option-icon">➕</div>
-                <div class="option-title">Registrar Mascota</div>
-                <div class="option-desc">Registra una nueva mascota perdida y genera su código QR único</div>
-            </a>
-            
-            <a href="/my-pets" class="option-card mypets">
-                <div class="option-icon">📋</div>
-                <div class="option-title">Mis Mascotas</div>
-                <div class="option-desc">Ver y gestionar todas tus mascotas registradas</div>
-            </a>
-            
-            {% if is_admin %}
-            <a href="/admin" class="option-card admin">
-                <div class="option-icon">⚙️</div>
-                <div class="option-title">Panel de Administración</div>
-                <div class="option-desc">Gestionar usuarios y todas las mascotas del sistema</div>
-            </a>
 
-            <a href="/generate-qr" class="option-card register">
-                <div class="option-icon">🆕</div>
-                <div class="option-title">Generar QR Vacío</div>
-                <div class="option-desc">Crea un QR sin datos para activar al encontrar una mascota</div>
-            </a>
-
-            <a href="/generate-qr-bulk" class="option-card register">
-                <div class="option-icon">📦</div>
-                <div class="option-title">Generar QR Masivo</div>
-                <div class="option-desc">Crea múltiples QR vacíos y descárgalos en ZIP</div>
-            </a>
-            {% endif %}
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-primary">
+                    <i class="fas fa-paw"></i>
+                </div>
+                <div class="stat-value">3</div>
+                <div class="stat-label">Mascotas registradas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-success">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="stat-value">5</div>
+                <div class="stat-label">QR generados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-warning">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-value">2</div>
+                <div class="stat-label">Vacunas pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-purple">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">1</div>
+                <div class="stat-label">Mascota activa</div>
+            </div>
         </div>
+
+        <!-- Actions Grid -->
+        <div class="actions-grid">
+            <div class="action-card" onclick="location.href='/register'">
+                <i class="fas fa-plus-circle" style="color: #4CAF50;"></i>
+                <h3>Registrar Mascota</h3>
+                <p>Crea un nuevo perfil y genera su código QR único</p>
+                <button class="btn"><i class="fas fa-qrcode"></i> Registrar ahora</button>
+            </div>
+
+            <div class="action-card" onclick="location.href='/my-pets'">
+                <i class="fas fa-dog" style="color: #2196F3;"></i>
+                <h3>Mis Mascotas</h3>
+                <p>Ver, editar y gestionar todas tus mascotas registradas</p>
+                <button class="btn"><i class="fas fa-eye"></i> Ver lista</button>
+            </div>
+
+            <div class="action-card" onclick="location.href='/generate-qr'">
+                <i class="fas fa-qrcode" style="color: #9C27B0;"></i>
+                <h3>Generar QR Vacío</h3>
+                <p>Crea QR para mascotas perdidas (para activar más tarde)</p>
+                <button class="btn"><i class="fas fa-plus"></i> Generar QR</button>
+            </div>
+
+            <div class="action-card" onclick="location.href='/generate-qr-bulk'">
+                <i class="fas fa-cubes" style="color: #FF9800;"></i>
+                <h3>QR Masivo</h3>
+                <p>Genera y descarga múltiples QR en ZIP (ideal para refugios)</p>
+                <button class="btn"><i class="fas fa-file-archive"></i> Descargar</button>
+            </div>
+        </div>
+
+        <!-- Admin Section (solo si es admin) -->
+        {% if is_admin %}
+        <div class="admin-section">
+            <h2><i class="fas fa-cogs"></i> Panel de Administración</h2>
+            <p>Gestiona usuarios, mascotas y configuraciones del sistema</p>
+            
+            <div class="admin-stats">
+                <div class="admin-stat">
+                    <div class="value">12</div>
+                    <div class="label">Usuarios</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="value">24</div>
+                    <div class="label">Mascotas</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="value">3</div>
+                    <div class="label">QR activos</div>
+                </div>
+                <div class="admin-stat">
+                    <div class="value">1</div>
+                    <div class="label">Refugio asociado</div>
+                </div>
+            </div>
+
+            <button class="btn" style="margin-top: 20px; background: var(--purple);" onclick="location.href='/admin'">
+                <i class="fas fa-user-shield"></i> Acceder al Panel Admin
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer style="text-align: center; margin-top: 40px; color: rgba(255,255,255,0.8); font-size: 14px;">
+            <p>© {{ year }} Pet Rescue QR — Protegiendo a las mascotas, uno QR a la vez</p>
+        </footer>
     </div>
+
+    <script>
+        // Simulación de dinamismo (en producción, esto vendría de /api/stats)
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animate stats on scroll
+            const statCards = document.querySelectorAll('.stat-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            statCards.forEach(card => observer.observe(card));
+
+            // Simular actualización dinámica (ej: cada 30s)
+            setInterval(() => {
+                const stats = document.querySelectorAll('.stat-value');
+                stats.forEach(el => {
+                    const current = parseInt(el.textContent);
+                    const change = Math.floor(Math.random() * 2) - 1; // -1, 0, +1
+                    if (current + change >= 0) {
+                        el.textContent = current + change;
+                    }
+                });
+            }, 30000);
+        });
+    </script>
 </body>
 </html>

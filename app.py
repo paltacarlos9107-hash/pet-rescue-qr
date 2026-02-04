@@ -985,6 +985,8 @@ def delete_vaccine_simple(vaccine_id):
         return jsonify({"success": True})
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
+    
+    
 
 # -------------------------------------------------
 # SERVIDOR
