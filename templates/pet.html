@@ -424,12 +424,21 @@
                     <i>💉</i> Ver Vacunas
                 </a>
                 
-                {% if pet.owner_email == user_email %}
+                <!-- Gestionar Vacunas para usuarios registrados -->
+                {% if pet.owner_email == user_email and not pet.is_registered %}
                 <a href="/my-pet/{{ pet.id }}/vaccines" class="dropdown-item">
                     <i>🛠️</i> Gestionar Vacunas
                 </a>
                 {% endif %}
                 
+                <!-- Gestionar Vacunas para QR activados -->
+                {% if pet.is_registered and pet.registration_password %}
+                <a href="/pet/{{ pet.id }}/vaccines/manage" class="dropdown-item">
+                    <i>🛠️</i> Gestionar Vacunas
+                </a>
+                {% endif %}
+                
+                <!-- Editar Información (solo QR activados) -->
                 {% if pet.is_registered and pet.registration_password %}
                 <a href="/edit/{{ pet.id }}/password" class="dropdown-item">
                     <i>✏️</i> Editar Información
