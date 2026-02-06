@@ -39,6 +39,75 @@
             backdrop-filter: blur(10px);
             padding: 30px;
             text-align: center;
+            position: relative;
+        }
+        
+        /* Menú hamburguesa */
+        .hamburger-menu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+        
+        .hamburger-btn {
+            background: #9C27B0;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .hamburger-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 12px 0;
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.2s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dropdown-item {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: #9C27B0;
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
         }
         
         /* Logo header */
@@ -237,31 +306,6 @@
             box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
         }
         
-        /* Botones secundarios */
-        .secondary-actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .btn-secondary-small {
-            background: #9C27B0;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        
-        .btn-edit {
-            background: #FF9800;
-        }
-        
         /* Trust indicators */
         .trust-indicators {
             margin-top: 25px;
@@ -352,20 +396,48 @@
                 padding: 12px 20px;
             }
             
-            .btn-secondary-small {
-                font-size: 13px;
-                padding: 6px 10px;
-            }
-            
             .modal-content {
                 width: 95%;
                 height: 85%;
+            }
+            
+            .hamburger-menu {
+                top: 15px;
+                left: 15px;
+            }
+            
+            .dropdown-menu {
+                top: 60px;
+                left: 15px;
+                min-width: 180px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Menú hamburguesa -->
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="menuBtn">☰</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="/pet/{{ pet.id }}/vaccines" class="dropdown-item">
+                    <i>💉</i> Ver Vacunas
+                </a>
+                
+                {% if pet.owner_email == user_email %}
+                <a href="/my-pet/{{ pet.id }}/vaccines" class="dropdown-item">
+                    <i>🛠️</i> Gestionar Vacunas
+                </a>
+                {% endif %}
+                
+                {% if pet.is_registered and pet.registration_password %}
+                <a href="/edit/{{ pet.id }}/password" class="dropdown-item">
+                    <i>✏️</i> Editar Información
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Logo de la app -->
         <div class="app-logo">
             <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
@@ -423,38 +495,6 @@
             {% endif %}
         </div>
 
-       <!-- Botones secundarios -->
-        <div class="secondary-actions">
-            <a href="/pet/{{ pet.id }}/vaccines" 
-            class="btn-secondary-small">
-                💉 Ver Vacunas
-            </a>
-            
-            <!-- Gestionar Vacunas para usuarios registrados -->
-            {% if pet.owner_email == user_email and not pet.is_registered %}
-            <a href="/my-pet/{{ pet.id }}/vaccines" 
-            class="btn-secondary-small">
-                🛠️ Gestionar Vacunas
-            </a>
-            {% endif %}
-            
-            <!-- Gestionar Vacunas para QR activados -->
-            {% if pet.is_registered and pet.registration_password %}
-            <a href="/pet/{{ pet.id }}/vaccines/manage" 
-            class="btn-secondary-small">
-                🛠️ Gestionar Vacunas
-            </a>
-            {% endif %}
-            
-            <!-- Editar Información (solo QR activados) -->
-            {% if pet.is_registered and pet.registration_password %}
-            <a href="/edit/{{ pet.id }}/password" 
-            class="btn-secondary-small btn-edit">
-                ✏️ Editar Información
-            </a>
-            {% endif %}
-        </div>
-
         <!-- Indicadores de confianza -->
         <div class="trust-indicators">
             🔒 Protegido por Pet Rescue QR — Tus datos están cifrados y seguros
@@ -476,6 +516,21 @@
     </div>
 
     <script>
+        // Funcionalidad del menú hamburguesa
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        
+        menuBtn.addEventListener('click', () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (event) => {
+            if (!menuBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+        
         // Funcionalidad de modal
         function openModal() {
             document.getElementById("imageModal").style.display = "block";
