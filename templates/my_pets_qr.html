@@ -191,23 +191,6 @@
             margin-bottom: 15px;
         }
 
-        .register-btn {
-            background: var(--success);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .register-btn:hover {
-            background: #388E3C;
-        }
-
         @media (max-width: 768px) {
             .pets-grid {
                 grid-template-columns: 1fr;
@@ -223,11 +206,21 @@
 </head>
 <body>
     <div class="container">
-        
-        <!-- En el header, reemplaza el botón de logout por: -->
-        <a href="/qr-logout" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-        </a>
+        <header>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" alt="Pet Rescue QR Logo">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    <h1>¡Hola, {{ user_email }}!</h1>
+                    <p>Tus mascotas registradas</p>
+                </div>
+                <a href="/qr-logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </header>
 
         <h2 class="section-title">Mis Mascotas</h2>
 
@@ -267,10 +260,7 @@
         {% else %}
         <div class="no-pets">
             <h3>📭 No tienes mascotas registradas</h3>
-            <p>Registra tu primera mascota y genera su código QR único.</p>
-            <a href="/register" class="register-btn">
-                <i class="fas fa-plus"></i> Registrar Mascota
-            </a>
+            <p>Activa tu primera placa QR para verla aquí.</p>
         </div>
         {% endif %}
     </div>

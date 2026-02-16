@@ -987,7 +987,84 @@ def delete_vaccine_simple(vaccine_id):
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
 
+@app.route("/qr-login", methods=["GET", "POST"])
+def qr_login():
+    """Login para dueños de mascotas activadas desde QR vacío."""
+    error = ""
+    
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        
+        if not email or not password:
+            error = "Correo y contraseña son obligatorios."
+        else:
+            # Verificar si existe al menos una mascota con ese correo y contraseña
+            conn = get_db_connection()
+            cur = conn.cursor()
+            if IS_PRODUCTION:
+                cur.execute("""
+                    SELECT id FROM pets 
+                    WHERE owner_email = %s AND registration_password = %s AND is_registered = TRUE
+                    LIMIT 1
+                """, (email, password))
+            else:
+                cur.execute("""
+                    SELECT id FROM pets 
+                    WHERE owner_email = ? AND registration_password = ? AND is_registered = TRUE
+                    LIMIT 1
+                """, (email, password))
+            result = cur.fetchone()
+            cur.close()
+            conn.close()
+            
+            if result:
+                # Crear sesión temporal
+                session["qr_logged_in"] = True
+                session["qr_email"] = email
+                session["last_activity"] = time.time()
+                return redirect("/my-pets-qr")
+            else:
+                error = "Correo o contraseña incorrectos."
+    
+    return render_template("qr_login.html", error=error)
 
+def qr_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("qr_logged_in"):
+            return redirect("/qr-login")
+        
+        # Verificar inactividad (900 segundos = 15 minutos)
+        last_activity = session.get("last_activity", 0)
+        if time.time() - last_activity > 900:
+            session.clear()
+            return redirect("/qr-login?message=timeout")
+        
+        session["last_activity"] = time.time()
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/my-pets-qr")
+@qr_login_required
+def my_pets_qr():
+    """Muestra solo las mascotas del correo usado en QR activado."""
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE owner_email = %s AND is_registered = TRUE", (email,))
+    else:
+        cur.execute("SELECT * FROM pets WHERE owner_email = ? AND is_registered = TRUE", (email,))
+    pets = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template("my_pets_qr.html", pets=pets, user_email=email)
+
+@app.route("/qr-logout")
+def qr_logout():
+    session.clear()
+    return redirect("/qr-login")
 
 # -------------------------------------------------
 # SERVIDOR
