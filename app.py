@@ -987,15 +987,7 @@ def delete_vaccine_simple(vaccine_id):
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
 
-@app.route("/my-pets")
-@login_required
-@check_inactivity
-def my_pets():
-    """Muestra solo las mascotas del usuario actual."""
-    pets = get_all_pets(owner_email=session["user_email"])
-    return render_template("my_pets.html", pets=pets)
-    
-    
+
 
 # -------------------------------------------------
 # SERVIDOR
