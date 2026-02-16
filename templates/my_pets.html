@@ -4,204 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Mascotas - Pet Rescue QR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-800: #343a40;
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--gray-800);
             min-height: 100vh;
-            padding: 0;
-            margin: 0;
+            padding: 20px;
         }
-        
+
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            padding: 30px;
         }
-        
-        /* Logo */
-        .app-logo {
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .welcome h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .welcome p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #c2185b;
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .pet-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .pet-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+        }
+
+        .pet-image {
+            height: 200px;
+            background: var(--gray-200);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 30px;
+            font-size: 48px;
         }
-        
-        .logo-img {
-            width: 120px;
-            height: auto;
+
+        .pet-info {
+            padding: 20px;
         }
-        
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1;
+
+        .pet-info h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--gray-800);
         }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: 600;
+
+        .pet-info p {
+            margin: 8px 0;
+            color: #6c757d;
+            font-size: 14px;
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+
+        .pet-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
-        
-        th, td {
-            padding: 14px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background: #f1f8e9;
-            color: #2e7d32;
-            font-weight: 600;
-        }
-        
-        .pet-photo {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
+
+        .action-btn {
+            padding: 8px 16px;
             border-radius: 8px;
-            border: 1px solid #eee;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: var(--transition);
         }
-        
+
+        .btn-edit {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-vaccines {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-qr {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
         .no-pets {
             text-align: center;
-            color: #666;
-            padding: 40px;
+            color: white;
+            padding: 60px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
         }
-        
-        /* Responsive mobile */
+
+        .no-pets h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .register-btn {
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .register-btn:hover {
+            background: #388E3C;
+        }
+
         @media (max-width: 768px) {
-            .container {
-                margin: 0 5px;
-                padding: 20px 10px;
+            .pets-grid {
+                grid-template-columns: 1fr;
             }
             
-            .logo-img {
-                width: 60px;
-            }
-            
-            .logo-text {
-                font-size: 18px;
-            }
-            
-            table {
-                font-size: 14px;
-            }
-            
-            th, td {
-                padding: 8px 5px;
-            }
-            
-            .pet-photo {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .back-link {
-                font-size: 14px;
+            header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Logo -->
-        <div class="app-logo">
-            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
-                 alt="Pet Rescue QR Logo" 
-                 class="logo-img">
-            <span class="logo-text">Pet Rescue QR</span>
-        </div>
+        <header>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" alt="Pet Rescue QR Logo">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            <div class="user-info">
+                <div class="welcome">
+                    <h1>¡Hola, {{ session.user_email }}!</h1>
+                    <p>Tus mascotas registradas</p>
+                </div>
+                <a href="/logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </header>
 
-        <a href="/" class="back-link">← Volver al Registro</a>
-        
+        <h2 class="section-title">Mis Mascotas</h2>
+
         {% if pets %}
-        <div style="overflow-x: auto;">
-            <table style="min-width: 600px; width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr>
-                        <th>Foto</th>
-                        <th>Nombre</th>
-                        <th>Raza</th>
-                        <th>Ciudad</th>
-                        <th>Teléfono</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pet in pets %}
-                    <tr>
-                        <td>
-                            {% if pet.photo_url %}
-                                <img src="{{ pet.photo_url }}" alt="Foto" class="pet-photo">
-                            {% else %}
-                                🐾
-                            {% endif %}
-                        </td>
-                        <td>{{ pet.name }}</td>
-                        <td>{{ pet.breed or '-' }}</td>
-                        <td>{{ pet.city or '-' }}</td>
-                        <td>{{ pet.owner_phone or '-' }}</td>
-                        <td>
-                            <a href="/qr/{{ pet.id }}" 
-                            style="display: block; color: #4CAF50; text-decoration: none; font-size: 14px; margin-bottom: 8px;">
-                                📱 Ver QR
-                            </a>
-                            <a href="/pet/{{ pet.id }}" 
-                            style="display: block; color: #2196F3; text-decoration: none; font-size: 14px; margin-bottom: 8px;">
-                                ℹ️ Ver Información
-                            </a>
-                            <a href="/my-pet/{{ pet.id }}/vaccines" 
-                            style="display: block; color: #9C27B0; text-decoration: none; font-size: 14px; margin-bottom: 8px;">
-                                💉 Gestionar Vacunas
-                            </a>
-                            <a href="/edit-my-pet/{{ pet.id }}" 
-                            style="display: block; color: #FF9800; text-decoration: none; font-size: 14px;">
-                                ✏️ Editar
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="pets-grid">
+            {% for pet in pets %}
+            <div class="pet-card">
+                <div class="pet-image">
+                    {% if pet.photo_url %}
+                        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        🐾
+                    {% endif %}
+                </div>
+                <div class="pet-info">
+                    <h3>{{ pet.name }}</h3>
+                    <p><strong>Raza:</strong> {{ pet.breed or 'No especificada' }}</p>
+                    <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
+                    <p><strong>Ciudad:</strong> {{ pet.city or 'No especificada' }}</p>
+                    <p><strong>Dirección:</strong> {{ pet.address or 'No especificada' }}</p>
+                    
+                    <div class="pet-actions">
+                        <a href="/edit-my-pet/{{ pet.id }}" class="action-btn btn-edit">
+                            <i class="fas fa-edit"></i> Editar Info
+                        </a>
+                        <a href="/my-pet/{{ pet.id }}/vaccines" class="action-btn btn-vaccines">
+                            <i class="fas fa-syringe"></i> Vacunas
+                        </a>
+                        <a href="/qr/{{ pet.id }}" class="action-btn btn-qr">
+                            <i class="fas fa-qrcode"></i> Ver QR
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         {% else %}
         <div class="no-pets">
-            <h3>📭 No has registrado ninguna mascota aún</h3>
-            <p><a href="/" style="color: #4CAF50; text-decoration: none;">Registrar mi primera mascota →</a></p>
+            <h3>📭 No tienes mascotas registradas</h3>
+            <p>Registra tu primera mascota y genera su código QR único.</p>
+            <a href="/register" class="register-btn">
+                <i class="fas fa-plus"></i> Registrar Mascota
+            </a>
         </div>
         {% endif %}
     </div>
