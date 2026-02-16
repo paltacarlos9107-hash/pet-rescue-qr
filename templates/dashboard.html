@@ -371,6 +371,14 @@
                 <button class="btn"><i class="fas fa-eye"></i> Ver lista</button>
             </div>
 
+            <!-- En la sección de acciones -->
+            <div class="action-card" onclick="location.href='/my-placas'">
+                <i class="fas fa-id-badge" style="color: #9C27B0;"></i>
+                <h3>Mis Placas</h3>
+                <p>Ver y gestionar las placas registradas con tu correo</p>
+                <button class="btn"><i class="fas fa-eye"></i> Ver mis placas</button>
+            </div>
+
             <!-- Solo mostrar QR opciones si es admin -->
             {% if is_admin %}
             <div class="action-card" onclick="location.href='/generate-qr'">

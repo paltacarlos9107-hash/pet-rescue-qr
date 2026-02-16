@@ -987,6 +987,21 @@ def delete_vaccine_simple(vaccine_id):
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
     
+@app.route("/my-placas")
+@login_required
+@check_inactivity
+def my_placas():
+    """Muestra las placas/mascotas registradas con el correo del usuario."""
+    from database import get_all_pets
+    
+    # Obtener mascotas donde el owner_email coincide con el usuario logueado
+    pets = get_all_pets(owner_email=session["user_email"])
+    
+    # Filtrar solo mascotas activadas (is_registered = true)
+    activated_pets = [pet for pet in pets if pet.get("is_registered")]
+    
+    return render_template("my_placas.html", pets=activated_pets)
+    
     
 
 # -------------------------------------------------
