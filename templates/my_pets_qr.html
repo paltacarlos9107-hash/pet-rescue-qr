@@ -117,11 +117,48 @@
 
         .pet-image {
             height: 200px;
-            background: var(--gray-200);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .pet-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.8);
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pet-image:hover .click-hint {
+            opacity: 1;
+        }
+
+        .hero-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
+        }
+
+        .hero-icon {
+            font-size: 80px;
+            color: white;
+            opacity: 0.8;
         }
 
         .pet-info {
@@ -169,11 +206,6 @@
             color: white;
         }
 
-        .btn-qr {
-            background: var(--primary);
-            color: white;
-        }
-
         .action-btn:hover {
             transform: scale(1.05);
         }
@@ -189,6 +221,49 @@
         .no-pets h3 {
             font-size: 24px;
             margin-bottom: 15px;
+        }
+
+        /* Modal de imagen */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            display: block;
+            margin: auto;
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            animation: zoomIn 0.3s;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         @media (max-width: 768px) {
@@ -228,11 +303,14 @@
         <div class="pets-grid">
             {% for pet in pets %}
             <div class="pet-card">
-                <div class="pet-image">
+                <div class="pet-image" id="heroContainer">
                     {% if pet.photo_url %}
-                        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}">
+                        <div class="click-hint">🔍 Toque para ampliar</div>
                     {% else %}
-                        🐾
+                        <div class="hero-placeholder">
+                            <span class="hero-icon">🐾</span>
+                        </div>
                     {% endif %}
                 </div>
                 <div class="pet-info">
@@ -261,5 +339,45 @@
         </div>
         {% endif %}
     </div>
+
+    <!-- Modal de imagen completa -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        // Funcionalidad de modal
+        function openModal(imgSrc) {
+            document.getElementById("modalImage").src = imgSrc;
+            document.getElementById("imageModal").style.display = "block";
+        }
+        
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById("imageModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Tecla ESC para cerrar
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+        
+        // Asignar evento de clic a cada imagen
+        document.querySelectorAll('.pet-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                openModal(img.src);
+            });
+        });
+    </script>
 </body>
 </html>
