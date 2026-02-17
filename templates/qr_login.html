@@ -3,77 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login QR - Pet Rescue QR</title>
+    <title>Acceso a Mis Mascotas - Pet Rescue QR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
+        
         .login-container {
-            background: white;
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 40px;
             width: 100%;
-            max-width: 400px;
-        }
-        .login-container h2 {
+            max-width: 450px;
             text-align: center;
-            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .logo img {
+            width: 60px;
+            height: auto;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
             color: #2c3e50;
         }
-        .form-group {
-            margin-bottom: 15px;
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 22px;
         }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
             color: #2c3e50;
+            font-size: 14px;
         }
+        
         input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
+            transition: all 0.2s;
         }
+        
+        input:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+        
         button {
-            width: 100%;
-            padding: 12px;
-            background: #2196F3;
+            background: linear-gradient(120deg, #2196F3, #1976D2);
             color: white;
+            padding: 12px 24px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
+            width: 100%;
+            transition: all 0.2s;
         }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        
         .error {
+            background: #ffebee;
             color: #d32f2f;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .logo {
-            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
         }
-        .logo img {
-            width: 60px;
+        
+        .instructions {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #2e7d32;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
+        <!-- Logo actualizado -->
         <div class="logo">
-            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1768922756/logo-pet-tescue-qr_nvlgbl.png" alt="Pet Rescue QR">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
+                 alt="Pet Rescue QR Logo">
+            <span class="logo-text">Pet Rescue QR</span>
         </div>
+
         <h2>🔐 Acceso a Mis Mascotas</h2>
         
         {% if error %}
@@ -89,12 +147,19 @@
                 <label for="email">Correo electrónico</label>
                 <input type="email" id="email" name="email" required placeholder="tu@email.com">
             </div>
+            
             <div class="form-group">
                 <label for="password">Contraseña de edición</label>
                 <input type="password" id="password" name="password" required placeholder="Tu contraseña">
             </div>
+            
             <button type="submit">Iniciar Sesión</button>
         </form>
+        
+        <div class="instructions">
+            <p><strong>ℹ️ ¿No recuerdas tu contraseña?</strong><br>
+            Usa la misma contraseña que ingresaste al activar tu placa QR.</p>
+        </div>
     </div>
 </body>
 </html>
