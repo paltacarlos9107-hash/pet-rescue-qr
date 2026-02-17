@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Mascota - Pet Rescue QR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+        }
+        /* Logo header */
+        .app-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .logo-img {
+            width: 120px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            background: linear-gradient(120deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .error {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #1976D2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .current-photo {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .current-photo img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo -->
+        <div class="app-logo">
+            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
+                 alt="Pet Rescue QR Logo" 
+                 class="logo-img">
+            <span class="logo-text">Pet Rescue QR</span>
+        </div>
+
+        <h1>✏️ Editar Mascota: {{ pet.name }}</h1>
+        
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Nombre de la mascota *</label>
+                <input type="text" id="name" name="name" value="{{ pet.name }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="breed">Raza (opcional)</label>
+                <input type="text" id="breed" name="breed" value="{{ pet.breed or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Señas particulares</label>
+                <input type="text" id="description" name="description" value="{{ pet.description or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="owner_name">Tu nombre *</label>
+                <input type="text" id="owner_name" name="owner_name" value="{{ pet.owner_name }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="city">Ciudad *</label>
+                <input type="text" id="city" name="city" value="{{ pet.city or '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Dirección de domicilio</label>
+                <input type="text" id="address" name="address" value="{{ pet.address or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Teléfono de contacto</label>
+                <input type="tel" id="phone" name="phone" value="{{ pet.owner_phone or '' }}">
+            </div>
+            
+            <!-- Foto actual y opción de reemplazar -->
+            {% if pet.photo_url %}
+            <div class="current-photo">
+                <p><strong>Foto actual:</strong></p>
+                <img src="{{ pet.photo_url }}" alt="Foto actual">
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="photo">Reemplazar foto (opcional)</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+            </div>
+            
+            <button type="submit">💾 Guardar Cambios</button>
+        </form>
+        
+        <a href="/my-pets" class="back-link">← Volver a Mis Mascotas</a>
+    </div>
+</body>
+</html>

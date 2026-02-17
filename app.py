@@ -1066,6 +1066,145 @@ def qr_logout():
     session.clear()
     return redirect("/qr-login")
 
+@app.route("/edit-my-pet-qr/<pet_id>", methods=["GET", "POST"])
+@qr_login_required
+def edit_my_pet_qr(pet_id):
+    """Permite a usuarios QR editar sus mascotas."""
+    email = session["qr_email"]
+    
+    # Verificar que la mascota pertenezca al usuario
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para editar esta mascota.</h2>", 403
+
+    if request.method == "POST":
+        # Procesar la subida de foto (si existe)
+        photo_url = pet.get("photo_url")  # Mantener la foto existente por defecto
+        if "photo" in request.files:
+            photo = request.files["photo"]
+            if photo and photo.filename:
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        photo,
+                        folder="pet_rescue_qr/edited",
+                        resource_type="image"
+                    )
+                    photo_url = upload_result.get("secure_url")
+                except Exception as e:
+                    print("📷 Error al subir foto en edición:", str(e))
+
+        # Obtener y actualizar todos los campos
+        name = request.form.get("name", pet["name"]).strip()
+        breed = request.form.get("breed", pet["breed"] or "").strip()
+        description = request.form.get("description", pet["description"] or "").strip()
+        owner_name = request.form.get("owner_name", pet["owner_name"]).strip()
+        owner_phone = request.form.get("phone", pet["owner_phone"] or "").strip()
+        city = request.form.get("city", pet["city"] or "").strip()
+        address = request.form.get("address", pet["address"] or "").strip()
+
+        # Validación básica
+        if not name or not owner_name:
+            return render_template("edit_my_pet_form_qr.html", pet=pet, error="Nombre y dueño son obligatorios.")
+
+        # Actualizar en la base de datos
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if IS_PRODUCTION:
+            cur.execute("""
+                UPDATE pets SET 
+                    name=%s, breed=%s, description=%s, owner_name=%s, 
+                    owner_phone=%s, city=%s, address=%s, photo_url=%s
+                WHERE id=%s
+            """, (name, breed, description, owner_name, owner_phone, city, address, photo_url, pet_id))
+        else:
+            cur.execute("""
+                UPDATE pets SET 
+                    name=?, breed=?, description=?, owner_name=?, 
+                    owner_phone=?, city=?, address=?, photo_url=?
+                WHERE id=?
+            """, (name, breed, description, owner_name, owner_phone, city, address, photo_url, pet_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return f"""
+        <script>
+            alert('✅ Información actualizada exitosamente.');
+            window.location.href='/my-pets-qr';
+        </script>
+        """
+
+    return render_template("edit_my_pet_form_qr.html", pet=pet)
+
+
+@app.route("/my-pet-qr/<pet_id>/vaccines")
+@qr_login_required
+def view_my_vaccines_qr(pet_id):
+    """Muestra vacunas para usuarios QR."""
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
+    
+    vaccines = get_vaccines_by_pet(pet_id)
+    return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=True)
+
+
+@app.route("/my-pet-qr/<pet_id>/vaccines/add", methods=["GET", "POST"])
+@qr_login_required
+def add_vaccine_record_qr(pet_id):
+    """Agrega vacuna para usuarios QR."""
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para editar esta mascota.</h2>", 403
+    
+    if request.method == "POST":
+        try:
+            vaccine_name = request.form.get("vaccine_name", "").strip()
+            date_administered = request.form.get("date_administered", "").strip()
+            next_due_date = request.form.get("next_due_date", "").strip() or None
+            veterinarian = request.form.get("veterinarian", "").strip() or None
+            notes = request.form.get("notes", "").strip() or None
+
+            if not vaccine_name or not date_administered:
+                return render_template("add_vaccine.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
+
+            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+            return redirect(f"/my-pet-qr/{pet_id}/vaccines")
+            
+        except Exception as e:
+            return render_template("add_vaccine.html", pet=pet, error=f"Error al guardar: {str(e)}")
+    
+    return render_template("add_vaccine.html", pet=pet)
+
 # -------------------------------------------------
 # SERVIDOR
 # -------------------------------------------------

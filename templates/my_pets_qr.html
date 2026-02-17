@@ -243,13 +243,13 @@
                     <p><strong>Dirección:</strong> {{ pet.address or 'No especificada' }}</p>
                     
                     <div class="pet-actions">
-                        <a href="/edit-my-pet/{{ pet.id }}" class="action-btn btn-edit">
+                        <a href="/edit-my-pet-qr/{{ pet.id }}" class="action-btn btn-edit">
                             <i class="fas fa-edit"></i> Editar Info
                         </a>
                         <a href="/my-pet/{{ pet.id }}/vaccines" class="action-btn btn-vaccines">
                             <i class="fas fa-syringe"></i> Vacunas
                         </a>
-                        <a href="/qr/{{ pet.id }}" class="action-btn btn-qr">
+                        <a href="/my-pet-qr/{{ pet.id }}/vaccines" class="action-btn btn-vaccines">
                             <i class="fas fa-qrcode"></i> Ver QR
                         </a>
                     </div>
