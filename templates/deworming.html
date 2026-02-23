@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desparasitaciones - {{ pet.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-800: #343a40;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--gray-800);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .pet-info {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .deworming-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .deworming-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .deworming-item:last-child {
+            border-bottom: none;
+        }
+
+        .deworming-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .deworming-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .deworming-date {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .deworming-detail {
+            color: #6c757d;
+            font-size: 14px;
+            margin: 4px 0;
+        }
+
+        .btn-add {
+            display: inline-block;
+            background: #673AB7;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .btn-add:hover {
+            background: #512DA8;
+            transform: translateY(-2px);
+        }
+
+        .no-deworming {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" alt="Pet Rescue QR Logo">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            <a href="/my-pets-qr" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
+            </a>
+        </header>
+
+        <h2 class="section-title">💊 Historial de Desparasitaciones</h2>
+
+        <div class="pet-info">
+            <h2>{{ pet.name }} ({{ pet.breed or 'Sin raza' }})</h2>
+            <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
+        </div>
+
+        <div class="deworming-list">
+            {% if deworming %}
+                {% for record in deworming %}
+                <div class="deworming-item">
+                    <div class="deworming-header">
+                        <span class="deworming-name">{{ record.vaccine_name }}</span>
+                        <span class="deworming-date">{{ record.date_administered }}</span>
+                    </div>
+                    {% if record.next_due_date %}
+                    <div class="deworming-detail">🔄 Próxima dosis: {{ record.next_due_date }}</div>
+                    {% endif %}
+                    {% if record.veterinarian %}
+                    <div class="deworming-detail">👨‍⚕️ Veterinario: {{ record.veterinarian }}</div>
+                    {% endif %}
+                    {% if record.notes %}
+                    <div class="deworming-detail">📝 Notas: {{ record.notes }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-deworming">
+                    <p>📭 No hay desparasitaciones registradas.</p>
+                </div>
+            {% endif %}
+
+            {% if is_owner %}
+                <a href="/my-pet-qr/{{ pet.id }}/deworming/add" class="btn-add">
+                    <i class="fas fa-plus"></i> Agregar Desparasitación
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

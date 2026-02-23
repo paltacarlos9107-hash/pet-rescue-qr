@@ -158,9 +158,11 @@
                 <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" alt="Pet Rescue QR Logo">
                 <h1>Pet Rescue QR</h1>
             </div>
-            <a href="/my-pets-qr" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
+            {% if session.qr_logged_in %}
+                <a href="/my-pet-qr/{{ pet.id }}/vaccines" class="back-btn">Volver</a>
+            {% else %}
+                <a href="/my-pet/{{ pet.id }}/vaccines" class="back-btn">Volver</a>
+            {% endif %}
         </header>
 
         <div class="form-card">
