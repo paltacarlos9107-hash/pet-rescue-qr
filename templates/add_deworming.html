@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Desparasitación - {{ pet.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-800: #343a40;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--gray-800);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--gray-800);
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .pet-info {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .pet-info h3 {
+            font-size: 20px;
+            color: var(--gray-800);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        .submit-btn {
+            background: linear-gradient(120deg, var(--purple), #673AB7);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(156, 39, 176, 0.4);
+        }
+
+        .error {
+            background: #ffebee;
+            color: #d32f2f;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" alt="Pet Rescue QR Logo">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            <a href="/my-pets-qr" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </header>
+
+        <div class="form-card">
+            <div class="pet-info">
+                <h3>🪴 {{ pet.name }} ({{ pet.breed or 'Sin raza' }})</h3>
+            </div>
+
+            <h2>💊 Registrar Desparasitación</h2>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="medicine_name">Medicamento *</label>
+                    <input type="text" id="medicine_name" name="medicine_name" required placeholder="Ej: Drontal, Milbemax">
+                </div>
+
+                <div class="form-group">
+                    <label for="date_administered">Fecha de aplicación *</label>
+                    <input type="date" id="date_administered" name="date_administered" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="next_due_date">Próxima dosis (opcional)</label>
+                    <input type="date" id="next_due_date" name="next_due_date">
+                </div>
+
+                <div class="form-group">
+                    <label for="veterinarian">Veterinario (opcional)</label>
+                    <input type="text" id="veterinarian" name="veterinarian" placeholder="Nombre del veterinario">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notas adicionales</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Dosis, reacciones, etc."></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Guardar Desparasitación
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
