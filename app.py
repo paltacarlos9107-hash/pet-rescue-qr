@@ -941,49 +941,8 @@ def add_deworming_record_qr(pet_id):
 
 @app.route("/vaccine-qr/<int:vaccine_id>/delete", methods=["POST"])
 @qr_login_required
-def delete_vaccine_record_qr(vaccine_id):
+def delete_vaccine_qr(vaccine_id):  # ← Nombre único
     """Elimina un registro de vacuna (solo dueños QR)."""
-    # Obtener el pet_id y verificar permisos
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT pet_id FROM vaccines WHERE id = %s", (vaccine_id,))
-    else:
-        cur.execute("SELECT pet_id FROM vaccines WHERE id = ?", (vaccine_id,))
-    result = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not result:
-        return jsonify({"error": "Vacuna no encontrada"}), 404
-    
-    pet_id = result["pet_id"]
-    email = session["qr_email"]
-    
-    # Verificar que la mascota pertenezca al usuario QR
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT id FROM pets WHERE id = %s AND owner_email = %s", (pet_id, email))
-    else:
-        cur.execute("SELECT id FROM pets WHERE id = ? AND owner_email = ?", (pet_id, email))
-    pet_result = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not pet_result:
-        return jsonify({"error": "No tienes permiso"}), 403
-    
-    if delete_vaccine(vaccine_id):
-        return jsonify({"success": True})
-    else:
-        return jsonify({"error": "No se pudo eliminar"}), 400
-
-@app.route("/vaccine-qr/<int:vaccine_id>/delete", methods=["POST"])
-@qr_login_required
-def delete_vaccine_record_qr(vaccine_id):
-    """Elimina un registro de vacuna (solo dueños QR)."""
-    # Obtener el pet_id y verificar permisos
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
