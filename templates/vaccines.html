@@ -111,7 +111,22 @@
             <span class="logo-text">Pet Rescue QR</span>
         </div>
 
-        <a href="/pet/{{ pet.id }}" class="back-link">← Volver a {{ pet.name }}</a>
+        <!-- Botón de retorno inteligente -->
+        {% if is_owner %}
+            {% if '/my-pet-qr/' in request.url %}
+                <a href="/my-pets-qr" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
+                </a>
+            {% else %}
+                <a href="/my-pets" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
+                </a>
+            {% endif %}
+        {% else %}
+            <a href="/pet/{{ pet.id }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver a la mascota
+            </a>
+        {% endif %}
         
         <h1>💉 Historial de Vacunas - {{ pet.name }}</h1>
         
