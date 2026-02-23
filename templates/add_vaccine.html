@@ -108,7 +108,16 @@
             <span class="logo-text">Pet Rescue QR</span>
         </div>
 
-        <a href="/my-pet-qr/{{ pet.id }}/vaccines">Volver</a>
+        <!-- Botón de retorno inteligente -->
+        {% if session.qr_logged_in %}
+            <a href="/my-pet-qr/{{ pet.id }}/vaccines" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver a Vacunas
+            </a>
+        {% else %}
+            <a href="/my-pet/{{ pet.id }}/vaccines" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Volver a Vacunas
+            </a>
+        {% endif %}
         
         <h1>💉 Agregar Vacuna - {{ pet.name }}</h1>
         
