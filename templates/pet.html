@@ -4,45 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ pet.name }} - Pet Rescue QR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-800: #343a40;
+            --transition: all 0.3s ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-        
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--gray-800);
             min-height: 100vh;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            text-align: center;
+            padding: 20px;
             position: relative;
         }
-        
-        /* Menú hamburguesa */
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Botón de menú hamburguesa */
+        .menu-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* Menú desplegable */
         .dropdown-menu {
             position: absolute;
             top: 60px;
@@ -76,293 +86,102 @@
             color: #555;
         }
 
-        .hamburger-menu {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-        }
-        
-        .hamburger-btn {
-            background: #9C27B0;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
-            transition: all 0.2s;
-        }
-        
-        .hamburger-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
-        }
-        
-        .dropdown-menu {
-            position: absolute;
-            top: 70px;
-            left: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            padding: 12px 0;
-            min-width: 200px;
-            z-index: 1000;
-            display: none;
-            animation: slideDown 0.2s ease;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .dropdown-item {
-            padding: 12px 20px;
-            text-decoration: none;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-        
-        .dropdown-item:hover {
-            background: #f8f9fa;
-            color: #9C27B0;
-        }
-        
-        .dropdown-item i {
-            width: 20px;
+        .pet-header {
             text-align: center;
-        }
-        
-        /* Logo header */
-        .app-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .logo-img {
-            width: 120px;
-            height: auto;
-        }
-        
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1;
-        }
-        
-        /* Hero Banner con Foto de Mascota */
-        .pet-hero {
-            position: relative;
-            width: 100%;
-            height: 300px;
             margin-bottom: 25px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        .pet-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .pet-image {
+            height: 250px;
+            margin-bottom: 25px;
+            position: relative;
             cursor: pointer;
-            transition: transform 0.2s;
         }
-        
-        .pet-hero:hover {
-            transform: scale(1.02);
-        }
-        
-        .hero-image {
+
+        .pet-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 12px;
             display: block;
         }
-        
+
         .hero-placeholder {
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .hero-icon {
-            font-size: 80px;
+            font-size: 100px;
             color: white;
             opacity: 0.8;
         }
-        
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-            display: flex;
-            align-items: flex-end;
-            padding: 20px;
-            color: white;
-        }
-        
-        .hero-content {
-            text-align: left;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-        
-        .lost-badge {
-            background: #e91e63;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: inline-block;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(233, 30, 99, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(233, 30, 99, 0); }
-        }
-        
-        .hero-content h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            line-height: 1.2;
-        }
-        
-        .click-hint {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.8);
-            color: #333;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .pet-hero:hover .click-hint {
-            opacity: 1;
-        }
-        
+
         .info {
-            text-align: left;
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-        
+
         .info p {
-            margin: 10px 0;
-            color: #333;
-            font-size: 16px;
+            margin: 8px 0;
+            color: #555;
+        }
+
+        .main-actions {
             display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-        
-        .info p strong {
-            min-width: 80px;
-            color: #2c3e50;
-        }
-        
-        .verified {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        /* Botones principales */
-        .main-actions {
-            margin: 25px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .btn-primary {
-            background: #2196F3;
-            color: white;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
             font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+            transition: var(--transition);
+            text-align: center;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #4CAF50;
+
+        .btn-location {
+            background: var(--primary);
             color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 16px;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
-        
-        .btn-secondary:hover {
+
+        .btn-call {
+            background: var(--warning);
+            color: white;
+        }
+
+        .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        
-        /* Trust indicators */
-        .trust-indicators {
-            margin-top: 25px;
-            padding: 15px;
-            background: #e8f5e9;
-            border-radius: 12px;
-            border-left: 4px solid #4CAF50;
-            font-size: 14px;
-            color: #2e7d32;
-        }
-        
-        .testimonial {
-            margin-top: 15px;
-            font-style: italic;
-            font-size: 13px;
-            color: #666;
-            text-align: right;
-        }
-        
-        /* Modal de imagen completa */
+
+        /* Modal de imagen */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
@@ -370,7 +189,7 @@
             background-color: rgba(0,0,0,0.95);
             animation: fadeIn 0.3s;
         }
-        
+
         .modal-content {
             display: block;
             margin: auto;
@@ -379,7 +198,7 @@
             object-fit: contain;
             animation: zoomIn 0.3s;
         }
-        
+
         .close {
             position: absolute;
             top: 20px;
@@ -388,237 +207,145 @@
             font-size: 40px;
             font-weight: bold;
             cursor: pointer;
-            z-index: 1001;
+            z-index: 2001;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+
         @keyframes zoomIn {
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-        
-        /* Responsive mobile */
+
         @media (max-width: 768px) {
-            .container {
-                padding: 20px 15px;
-                margin: 0 10px;
+            .main-actions {
+                flex-direction: column;
+                align-items: center;
             }
             
-            .logo-img {
-                width: 60px;
-            }
-            
-            .logo-text {
-                font-size: 18px;
-            }
-            
-            .pet-hero {
-                height: 250px;
-            }
-            
-            .hero-content h1 {
-                font-size: 26px;
-            }
-            
-            .btn-primary, .btn-secondary {
-                font-size: 15px;
-                padding: 12px 20px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                height: 85%;
-            }
-            
-            .hamburger-menu {
-                top: 15px;
-                left: 15px;
-            }
-            
-            .dropdown-menu {
-                top: 60px;
-                left: 15px;
-                min-width: 180px;
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Botón de menú hamburguesa -->
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-        <!-- Historial de Desparasitaciones -->
-        {% if deworming %}
-        <div class="info" style="margin-top: 20px;">
-            <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 18px;">
-                💊 Historial de Desparasitaciones
-            </h3>
-            {% for record in deworming %}
-            <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #9C27B0;">
-                <p><strong>{{ record.vaccine_name }}</strong></p>
-                <p>📅 Fecha: {{ record.date_administered }}</p>
-                {% if record.next_due_date %}
-                <p>🔄 Próxima: {{ record.next_due_date }}</p>
-                {% endif %}
-                {% if record.veterinarian %}
-                <p>👨‍⚕️ Veterinario: {{ record.veterinarian }}</p>
-                {% endif %}
-            </div>
+    <!-- Menú desplegable -->
+    <div class="dropdown-menu" id="dropdownMenu">
+        <h3>📋 Información Médica</h3>
+
+        <!-- Vacunas -->
+        <div class="menu-section">
+            <strong>💉 Vacunas:</strong>
+            {% set vaccines = [] %}
+            {% for v in pet.vaccines if v.get('type', 'vaccine') == 'vaccine' %}
+                {% set _ = vaccines.append(v) %}
             {% endfor %}
-        </div>
-        {% endif %}
-        
-        <!-- Menú hamburguesa (dropdown) -->
-        <div class="dropdown-menu" id="dropdownMenu">
-            <h3>📋 Información Médica</h3>
-
-            <!-- Vacunas -->
-            <div class="menu-section">
-                <strong>💉 Vacunas:</strong>
-                {% set vaccines = [] %}
-                {% for v in pet.vaccines if 'vaccine_name' in v and v.get('type', 'vaccine') == 'vaccine' %}
-                    {% set _ = vaccines.append(v) %}
-                {% endfor %}
-                {% if vaccines %}
-                    <ul style="padding-left: 20px; margin-top: 5px;">
-                        {% for v in vaccines %}
-                        <li>{{ v.vaccine_name }} ({{ v.date_administered }})</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="margin-top: 5px; font-style: italic;">No registradas</p>
-                {% endif %}
-            </div>
-
-            <!-- Desparasitaciones -->
-            <div class="menu-section" style="margin-top: 15px;">
-                <strong>💊 Desparasitaciones:</strong>
-                {% if deworming %}
-                    <ul style="padding-left: 20px; margin-top: 5px;">
-                        {% for d in deworming %}
-                        <li>{{ d.vaccine_name }} ({{ d.date_administered }})</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="margin-top: 5px; font-style: italic;">No registradas</p>
-                {% endif %}
-            </div>
-
-            <!-- Enlace a ventas -->
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-                <a href="https://petrescueqr-sales.onrender.com/" 
-                target="_blank"
-                style="display: inline-block; background: #2196F3; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold;">
-                    🛒 Comprar Placa QR
-                </a>
-            </div>
+            {% if vaccines %}
+                <ul>
+                    {% for v in vaccines %}
+                    <li>{{ v.vaccine_name }} ({{ v.date_administered }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="font-style: italic; margin-top: 5px;">No registradas</p>
+            {% endif %}
         </div>
 
-        <!-- Logo de la app -->
-        <div class="app-logo">
-            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
-                 alt="Pet Rescue QR Logo" 
-                 class="logo-img">
-            <span class="logo-text">Pet Rescue QR</span>
+        <!-- Desparasitaciones -->
+        <div class="menu-section">
+            <strong>💊 Desparasitaciones:</strong>
+            {% if deworming %}
+                <ul>
+                    {% for d in deworming %}
+                    <li>{{ d.vaccine_name }} ({{ d.date_administered }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="font-style: italic; margin-top: 5px;">No registradas</p>
+            {% endif %}
         </div>
 
-        <!-- Hero Banner con Foto de Mascota -->
-        <div class="pet-hero" id="heroContainer">
+        <!-- Enlace a ventas -->
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+            <a href="https://petrescueqr-sales.onrender.com/" 
+               target="_blank"
+               style="display: inline-block; background: var(--primary); color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold;">
+                🛒 Comprar Placa QR
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="pet-header">
+            <h1>{{ pet.name }}</h1>
+            <p>{{ pet.breed or 'Sin raza' }} • {{ pet.city or 'Ciudad no especificada' }}</p>
+        </div>
+
+        <div class="pet-image" id="heroContainer">
             {% if pet.photo_url %}
-                <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}" class="hero-image">
-                <div class="click-hint">🔍 Toque para ampliar</div>
+                <img src="{{ pet.photo_url }}" alt="Foto de {{ pet.name }}">
             {% else %}
                 <div class="hero-placeholder">
                     <span class="hero-icon">🐾</span>
                 </div>
             {% endif %}
-            <div class="hero-overlay">
-                <div class="hero-content">
-                    <span class="lost-badge">🚨 ¡{{ pet.name.upper() }} ESTÁ PERDIDA!</span>
-                    <h1>Ayúdanos a devolverla a casa</h1>
-                </div>
-            </div>
         </div>
 
         <div class="info">
-            {% if pet.owner_phone %}
-            <p><strong>📞 Teléfono:</strong> {{ pet.owner_phone|replace('', ' ') }}</p>
+            <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
+            {% if pet.description %}
+                <p><strong>Señas particulares:</strong> {{ pet.description }}</p>
             {% endif %}
             {% if pet.address %}
-            <p><strong>🏠 Dirección:</strong> {{ pet.address }}</p>
-            {% endif %}
-            {% if pet.owner_name %}
-            <p><strong>👨‍🦱 Dueño:</strong> <span class="verified">✅ {{ pet.owner_name }}</span></p>
-            {% endif %}
-            {% if pet.breed %}
-            <p><strong>🐶 Raza:</strong> {{ pet.breed }}</p>
-            {% endif %}
-            {% if pet.description %}
-            <p><strong>🎨 Señas:</strong> {{ pet.description }}</p>
+                <p><strong>Dirección:</strong> {{ pet.address }}</p>
             {% endif %}
         </div>
 
-        <!-- Botones principales -->
         <div class="main-actions">
-            <button id="helpBtn" class="btn-primary">
-                📍 Enviar ubicación
-            </button>
-            
-            {% if pet.owner_phone %}
-            <a href="tel:{{ pet.owner_phone }}" class="btn-secondary">
-                📞 Llamar al dueño
+            <a href="/report-location/{{ pet.id }}" class="action-btn btn-location">
+                <i class="fas fa-map-marker-alt"></i> Enviar ubicación
             </a>
+            {% if pet.owner_phone %}
+                <a href="tel:{{ pet.owner_phone }}" class="action-btn btn-call">
+                    <i class="fas fa-phone"></i> Llamar al dueño
+                </a>
             {% endif %}
         </div>
-
-        <!-- Enlace a página de ventas -->
-        <div style="margin-top: 25px; padding: 15px; background: #e3f2fd; border-radius: 12px; text-align: center;">
-            <p style="color: #1565c0; font-weight: 600; margin: 0;">
-                ¿Quieres proteger a tu mascota con una placa QR?
-            </p>
-            <a href="https://petrescueqr-sales.onrender.com/" 
-                target="_blank"
-                style="display: inline-block; margin-top: 10px; background: #2c3e50; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
-                    🛒 Comprar Placa QR
-            </a>
-        </div>
-
-        <p style="font-size: 12px; color: #6c757d; margin-top: 20px; text-align: center;">
-            💙 Ayudando a volver a casa desde Colombia
-        </p>
-
-        <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
 
     <!-- Modal de imagen completa -->
     <div id="imageModal" class="modal">
         <span class="close" onclick="closeModal()">&times;</span>
-        {% if pet.photo_url %}
-        <img class="modal-content" id="modalImage" src="{{ pet.photo_url }}">
-        {% endif %}
+        <img class="modal-content" id="modalImage">
     </div>
 
     <script>
-        // Funcionalidad del menú hamburguesa
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        
-        menuBtn.addEventListener('click', () => {
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        });
-        
+        // Menú hamburguesa
+        function toggleMenu() {
+            const menu = document.getElementById("dropdownMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
         // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', (event) => {
-            if (!menuBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
-                dropdownMenu.style.display = 'none';
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById("dropdownMenu");
+            const button = document.querySelector('.menu-btn');
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.style.display = "none";
             }
         });
-        
+
         // Funcionalidad de modal
-        function openModal() {
+        function openModal(imgSrc) {
+            document.getElementById("modalImage").src = imgSrc;
             document.getElementById("imageModal").style.display = "block";
         }
         
@@ -626,7 +353,6 @@
             document.getElementById("imageModal").style.display = "none";
         }
         
-        // Cerrar modal al hacer clic fuera de la imagen
         window.onclick = function(event) {
             const modal = document.getElementById("imageModal");
             if (event.target === modal) {
@@ -634,57 +360,18 @@
             }
         }
         
-        // Tecla ESC para cerrar
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
                 closeModal();
             }
         });
         
-        // Asignar evento de clic solo si hay foto
-        {% if pet.photo_url %}
-        document.getElementById("heroContainer").onclick = openModal;
-        {% endif %}
-        
-        // Funcionalidad del botón de ayuda
-        document.getElementById("helpBtn").onclick = async () => {
-            const button = document.getElementById("helpBtn");
-            const loading = document.getElementById("loading");
-            button.disabled = true;
-            loading.style.display = "block";
-            loading.textContent = "Obteniendo ubicación...";
-
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000
-                    });
-                });
-
-                const response = await fetch("/report", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        pet_id: "{{ pet.id }}",
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    })
-                });
-
-                const result = await response.json();
-                if (result.status === "success") {
-                    window.location.href = result.whatsapp_url;
-                } else {
-                    loading.textContent = result.error || "No se pudo generar el enlace.";
-                    button.disabled = false;
-                }
-            } catch (error) {
-                loading.textContent = "No se pudo obtener la ubicación.";
-                console.error(error);
-                button.disabled = false;
-            }
-        };
+        // Asignar evento de clic a la imagen
+        document.querySelectorAll('.pet-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                openModal(img.src);
+            });
+        });
     </script>
 </body>
 </html>
