@@ -37,7 +37,6 @@ init_db()
 # FUNCIONES AUXILIARES
 # -------------------------------------------------
 def clear_user_session():
-    """Limpia la sesión del usuario actual de forma segura."""
     try:
         if session.get("logged_in") and session.get("user_email"):
             clear_user_session_token(session["user_email"])
@@ -55,7 +54,7 @@ def qr_login_required(f):
         if not session.get("qr_logged_in"):
             return redirect("/qr-login")
         last_activity = session.get("last_activity", 0)
-        if time.time() - last_activity > 900:  # 15 minutos
+        if time.time() - last_activity > 900:
             session.clear()
             return redirect("/qr-login?message=timeout")
         session["last_activity"] = time.time()
