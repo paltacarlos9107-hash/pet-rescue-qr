@@ -3,203 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vacunas - {{ pet.name }} - Pet Rescue QR</title>
+    <title>Vacunas - {{ pet.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            padding: 0;
-            margin: 0;
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #e91e63;
+            --purple: #9C27B0;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-800: #343a40;
+            --transition: all 0.3s ease;
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: var(--gray-800);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            padding: 30px;
         }
-        /* Logo header */
-        .app-logo {
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 12px;
-            margin-bottom: 20px;
         }
-        .logo-img {
-            width: 120px;
-            height: auto;
+
+        .logo img {
+            width: 50px;
+            height: 50px;
         }
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .add-vaccine-btn {
-            background: linear-gradient(120deg, #4CAF50, #2E7D32);
+
+        .back-btn {
             color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
             text-decoration: none;
-            display: inline-block;
-            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+
+        .back-btn:hover {
+            text-decoration: underline;
         }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 25px;
         }
-        th {
-            background: #f1f8e9;
-            color: #2e7d32;
+
+        .pet-info {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .pet-info h2 {
+            color: var(--gray-800);
+            margin-bottom: 10px;
+        }
+
+        .vaccines-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .vaccine-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .vaccine-item:last-child {
+            border-bottom: none;
+        }
+
+        .vaccine-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .vaccine-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .vaccine-date {
+            color: var(--primary);
             font-weight: 600;
         }
-        .no-vaccines {
-            text-align: center;
-            color: #666;
-            padding: 40px;
+
+        .vaccine-detail {
+            color: #6c757d;
+            font-size: 14px;
+            margin: 4px 0;
         }
-        .delete-btn {
-            background: #f44336;
+
+        .btn-add {
+            display: inline-block;
+            background: var(--purple);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: var(--transition);
+        }
+
+        .btn-add:hover {
+            background: #7b1fa2;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background: var(--danger);
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
         }
-        
+
+        .btn-delete:hover {
+            background: #c2185b;
+        }
+
+        .no-vaccines {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Logo -->
-        <div class="app-logo">
-            <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
-                 alt="Pet Rescue QR Logo" 
-                 class="logo-img">
-            <span class="logo-text">Pet Rescue QR</span>
+        <header>
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" alt="Pet Rescue QR Logo">
+                <h1>Pet Rescue QR</h1>
+            </div>
+            
+            <!-- Botón de retorno inteligente -->
+            {% if is_owner %}
+                {% if '/my-pet-qr/' in request.url %}
+                    <a href="/my-pets-qr" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
+                    </a>
+                {% else %}
+                    <a href="/my-pets" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="/pet/{{ pet.id }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Volver a la mascota
+                </a>
+            {% endif %}
+        </header>
+
+        <h2 class="section-title">💉 Historial de Vacunas</h2>
+
+        <div class="pet-info">
+            <h2>{{ pet.name }} ({{ pet.breed or 'Sin raza' }})</h2>
+            <p><strong>Dueño:</strong> {{ pet.owner_name }}</p>
         </div>
 
-        <!-- Botón de retorno inteligente -->
-        {% if is_owner %}
-            {% if '/my-pet-qr/' in request.url %}
-                <a href="/my-pets-qr" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
-                </a>
+        <div class="vaccines-list">
+            {% if vaccines %}
+                {% for vaccine in vaccines %}
+                <div class="vaccine-item">
+                    <div class="vaccine-header">
+                        <span class="vaccine-name">{{ vaccine.vaccine_name }}</span>
+                        <span class="vaccine-date">{{ vaccine.date_administered }}</span>
+                    </div>
+                    {% if vaccine.next_due_date %}
+                    <div class="vaccine-detail">🔄 Próxima dosis: {{ vaccine.next_due_date }}</div>
+                    {% endif %}
+                    {% if vaccine.veterinarian %}
+                    <div class="vaccine-detail">👨‍⚕️ Veterinario: {{ vaccine.veterinarian }}</div>
+                    {% endif %}
+                    {% if vaccine.notes %}
+                    <div class="vaccine-detail">📝 Notas: {{ vaccine.notes }}</div>
+                    {% endif %}
+                    
+                    <!-- Botón de eliminar solo para dueños -->
+                    {% if is_owner %}
+                        <button 
+                            onclick="deleteVaccine({{ vaccine.id }})" 
+                            class="btn-delete"
+                            style="margin-top: 10px;"
+                        >
+                            Eliminar
+                        </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
             {% else %}
-                <a href="/my-pets" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> Volver a Mis Mascotas
-                </a>
+                <div class="no-vaccines">
+                    <p>📭 No hay vacunas registradas.</p>
+                </div>
             {% endif %}
-        {% else %}
-            <a href="/pet/{{ pet.id }}" class="back-btn">
-                <i class="fas fa-arrow-left"></i> Volver a la mascota
-            </a>
-        {% endif %}
-        
-        <h1>💉 Historial de Vacunas - {{ pet.name }}</h1>
-        
-        {% if is_owner %}
-            {% if '/my-pet-qr/' in request.url %}
-                <a href="/my-pet-qr/{{ pet.id }}/vaccines/add" class="btn-add">Agregar Vacuna</a>
-            {% else %}
-                <a href="/my-pet/{{ pet.id }}/vaccines/add" class="btn-add">Agregar Vacuna</a>
-            {% endif %}
-        {% endif %}
-        
-        {% if vaccines %}
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Vacuna</th>
-                        <th>Fecha</th>
-                        <th>Próxima</th>
-                        <th>Veterinario</th>
-                        {% if is_owner %}
-                        <th>Acciones</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-               <tbody>
-                    {% for vaccine in vaccines %}
-                    <tr>
-                        <td>{{ vaccine.vaccine_name }}</td>
-                        <td>{{ vaccine.date_administered }}</td>
-                        <td>{{ vaccine.next_due_date or '-' }}</td>
-                        <td>{{ vaccine.veterinarian or '-' }}</td>
-                        {% if is_owner %}
-                        <td>
-                            <button class="delete-btn" onclick="deleteVaccine({{ vaccine.id }})">🗑️</button>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="no-vaccines">
-            <h3>📭 No hay registros de vacunas</h3>
+
+            <!-- Botón de agregar solo para dueños -->
             {% if is_owner %}
-            <p><a href="/my-pet/{{ pet.id }}/vaccines/add" style="color: #4CAF50; text-decoration: none;">Agregar primera vacuna →</a></p>
+                {% if '/my-pet-qr/' in request.url %}
+                    <a href="/my-pet-qr/{{ pet.id }}/vaccines/add" class="btn-add">
+                        <i class="fas fa-plus"></i> Agregar Vacuna
+                    </a>
+                {% else %}
+                    <a href="/my-pet/{{ pet.id }}/vaccines/add" class="btn-add">
+                        <i class="fas fa-plus"></i> Agregar Vacuna
+                    </a>
+                {% endif %}
             {% endif %}
         </div>
-        {% endif %}
     </div>
 
     <script>
         function deleteVaccine(vaccineId) {
-            if (confirm('¿Eliminar este registro de vacuna?')) {
-                fetch(`/vaccine/${vaccineId}/delete`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error al eliminar: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    alert('Error de conexión');
-                });
-            }
+            if (!confirm("¿Estás seguro de eliminar esta vacuna?")) return;
+            
+            let url = '';
+            {% if '/my-pet-qr/' in request.url %}
+                url = `/vaccine-qr/${vaccineId}/delete`;
+            {% else %}
+                url = `/vaccine/${vaccineId}/delete`;
+            {% endif %}
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert("Error al eliminar: " + (data.error || "Desconocido"));
+                }
+            })
+            .catch(error => {
+                alert("Error de conexión");
+            });
         }
     </script>
 </body>
