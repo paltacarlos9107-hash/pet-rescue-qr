@@ -79,6 +79,55 @@ def init_users_table():
     cur.close()
     conn.close()
 
+def init_vaccines_table():
+    """Crea la tabla de vacunas y desparasitaciones si no existe."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if IS_PRODUCTION:
+        # PostgreSQL
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS vaccines (
+                id SERIAL PRIMARY KEY,
+                pet_id TEXT NOT NULL,
+                vaccine_name TEXT NOT NULL,
+                date_administered DATE NOT NULL,
+                next_due_date DATE,
+                veterinarian TEXT,
+                notes TEXT,
+                type TEXT DEFAULT 'vaccine'
+            )
+        """)
+        # Asegurar que la columna 'type' exista
+        try:
+            cur.execute("ALTER TABLE vaccines ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'vaccine'")
+        except Exception as e:
+            print(f"⚠️ Advertencia al agregar 'type' en vaccines:", e)
+    else:
+        # SQLite
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS vaccines (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pet_id TEXT NOT NULL,
+                vaccine_name TEXT NOT NULL,
+                date_administered TEXT NOT NULL,
+                next_due_date TEXT,
+                veterinarian TEXT,
+                notes TEXT,
+                type TEXT DEFAULT 'vaccine'
+            )
+        """)
+        # Asegurar que la columna 'type' exista
+        try:
+            cur.execute("ALTER TABLE vaccines ADD COLUMN type TEXT DEFAULT 'vaccine'")
+        except Exception as e:
+            # Columna ya existe
+            pass
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def init_db():
     """Inicializa todas las tablas de la base de datos."""
     conn = get_db_connection()
@@ -155,6 +204,7 @@ def init_db():
     
     # 👇 ¡Importante! Inicializar la tabla de usuarios con soporte de admin y tokens
     init_users_table()
+    init_vaccines_table()
 
 def add_user(email, password_hash):
     """Agrega un nuevo usuario a la base de datos."""
