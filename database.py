@@ -345,17 +345,30 @@ def add_vaccine(pet_id, vaccine_name, date_administered, next_due_date=None, vet
     conn.close()
 
 def get_vaccines_by_pet(pet_id):
-    """Obtiene todas las vacunas de una mascota."""
+    """Obtiene SOLO los registros de tipo 'vaccine'."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s ORDER BY date_administered DESC", (pet_id,))
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
     else:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? ORDER BY date_administered DESC", (pet_id,))
-    vaccines = cur.fetchall()
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
+    result = cur.fetchall()
     cur.close()
     conn.close()
-    return vaccines
+    return result
+
+def get_deworming_by_pet(pet_id):
+    """Obtiene SOLO los registros de tipo 'deworming'."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    result = cur.fetchall()
+    cur.close()
+    conn.close()
+    return result
 
 def delete_vaccine(vaccine_id):
     """Elimina un registro de vacuna."""

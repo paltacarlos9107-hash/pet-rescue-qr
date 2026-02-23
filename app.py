@@ -866,7 +866,7 @@ def view_my_vaccines_qr(pet_id):
     conn.close()
     if not pet:
         return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
-    vaccines = get_vaccines_by_pet(pet_id)
+    vaccines = get_vaccines_by_pet(pet_id)  # ← Ahora solo vacunas
     return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=True)
 
 @app.route("/my-pet-qr/<pet_id>/vaccines/add", methods=["GET", "POST"])
@@ -1003,19 +1003,8 @@ def view_my_deworming_qr(pet_id):
     conn.close()
     if not pet:
         return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
-    
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
-    else:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
-    deworming_records = cur.fetchall()
-    cur.close()
-    conn.close()
-    
-    return render_template("deworming.html", pet=pet, deworming=deworming_records, is_owner=True)
-
+    deworming = get_deworming_by_pet(pet_id)  # ← Solo desparasitaciones
+    return render_template("deworming.html", pet=pet, deworming=deworming, is_owner=True)
 # -------------------------------------------------
 # SERVIDOR
 # -------------------------------------------------
