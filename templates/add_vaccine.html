@@ -116,33 +116,35 @@
             <div class="error">{{ error }}</div>
         {% endif %}
 
-        <form method="POST">
+        <form method="POST" action="/my-pet-qr/{{ pet.id }}/vaccines/add">
             <div class="form-group">
                 <label for="vaccine_name">Nombre de la vacuna *</label>
-                <input type="text" id="vaccine_name" name="vaccine_name" required placeholder="Ej: Rabia, Parvovirus, etc.">
+                <input type="text" id="vaccine_name" name="vaccine_name" required placeholder="Ej: Antirrábica, Triple Felina">
             </div>
-            
+
             <div class="form-group">
-                <label for="date_administered">Fecha de administración *</label>
+                <label for="date_administered">Fecha de aplicación *</label>
                 <input type="date" id="date_administered" name="date_administered" required>
             </div>
-            
+
             <div class="form-group">
-                <label for="next_due_date">Próxima fecha (opcional)</label>
+                <label for="next_due_date">Próxima dosis (opcional)</label>
                 <input type="date" id="next_due_date" name="next_due_date">
             </div>
-            
+
             <div class="form-group">
                 <label for="veterinarian">Veterinario (opcional)</label>
                 <input type="text" id="veterinarian" name="veterinarian" placeholder="Nombre del veterinario">
             </div>
-            
+
             <div class="form-group">
-                <label for="notes">Notas adicionales (opcional)</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Lote, observaciones, etc."></textarea>
+                <label for="notes">Notas adicionales</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Lote, reacciones, etc."></textarea>
             </div>
-            
-            <button type="submit">💾 Guardar Vacuna</button>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Guardar Vacuna
+            </button>
         </form>
     </div>
 
