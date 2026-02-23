@@ -904,41 +904,6 @@ def add_vaccine_record_qr(pet_id):
         return redirect(f"/my-pet-qr/{pet_id}/vaccines")
     return render_template("add_vaccine.html", pet=pet)
 
-@app.route("/my-pet-qr/<pet_id>/deworming/add", methods=["GET", "POST"])
-@qr_login_required
-def add_deworming_record_qr(pet_id):
-    email = session["qr_email"]
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s", (pet_id, email))
-    else:
-        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ?", (pet_id, email))
-    pet = cur.fetchone()
-    cur.close()
-    conn.close()
-    if not pet:
-        return "<h2>❌ No tienes permiso para esta mascota.</h2>", 403
-    if request.method == "POST":
-        medicine_name = request.form.get("medicine_name", "").strip()
-        date_administered = request.form.get("date_administered", "").strip()
-        next_due_date = request.form.get("next_due_date", "") or None
-        veterinarian = request.form.get("veterinarian", "") or None
-        notes = request.form.get("notes", "") or None
-        if not medicine_name or not date_administered:
-            return render_template("add_deworming.html", pet=pet, error="Medicamento y fecha son obligatorios.")
-        conn = get_db_connection()
-        cur = conn.cursor()
-        if IS_PRODUCTION:
-            cur.execute("INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type) VALUES (%s, %s, %s, %s, %s, %s, 'deworming')", (pet_id, medicine_name, date_administered, next_due_date, veterinarian, notes))
-        else:
-            cur.execute("INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type) VALUES (?, ?, ?, ?, ?, ?, 'deworming')", (pet_id, medicine_name, date_administered, next_due_date, veterinarian, notes))
-        conn.commit()
-        cur.close()
-        conn.close()
-        return redirect(f"/my-pet-qr/{pet_id}/vaccines")
-    return render_template("add_deworming.html", pet=pet)
-
 @app.route("/vaccine-qr/<int:vaccine_id>/delete", methods=["POST"])
 @qr_login_required
 def delete_vaccine_qr(vaccine_id):  # ← Nombre único
@@ -978,36 +943,6 @@ def delete_vaccine_qr(vaccine_id):  # ← Nombre único
     else:
         return jsonify({"error": "No se pudo eliminar"}), 400
     
-@app.route("/my-pet-qr/<pet_id>/deworming")
-@qr_login_required
-def view_my_deworming_qr(pet_id):
-    email = session["qr_email"]
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
-    else:
-        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
-    pet = cur.fetchone()
-    cur.close()
-    conn.close()
-    if not pet:
-        return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
-    
-    # Obtener SOLO desparasitaciones
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
-    else:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
-    deworming_records = cur.fetchall()
-    cur.close()
-    conn.close()
-    
-    return render_template("deworming.html", pet=pet, deworming=deworming_records, is_owner=True)
-
-
 @app.route("/my-pet-qr/<pet_id>/deworming/add", methods=["GET", "POST"])
 @qr_login_required
 def add_deworming_record_qr(pet_id):
@@ -1052,6 +987,34 @@ def add_deworming_record_qr(pet_id):
         return redirect(f"/my-pet-qr/{pet_id}/deworming")
 
     return render_template("add_deworming.html", pet=pet)
+
+@app.route("/my-pet-qr/<pet_id>/deworming")
+@qr_login_required
+def view_my_deworming_qr(pet_id):
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not pet:
+        return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    deworming_records = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return render_template("deworming.html", pet=pet, deworming=deworming_records, is_owner=True)
 
 # -------------------------------------------------
 # SERVIDOR
