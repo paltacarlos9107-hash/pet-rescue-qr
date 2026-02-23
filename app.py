@@ -1232,43 +1232,6 @@ def view_my_vaccines_qr(pet_id):
 @app.route("/my-pet-qr/<pet_id>/vaccines/add", methods=["GET", "POST"])
 @qr_login_required
 def add_vaccine_record_qr(pet_id):
-    """Agrega vacuna para usuarios QR."""
-    email = session["qr_email"]
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
-    else:
-        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
-    pet = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not pet:
-        return "<h2>❌ No tienes permiso para editar esta mascota.</h2>", 403
-    
-    if request.method == "POST":
-        try:
-            vaccine_name = request.form.get("vaccine_name", "").strip()
-            date_administered = request.form.get("date_administered", "").strip()
-            next_due_date = request.form.get("next_due_date", "").strip() or None
-            veterinarian = request.form.get("veterinarian", "").strip() or None
-            notes = request.form.get("notes", "").strip() or None
-
-            if not vaccine_name or not date_administered:
-                return render_template("add_vaccine.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
-
-            add_vaccine(pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            return redirect(f"/my-pet-qr/{pet_id}/vaccines")
-            
-        except Exception as e:
-            return render_template("add_vaccine.html", pet=pet, error=f"Error al guardar: {str(e)}")
-    
-    return render_template("add_vaccine.html", pet=pet)
-
-@app.route("/my-pet-qr/<pet_id>/vaccines/add", methods=["GET", "POST"])
-@qr_login_required
-def add_vaccine_record_qr(pet_id):
     email = session["qr_email"]
     
     # Verificar que la mascota pertenezca al usuario
