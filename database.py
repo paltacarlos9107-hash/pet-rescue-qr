@@ -382,13 +382,13 @@ def add_vaccine(pet_id, vaccine_name, date_administered, next_due_date=None, vet
     cur = conn.cursor()
     if IS_PRODUCTION:
         cur.execute("""
-            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type)
+            VALUES (%s, %s, %s, %s, %s, %s, 'vaccine')
         """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
     else:
         cur.execute("""
-            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type)
+            VALUES (?, ?, ?, ?, ?, ?, 'vaccine')
         """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
     conn.commit()
     cur.close()
@@ -399,9 +399,9 @@ def get_vaccines_by_pet(pet_id):
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND (type = 'vaccine' OR type IS NULL)", (pet_id,))
     else:
-        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND (type = 'vaccine' OR type IS NULL)", (pet_id,))
     result = cur.fetchall()
     cur.close()
     conn.close()
