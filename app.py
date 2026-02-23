@@ -676,31 +676,23 @@ def my_pets():
     return render_template("my_pets.html", pets=pets)
 
 @app.route("/pet/<pet_id>")
-def pet_page(pet_id):
-    try:
-        pet = get_pet(pet_id)
-        if not pet:
-            return "<h2>❌ Mascota no encontrada o ya fue reportada.</h2>", 404
+def pet_detail(pet_id):
+    pet = get_pet_by_id(pet_id)
+    if not pet:
+        return "Mascota no encontrada", 404
 
-        # Generar el QR para esta mascota
-        if IS_PRODUCTION:
-            qr_url = f"https://{request.host}/pet/{pet_id}"
-        else:
-            qr_url = f"{request.url_root}pet/{pet_id}"
+    # Obtener solo desparasitaciones
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    deworming_records = cur.fetchall()
+    cur.close()
+    conn.close()
 
-        qr_img = qrcode.make(qr_url)
-        buffered = BytesIO()
-        qr_img.save(buffered, format="PNG")
-        qr_base64 = base64.b64encode(buffered.getvalue()).decode()
-
-        # Obtener email del usuario logueado (si existe)
-        user_email = session.get("user_email") if session.get("logged_in") else None
-
-        return render_template("pet.html", pet=pet, qr=qr_base64, qr_url=qr_url, user_email=user_email)
-    
-    except Exception as e:
-        print(f"❌ Error en /pet/{pet_id}: {repr(e)}")
-        return "<h2>❌ Error al cargar la mascota.</h2>", 500
+    return render_template("pet.html", pet=pet, deworming=deworming_records)
 
 @app.route("/report", methods=["POST"])
 def report_location():
@@ -1145,6 +1137,77 @@ def edit_my_pet_qr(pet_id):
 
     return render_template("edit_my_pet_form_qr.html", pet=pet)
 
+
+@app.route("/my-pet-qr/<pet_id>/vaccines")
+@qr_login_required
+def view_my_vaccines_qr(pet_id):
+    """Muestra vacunas para usuarios QR."""
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
+    
+    vaccines = get_vaccines_by_pet(pet_id)
+    return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=True)
+
+@app.route("/my-pet-qr/<pet_id>/deworming/add", methods=["GET", "POST"])
+@qr_login_required
+def add_deworming_record_qr(pet_id):
+    # Verificar que la mascota pertenezca al usuario
+    email = session["qr_email"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ?", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para esta mascota.</h2>", 403
+
+    if request.method == "POST":
+        # Guardar desparasitación (similar a vacunas, pero con type='deworming')
+        medicine_name = request.form.get("medicine_name", "").strip()
+        date_administered = request.form.get("date_administered", "").strip()
+        next_due_date = request.form.get("next_due_date", "") or None
+        veterinarian = request.form.get("veterinarian", "") or None
+        notes = request.form.get("notes", "") or None
+
+        if not medicine_name or not date_administered:
+            return render_template("add_deworming.html", pet=pet, error="Medicamento y fecha son obligatorios.")
+
+        # Guardar en base de datos (misma tabla que vacunas, con type='deworming')
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if IS_PRODUCTION:
+            cur.execute("""
+                INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type)
+                VALUES (%s, %s, %s, %s, %s, %s, 'deworming')
+            """, (pet_id, medicine_name, date_administered, next_due_date, veterinarian, notes))
+        else:
+            cur.execute("""
+                INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes, type)
+                VALUES (?, ?, ?, ?, ?, ?, 'deworming')
+            """, (pet_id, medicine_name, date_administered, next_due_date, veterinarian, notes))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return redirect(f"/my-pet-qr/{pet_id}/vaccines")
+
+    return render_template("add_deworming.html", pet=pet)
 
 @app.route("/my-pet-qr/<pet_id>/vaccines")
 @qr_login_required
