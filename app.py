@@ -515,6 +515,8 @@ def pet_detail(pet_id):
     pet = get_pet(pet_id)
     if not pet:
         return "Mascota no encontrada", 404
+
+    # Obtener desparasitaciones
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -524,6 +526,7 @@ def pet_detail(pet_id):
     deworming_records = cur.fetchall()
     cur.close()
     conn.close()
+
     return render_template("pet.html", pet=pet, deworming=deworming_records)
 
 @app.route("/report", methods=["POST"])

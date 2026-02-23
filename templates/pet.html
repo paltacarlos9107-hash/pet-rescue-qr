@@ -43,6 +43,39 @@
         }
         
         /* Menú hamburguesa */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            width: 280px;
+            display: none;
+        }
+
+        .dropdown-menu h3 {
+            margin: 0 0 12px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .menu-section {
+            margin-bottom: 12px;
+        }
+
+        .dropdown-menu ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .dropdown-menu li {
+            font-size: 14px;
+            color: #555;
+        }
+
         .hamburger-menu {
             position: absolute;
             top: 20px;
@@ -438,12 +471,48 @@
         </div>
         {% endif %}
         
-        <!-- Menú hamburguesa -->
-        <div class="hamburger-menu">
-            <button class="hamburger-btn" id="menuBtn">☰</button>
-            <div class="dropdown-menu" id="dropdownMenu">
-                <a href="/pet/{{ pet.id }}/vaccines" class="dropdown-item">
-                    <i>💉</i> Ver Vacunas
+        <!-- Menú hamburguesa (dropdown) -->
+        <div class="dropdown-menu" id="dropdownMenu">
+            <h3>📋 Información Médica</h3>
+
+            <!-- Vacunas -->
+            <div class="menu-section">
+                <strong>💉 Vacunas:</strong>
+                {% set vaccines = [] %}
+                {% for v in pet.vaccines if 'vaccine_name' in v and v.get('type', 'vaccine') == 'vaccine' %}
+                    {% set _ = vaccines.append(v) %}
+                {% endfor %}
+                {% if vaccines %}
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        {% for v in vaccines %}
+                        <li>{{ v.vaccine_name }} ({{ v.date_administered }})</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="margin-top: 5px; font-style: italic;">No registradas</p>
+                {% endif %}
+            </div>
+
+            <!-- Desparasitaciones -->
+            <div class="menu-section" style="margin-top: 15px;">
+                <strong>💊 Desparasitaciones:</strong>
+                {% if deworming %}
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        {% for d in deworming %}
+                        <li>{{ d.vaccine_name }} ({{ d.date_administered }})</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="margin-top: 5px; font-style: italic;">No registradas</p>
+                {% endif %}
+            </div>
+
+            <!-- Enlace a ventas -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                <a href="https://petrescueqr-sales.onrender.com/" 
+                target="_blank"
+                style="display: inline-block; background: #2196F3; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: bold;">
+                    🛒 Comprar Placa QR
                 </a>
             </div>
         </div>
