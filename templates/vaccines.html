@@ -116,7 +116,11 @@
         <h1>💉 Historial de Vacunas - {{ pet.name }}</h1>
         
         {% if is_owner %}
-        <a href="/my-pet/{{ pet.id }}/vaccines/add" class="add-vaccine-btn">➕ Agregar Vacuna</a>
+            {% if '/my-pet-qr/' in request.url %}
+                <a href="/my-pet-qr/{{ pet.id }}/vaccines/add" class="btn-add">Agregar Vacuna</a>
+            {% else %}
+                <a href="/my-pet/{{ pet.id }}/vaccines/add" class="btn-add">Agregar Vacuna</a>
+            {% endif %}
         {% endif %}
         
         {% if vaccines %}
