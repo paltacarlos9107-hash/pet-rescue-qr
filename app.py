@@ -1064,7 +1064,7 @@ def my_pets_qr():
 @app.route("/qr-logout")
 def qr_logout():
     session.clear()
-    return redirect("/qr-login")
+    return redirect("https://petrescueqr-sales.onrender.com/")
 
 @app.route("/edit-my-pet-qr/<pet_id>", methods=["GET", "POST"])
 @qr_login_required
