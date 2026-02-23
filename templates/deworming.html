@@ -81,6 +81,11 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
+        .pet-info h2 {
+            color: var(--gray-800);
+            margin-bottom: 10px;
+        }
+
         .deworming-list {
             background: white;
             border-radius: 12px;
@@ -91,6 +96,7 @@
         .deworming-item {
             padding: 15px;
             border-bottom: 1px solid var(--gray-200);
+            position: relative;
         }
 
         .deworming-item:last-child {
@@ -138,6 +144,21 @@
             transform: translateY(-2px);
         }
 
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-delete:hover {
+            background: #c2185b;
+        }
+
         .no-deworming {
             text-align: center;
             padding: 40px 20px;
@@ -181,6 +202,15 @@
                     {% if record.notes %}
                     <div class="deworming-detail">📝 Notas: {{ record.notes }}</div>
                     {% endif %}
+                    
+                    <!-- Botón de eliminar -->
+                    <button 
+                        onclick="deleteDeworming({{ record.id }})" 
+                        class="btn-delete"
+                        style="margin-top: 10px;"
+                    >
+                        Eliminar
+                    </button>
                 </div>
                 {% endfor %}
             {% else %}
@@ -196,5 +226,29 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        function deleteDeworming(dewormingId) {
+            if (!confirm("¿Estás seguro de eliminar esta desparasitación?")) return;
+            
+            fetch(`/deworming-qr/${dewormingId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert("Error al eliminar: " + (data.error || "Desconocido"));
+                }
+            })
+            .catch(error => {
+                alert("Error de conexión");
+            });
+        }
+    </script>
 </body>
 </html>

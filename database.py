@@ -421,7 +421,7 @@ def get_deworming_by_pet(pet_id):
     return result
 
 def delete_vaccine(vaccine_id):
-    """Elimina un registro de vacuna."""
+    """Elimina un registro de vacuna o desparasitación."""
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
