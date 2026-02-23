@@ -52,6 +52,25 @@ def clear_user_session():
 # DECORADORES
 # -------------------------------------------------
 
+from functools import wraps
+import time
+
+def qr_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get("qr_logged_in"):
+            return redirect("/qr-login")
+        
+        # Verificar inactividad (15 minutos = 900 segundos)
+        last_activity = session.get("last_activity", 0)
+        if time.time() - last_activity > 900:
+            session.clear()
+            return redirect("/qr-login?message=timeout")
+        
+        session["last_activity"] = time.time()
+        return f(*args, **kwargs)
+    return decorated_function
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -1138,27 +1157,6 @@ def edit_my_pet_qr(pet_id):
     return render_template("edit_my_pet_form_qr.html", pet=pet)
 
 
-@app.route("/my-pet-qr/<pet_id>/vaccines")
-@qr_login_required
-def view_my_vaccines_qr(pet_id):
-    """Muestra vacunas para usuarios QR."""
-    email = session["qr_email"]
-    conn = get_db_connection()
-    cur = conn.cursor()
-    if IS_PRODUCTION:
-        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
-    else:
-        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
-    pet = cur.fetchone()
-    cur.close()
-    conn.close()
-    
-    if not pet:
-        return "<h2>❌ No tienes permiso para ver esta mascota.</h2>", 403
-    
-    vaccines = get_vaccines_by_pet(pet_id)
-    return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=True)
-
 @app.route("/my-pet-qr/<pet_id>/deworming/add", methods=["GET", "POST"])
 @qr_login_required
 def add_deworming_record_qr(pet_id):
@@ -1266,6 +1264,56 @@ def add_vaccine_record_qr(pet_id):
         except Exception as e:
             return render_template("add_vaccine.html", pet=pet, error=f"Error al guardar: {str(e)}")
     
+    return render_template("add_vaccine.html", pet=pet)
+
+@app.route("/my-pet-qr/<pet_id>/vaccines/add", methods=["GET", "POST"])
+@qr_login_required
+def add_vaccine_record_qr(pet_id):
+    email = session["qr_email"]
+    
+    # Verificar que la mascota pertenezca al usuario
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM pets WHERE id = %s AND owner_email = %s AND is_registered = TRUE", (pet_id, email))
+    else:
+        cur.execute("SELECT * FROM pets WHERE id = ? AND owner_email = ? AND is_registered = TRUE", (pet_id, email))
+    pet = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if not pet:
+        return "<h2>❌ No tienes permiso para esta mascota.</h2>", 403
+
+    if request.method == "POST":
+        vaccine_name = request.form.get("vaccine_name", "").strip()
+        date_administered = request.form.get("date_administered", "").strip()
+        next_due_date = request.form.get("next_due_date", "") or None
+        veterinarian = request.form.get("veterinarian", "") or None
+        notes = request.form.get("notes", "") or None
+
+        if not vaccine_name or not date_administered:
+            return render_template("add_vaccine.html", pet=pet, error="Nombre de vacuna y fecha son obligatorios.")
+
+        # Guardar en base de datos
+        conn = get_db_connection()
+        cur = conn.cursor()
+        if IS_PRODUCTION:
+            cur.execute("""
+                INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
+        else:
+            cur.execute("""
+                INSERT INTO vaccines (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (pet_id, vaccine_name, date_administered, next_due_date, veterinarian, notes))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return redirect(f"/my-pet-qr/{pet_id}/vaccines")
+
     return render_template("add_vaccine.html", pet=pet)
 
 # -------------------------------------------------
