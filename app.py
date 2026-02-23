@@ -1040,22 +1040,6 @@ def qr_login():
     
     return render_template("qr_login.html", error=error)
 
-def qr_login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get("qr_logged_in"):
-            return redirect("/qr-login")
-        
-        # Verificar inactividad (900 segundos = 15 minutos)
-        last_activity = session.get("last_activity", 0)
-        if time.time() - last_activity > 900:
-            session.clear()
-            return redirect("/qr-login?message=timeout")
-        
-        session["last_activity"] = time.time()
-        return f(*args, **kwargs)
-    return decorated_function
-
 @app.route("/my-pets-qr")
 @qr_login_required
 def my_pets_qr():
