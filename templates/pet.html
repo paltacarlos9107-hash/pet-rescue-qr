@@ -464,28 +464,7 @@
         </div>
     </div>
 
-    <div class="container">
-        <!-- Historial de Desparasitaciones -->
-        {% if deworming %}
-        <div class="info" style="margin-top: 20px;">
-            <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 18px;">
-                💊 Historial de Desparasitaciones
-            </h3>
-            {% for record in deworming %}
-            <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px; border-left: 3px solid #9C27B0;">
-                <p><strong>{{ record.vaccine_name }}</strong></p>
-                <p>📅 Fecha: {{ record.date_administered }}</p>
-                {% if record.next_due_date %}
-                <p>🔄 Próxima: {{ record.next_due_date }}</p>
-                {% endif %}
-                {% if record.veterinarian %}
-                <p>👨‍⚕️ Veterinario: {{ record.veterinarian }}</p>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
+          
         <!-- Logo de la app -->
         <div class="app-logo">
             <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
