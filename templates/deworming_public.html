@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desparasitaciones - {{ pet.name }}</title>
+    <title>Desparasitaciones - {{ pet.name }} | Pet Rescue QR</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
             background-image: url('https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
@@ -16,49 +22,124 @@
             padding: 0;
             margin: 0;
         }
+        
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+            position: relative;
         }
+        
+        /* Encabezado con logo y botón de retorno */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 12px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+        
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1;
+        }
+        
         .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             color: #2196F3;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 16px;
         }
+        
         .back-link:hover {
             text-decoration: underline;
         }
-        .record {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 28px;
         }
+        
+        .record {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        
         .record:last-child {
             border-bottom: none;
         }
+        
         .record h3 {
             color: #2c3e50;
             margin: 0 0 8px 0;
+            font-size: 18px;
         }
+        
         .record p {
             color: #666;
             margin: 4px 0;
+            font-size: 14px;
         }
+        
         .no-records {
             text-align: center;
             color: #999;
             padding: 40px 0;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .logo img {
+                width: 60px;
+            }
+            .logo-text {
+                font-size: 18px;
+            }
+            .container {
+                padding: 20px 15px;
+                margin: 0 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="/pet/{{ pet.id }}" class="back-link">← Volver a la mascota</a>
+        <!-- Encabezado con logo y botón de retorno -->
+        <div class="header">
+            <div class="logo">
+                <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" alt="Pet Rescue QR Logo">
+                <h1 class="logo-text">Pet Rescue QR</h1>
+            </div>
+            <a href="/pet/{{ pet.id }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+
         <h2>💊 Desparasitaciones de {{ pet.name }}</h2>
         
         {% if deworming %}
