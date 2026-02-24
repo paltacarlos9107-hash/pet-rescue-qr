@@ -24,14 +24,19 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            min-height: 100vh;
-            padding: 0;
             margin: 0;
+            padding: 0;
+            /* Evitar scroll innecesario y relleno excesivo */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Para que el contenedor no se estire más de lo necesario */
         }
         
         .container {
             max-width: 600px;
-            margin: 0 auto;
+            width: 100%;
             background: rgba(255, 255, 255, 0.94);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -40,6 +45,9 @@
             padding: 30px;
             text-align: center;
             position: relative;
+            /* Limitar altura máxima en escritorio */
+            max-height: 95vh;
+            overflow-y: auto; /* Permitir scroll si el contenido es largo */
         }
         
         /* Menú hamburguesa — visible en todos los dispositivos */
