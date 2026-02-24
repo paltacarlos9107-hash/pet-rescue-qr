@@ -646,6 +646,26 @@ def view_vaccines(pet_id):
     vaccines = get_vaccines_by_pet(pet_id)
     return render_template("vaccines.html", pet=pet, vaccines=vaccines, is_owner=False)
 
+@app.route("/pet/<pet_id>/deworming")
+def view_deworming(pet_id):
+    """Muestra el historial de desparasitaciones de una mascota (público)."""
+    pet = get_pet(pet_id)
+    if not pet:
+        return "<h2>❌ Mascota no encontrada.</h2>", 404
+    
+    # Obtener solo desparasitaciones
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'deworming' ORDER BY date_administered DESC", (pet_id,))
+    deworming_records = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return render_template("deworming_public.html", pet=pet, deworming=deworming_records)
+
 @app.route("/my-pet/<pet_id>/vaccines")
 @login_required
 @check_inactivity

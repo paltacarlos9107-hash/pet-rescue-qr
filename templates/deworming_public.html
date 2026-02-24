@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desparasitaciones - {{ pet.name }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .record {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .record:last-child {
+            border-bottom: none;
+        }
+        .record h3 {
+            color: #2c3e50;
+            margin: 0 0 8px 0;
+        }
+        .record p {
+            color: #666;
+            margin: 4px 0;
+        }
+        .no-records {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/pet/{{ pet.id }}" class="back-link">← Volver a la mascota</a>
+        <h2>💊 Desparasitaciones de {{ pet.name }}</h2>
+        
+        {% if deworming %}
+            {% for record in deworming %}
+            <div class="record">
+                <h3>{{ record.vaccine_name }}</h3>
+                <p><strong>📅 Fecha:</strong> {{ record.date_administered }}</p>
+                {% if record.next_due_date %}
+                <p><strong>🔄 Próxima dosis:</strong> {{ record.next_due_date }}</p>
+                {% endif %}
+                {% if record.veterinarian %}
+                <p><strong>👨‍⚕️ Veterinario:</strong> {{ record.veterinarian }}</p>
+                {% endif %}
+                {% if record.notes %}
+                <p><strong>📝 Notas:</strong> {{ record.notes }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-records">
+                <p>📭 No hay desparasitaciones registradas.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
