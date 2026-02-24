@@ -42,12 +42,13 @@
             position: relative;
         }
         
-        /* Menú hamburguesa */
+        /* Menú hamburguesa — visible en todos los dispositivos */
         .hamburger-menu {
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 100;
+            z-index: 1000;
+            display: block; /* Asegura visibilidad */
         }
         
         .hamburger-btn {
@@ -79,7 +80,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
             padding: 12px 0;
-            min-width: 200px;
+            min-width: 240px;
             z-index: 1000;
             display: none;
             animation: slideDown 0.2s ease;
@@ -368,7 +369,7 @@
             to { transform: scale(1); opacity: 1; }
         }
         
-        /* Responsive mobile */
+        /* Responsive — solo ajustes, no redefine posiciones */
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -401,6 +402,7 @@
                 height: 85%;
             }
             
+            /* Asegurar que el menú siga visible en móvil */
             .hamburger-menu {
                 top: 15px;
                 left: 15px;
