@@ -24,19 +24,14 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            margin: 0;
-            padding: 0;
-            /* Evitar scroll innecesario y relleno excesivo */
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Para que el contenedor no se estire más de lo necesario */
+            padding: 0;
+            margin: 0;
         }
         
         .container {
             max-width: 600px;
-            width: 100%;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.94);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -45,18 +40,14 @@
             padding: 30px;
             text-align: center;
             position: relative;
-            /* Limitar altura máxima en escritorio */
-            max-height: 95vh;
-            overflow-y: auto; /* Permitir scroll si el contenido es largo */
         }
         
-        /* Menú hamburguesa — visible en todos los dispositivos */
+        /* Menú hamburguesa */
         .hamburger-menu {
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 1000;
-            display: block; /* Asegura visibilidad */
+            z-index: 100;
         }
         
         .hamburger-btn {
@@ -88,7 +79,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.15);
             padding: 12px 0;
-            min-width: 240px;
+            min-width: 200px;
             z-index: 1000;
             display: none;
             animation: slideDown 0.2s ease;
@@ -377,7 +368,7 @@
             to { transform: scale(1); opacity: 1; }
         }
         
-        /* Responsive — solo ajustes, no redefine posiciones */
+        /* Responsive mobile */
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -410,7 +401,6 @@
                 height: 85%;
             }
             
-            /* Asegurar que el menú siga visible en móvil */
             .hamburger-menu {
                 top: 15px;
                 left: 15px;
@@ -422,18 +412,21 @@
                 min-width: 180px;
             }
         }
-        /* Asegurar que el contenedor no sea más alto que el viewport en escritorio */
-        @media (min-width: 769px) {
-            .container {
-                max-height: calc(100vh - 40px); /* Deja margen superior/inferior */
-                padding-bottom: 20px;
-            }
-        }
     </style>
 </head>
 <body>
-    
-             
+    <div class="container">
+        <!-- Menú hamburguesa -->
+        <!-- Menú hamburguesa -->
+        <div class="hamburger-menu">
+            <button class="hamburger-btn" id="menuBtn">☰</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a href="/pet/{{ pet.id }}/vaccines" class="dropdown-item">
+                    <i>💉</i> Ver Vacunas
+                </a>
+            </div>
+        </div>
+
         <!-- Logo de la app -->
         <div class="app-logo">
             <img src="https://res.cloudinary.com/dvwvcc41m/image/upload/v1770246035/logo_lyo3kh.png" 
@@ -478,43 +471,6 @@
             {% endif %}
         </div>
 
-        <!-- Sección Médica (visible en todos los dispositivos) -->
-        <div class="info" style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 10px;">
-            <h3 style="color: #2c3e50; margin-bottom: 12px; font-size: 18px;">📋 Historial Médico</h3>
-
-            <!-- Vacunas -->
-            <div style="margin-bottom: 14px;">
-                <strong style="color: #2196F3; display: block; margin-bottom: 6px;">💉 Vacunas</strong>
-                {% if pet.vaccines %}
-                    <ul style="padding-left: 20px; margin: 0; list-style-type: disc;">
-                        {% for v in pet.vaccines if v.get('type', 'vaccine') == 'vaccine' %}
-                        <li style="font-size: 14px; color: #555; margin: 4px 0;">
-                            {{ v.vaccine_name }} ({{ v.date_administered }})
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="font-size: 14px; color: #999; margin: 0;">No registradas</p>
-                {% endif %}
-            </div>
-
-            <!-- Desparasitaciones -->
-            <div style="margin-bottom: 14px;">
-                <strong style="color: #9C27B0; display: block; margin-bottom: 6px;">💊 Desparasitaciones</strong>
-                {% if deworming %}
-                    <ul style="padding-left: 20px; margin: 0; list-style-type: disc;">
-                        {% for d in deworming %}
-                        <li style="font-size: 14px; color: #555; margin: 4px 0;">
-                            {{ d.vaccine_name }} ({{ d.date_administered }})
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="font-size: 14px; color: #999; margin: 0;">No registradas</p>
-                {% endif %}
-            </div>
-        </div>
-
         <!-- Botones principales -->
         <div class="main-actions">
             <button id="helpBtn" class="btn-primary">
@@ -528,21 +484,14 @@
             {% endif %}
         </div>
 
-        <!-- Enlace a página de ventas -->
-        <div style="margin-top: 25px; padding: 15px; background: #e3f2fd; border-radius: 12px; text-align: center;">
-            <p style="color: #1565c0; font-weight: 600; margin: 0;">
-                ¿Quieres proteger a tu mascota con una placa QR?
-            </p>
-            <a href="https://petrescueqr-sales.onrender.com/" 
-                target="_blank"
-                style="display: inline-block; margin-top: 10px; background: #2c3e50; color: white; padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
-                    🛒 Comprar Placa QR
-            </a>
+        <!-- Indicadores de confianza -->
+        <div class="trust-indicators">
+            🔒 Protegido por Pet Rescue QR — Tus datos están cifrados y seguros
+            <div class="testimonial">
+                "Encontré a Luna en 4 horas gracias al QR. ¡Funciona!"<br>
+                — María, Bogotá
+            </div>
         </div>
-
-        <p style="font-size: 12px; color: #6c757d; margin-top: 20px; text-align: center;">
-            💙 Ayudando a volver a casa desde Colombia
-        </p>
 
         <div id="loading" style="display: none; margin-top: 15px; color: #2e7d32; font-weight: bold; text-align: center;"></div>
     </div>
@@ -554,6 +503,91 @@
         <img class="modal-content" id="modalImage" src="{{ pet.photo_url }}">
         {% endif %}
     </div>
-    
+
+    <script>
+        // Funcionalidad del menú hamburguesa
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        
+        menuBtn.addEventListener('click', () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (event) => {
+            if (!menuBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.style.display = 'none';
+            }
+        });
+        
+        // Funcionalidad de modal
+        function openModal() {
+            document.getElementById("imageModal").style.display = "block";
+        }
+        
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+        
+        // Cerrar modal al hacer clic fuera de la imagen
+        window.onclick = function(event) {
+            const modal = document.getElementById("imageModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+        
+        // Tecla ESC para cerrar
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+        
+        // Asignar evento de clic solo si hay foto
+        {% if pet.photo_url %}
+        document.getElementById("heroContainer").onclick = openModal;
+        {% endif %}
+        
+        // Funcionalidad del botón de ayuda
+        document.getElementById("helpBtn").onclick = async () => {
+            const button = document.getElementById("helpBtn");
+            const loading = document.getElementById("loading");
+            button.disabled = true;
+            loading.style.display = "block";
+            loading.textContent = "Obteniendo ubicación...";
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    });
+                });
+
+                const response = await fetch("/report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pet_id: "{{ pet.id }}",
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    window.location.href = result.whatsapp_url;
+                } else {
+                    loading.textContent = result.error || "No se pudo generar el enlace.";
+                    button.disabled = false;
+                }
+            } catch (error) {
+                loading.textContent = "No se pudo obtener la ubicación.";
+                console.error(error);
+                button.disabled = false;
+            }
+        };
+    </script>
 </body>
 </html>
