@@ -516,7 +516,18 @@ def pet_detail(pet_id):
     if not pet:
         return "Mascota no encontrada", 404
 
-    # Obtener desparasitaciones
+    # Cargar vacunas (tipo 'vaccine')
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if IS_PRODUCTION:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = %s AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
+    else:
+        cur.execute("SELECT * FROM vaccines WHERE pet_id = ? AND type = 'vaccine' ORDER BY date_administered DESC", (pet_id,))
+    vaccines_records = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # Cargar desparasitaciones (tipo 'deworming')
     conn = get_db_connection()
     cur = conn.cursor()
     if IS_PRODUCTION:
@@ -527,7 +538,11 @@ def pet_detail(pet_id):
     cur.close()
     conn.close()
 
-    return render_template("pet.html", pet=pet, deworming=deworming_records)
+    # Asignar a pet (para que Jinja pueda acceder como pet.vaccines)
+    pet["vaccines"] = vaccines_records
+    pet["deworming"] = deworming_records
+
+    return render_template("pet.html", pet=pet)
 
 @app.route("/report", methods=["POST"])
 def report_location():
